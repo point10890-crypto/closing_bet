@@ -1,0 +1,38 @@
+# KR Market - Smart Money Screener
+# Python 3.9+ 권장
+
+# Flask 서버
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# 데이터 수집
+pykrx>=1.0.45
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# 데이터 처리
+pandas>=2.0.0
+numpy>=2.1.0
+yfinance
+
+# 스케줄링
+schedule>=1.2.0
+
+# AI 분석 (선택사항)
+google-generativeai>=0.3.0
+
+# 기타
+python-dotenv>=1.0.0
+tqdm>=4.66.0
+
+# 데이터 수집 (추가)
+finance-datareader>=0.9.50
+
+# AI/LLM
+openai>=1.0.0
+
+# 배포/운영
+gunicorn>=21.2.0
+waitress>=2.1.2
+aiohttp>=3.9.0
+setuptools

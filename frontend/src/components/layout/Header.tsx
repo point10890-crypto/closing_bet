@@ -1,0 +1,67 @@
+'use client';
+
+interface HeaderProps {
+    title: string;
+    onMenuClick?: () => void;
+}
+
+export default function Header({ title, onMenuClick }: HeaderProps) {
+    return (
+        <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 bg-[#09090b]/80 backdrop-blur-md shrink-0 z-40">
+            {/* Left: Hamburger (mobile) + Breadcrumbs */}
+            <div className="flex items-center gap-3">
+                {/* Hamburger - mobile only */}
+                <button
+                    onClick={onMenuClick}
+                    className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition-colors active:scale-95"
+                >
+                    <i className="fas fa-bars text-sm"></i>
+                </button>
+
+                {/* Brand - mobile only */}
+                <div className="md:hidden flex items-center gap-2">
+                    <div className="w-6 h-6 bg-[#2997ff] rounded-md flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/20">
+                        M
+                    </div>
+                    <span className="text-white font-bold text-sm tracking-tight">
+                        Market<span className="text-[#2997ff]">Flow</span>
+                    </span>
+                </div>
+
+                {/* Breadcrumbs - desktop only */}
+                <div className="hidden md:flex items-center gap-2">
+                    <span className="text-gray-500">
+                        <i className="fas fa-home"></i>
+                    </span>
+                    <span className="text-gray-600">/</span>
+                    <span className="text-gray-200 font-medium">{title}</span>
+                </div>
+            </div>
+
+            {/* Search - desktop only */}
+            <div className="hidden md:block max-w-md w-full mx-4">
+                <div className="relative group">
+                    <i className="fas fa-search absolute left-3 top-2.5 text-gray-500 group-focus-within:text-blue-500 transition-colors"></i>
+                    <input
+                        type="text"
+                        className="block w-full pl-10 pr-12 py-2 bg-[#18181b] border border-white/10 rounded-full text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                        placeholder="Search markets, tickers, or commands..."
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-gray-500 bg-white/5 rounded border border-gray-600">
+                            ⌘K
+                        </kbd>
+                    </div>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+                <button className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors relative active:scale-95">
+                    <i className="far fa-bell text-sm"></i>
+                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-black"></span>
+                </button>
+            </div>
+        </header>
+    );
+}

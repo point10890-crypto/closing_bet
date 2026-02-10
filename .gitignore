@@ -1,0 +1,52 @@
+# Environment & Secrets
+.env
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# Data (large files)
+data/
+*.csv
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!next.config.*
+!tailwind.config.*
+!postcss.config.*
+!components.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*_backup.py
+*_backup_*.py
+
+# Misc
+.claude/
+*.bak
