@@ -115,7 +115,7 @@ def get_portfolio_data():
 
         else:
             # --- Current Live Data Mode ---
-            csv_path = os.path.join('kr_market', 'wave_transition_analysis_results.csv')
+            csv_path = os.path.join('data', 'wave_transition_analysis_results.csv')
             if not os.path.exists(csv_path):
                 return jsonify({
                     'key_stats': {'qtd_return': '+5.2%', 'ytd_return': '+12.8%', 'one_year_return': '+15.4%', 'div_yield': '2.1%', 'expense_ratio': '0.45%'},

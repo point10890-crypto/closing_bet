@@ -553,7 +553,7 @@ def main():
                   f"{row['supply_demand_stage']}")
         
         # CSV 저장
-        output_path = os.path.join(screener.data_dir, 'kr_market', 'smart_money_picks.csv')
+        output_path = os.path.join(screener.data_dir, 'smart_money_picks.csv')
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         results.to_csv(output_path, index=False, encoding='utf-8-sig')
         print(f"\n📁 저장됨: {output_path}")

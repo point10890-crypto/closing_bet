@@ -30,9 +30,8 @@ def main():
         # 강제로 스캔 실행 (캐시 무시 옵션이 있다면 좋겠지만 없으므로 그대로 실행)
         summary = scanner.get_scan_summary()
         
-        # 저장 경로 설정
-        # common.py에서 'kr_market/closing_bet/summary.json'을 찾으므로 여기에 저장
-        output_dir = os.path.join(project_root, 'kr_market', 'closing_bet')
+        # 저장 경로 설정 — data/ 하위에 저장
+        output_dir = os.path.join(project_root, 'data', 'closing_bet')
         os.makedirs(output_dir, exist_ok=True)
         
         output_path = os.path.join(output_dir, 'summary.json')

@@ -72,14 +72,9 @@ class Config:
     SCHEDULE_ENABLED = os.environ.get('KR_MARKET_SCHEDULE_ENABLED', 'true').lower() == 'true'
     TZ = os.environ.get('KR_MARKET_TZ', 'Asia/Seoul')
     
-    # 스케줄 시간 (KST 기준)
-    PRICE_UPDATE_TIME = os.environ.get('KR_MARKET_PRICE_TIME', '16:00')
-    INST_UPDATE_TIME = os.environ.get('KR_MARKET_INST_TIME', '16:10')
-    SIGNAL_SCAN_TIME = os.environ.get('KR_MARKET_SIGNAL_TIME', '16:20')
-    REPORT_TIME = os.environ.get('KR_MARKET_REPORT_TIME', '16:30')
-    REPORT_TIME = os.environ.get('KR_MARKET_REPORT_TIME', '16:30')
-    FULL_UPDATE_TIME = os.environ.get('KR_MARKET_FULL_UPDATE_TIME', '15:10')
-    CLOSING_BET_TIME = os.environ.get('KR_MARKET_CLOSING_BET_TIME', '15:20')
+    # 스케줄 시간 (KST 기준) — 텔레그램 알림은 2회만 (15:10, 16:00)
+    ROUND1_TIME = os.environ.get('KR_MARKET_ROUND1_TIME', '15:10')   # 1차: 종가베팅 V2 + AI 분석
+    ROUND2_TIME = os.environ.get('KR_MARKET_ROUND2_TIME', '16:00')   # 2차: 데이터 갱신 + VCP 시그널
     HISTORY_TIME = os.environ.get('KR_MARKET_HISTORY_TIME', '10:00')
     
     # 타임아웃 (초)
@@ -126,12 +121,15 @@ logger = setup_logging()
 # 작업 함수들
 # ============================================================
 
-def run_command(cmd: list, description: str, timeout: int = 600) -> bool:
-    """명령 실행 헬퍼 (실시간 출력 스트리밍)"""
+def run_command(cmd: list, description: str, timeout: int = 600, notify: bool = False) -> bool:
+    """명령 실행 헬퍼 (실시간 출력 스트리밍)
+
+    Args:
+        notify: True일 때만 텔레그램 알림 전송 (기본: False → 로그만)
+    """
     logger.info(f"🚀 시작: {description}")
-    send_telegram(f"🚀 작업을 시작합니다: {description}")
     start = time.time()
-    
+
     try:
         # Popen으로 실행하여 실시간 출력 캡처
         process = subprocess.Popen(
@@ -145,35 +143,37 @@ def run_command(cmd: list, description: str, timeout: int = 600) -> bool:
             env={**os.environ, 'PYTHONPATH': Config.BASE_DIR, 'PYTHONIOENCODING': 'utf-8'},
             bufsize=1
         )
-        
+
         # 실시간 출력 로깅
         for line in iter(process.stdout.readline, ''):
             clean = line.strip()
             if clean:
                 logger.info(f"   > {clean}")
-        
+
         # 종료 대기
         process.wait(timeout=timeout)
-        
+
         elapsed = time.time() - start
-        
+
         if process.returncode == 0:
             logger.info(f"✅ 완료: {description} ({elapsed:.1f}초)")
-            # send_telegram(f"✅ 완료: {description}") # 너무 잦은 알림 방지
             return True
         else:
             logger.error(f"❌ 실패: {description} (Exit Code: {process.returncode})")
-            send_telegram(f"❌ 실패: {description} (Error Code: {process.returncode})")
+            if notify:
+                send_telegram(f"❌ 실패: {description} (Error Code: {process.returncode})")
             return False
-            
+
     except subprocess.TimeoutExpired:
         process.kill()
         logger.error(f"⏰ 타임아웃: {description}")
-        send_telegram(f"⏰ 타임아웃 발생: {description}")
+        if notify:
+            send_telegram(f"⏰ 타임아웃 발생: {description}")
         return False
     except Exception as e:
         logger.error(f"❌ 에러: {description} - {e}")
-        send_telegram(f"❌ 예외 발생: {description}\n{str(e)}")
+        if notify:
+            send_telegram(f"❌ 예외 발생: {description}\n{str(e)}")
         return False
 
 
@@ -243,17 +243,20 @@ def update_institutional_data():
     )
 
 
-def run_vcp_signal_scan():
-    """VCP 시그널 스캔"""
+def run_vcp_signal_scan(send_alert: bool = False):
+    """VCP 시그널 스캔
+
+    Args:
+        send_alert: True일 때만 VCP Top10 텔레그램 전송 (기본: False)
+    """
     success = run_command(
         [Config.PYTHON_PATH, '-m', 'signal_tracker'],
         'VCP + 외인매집 시그널 스캔',
         timeout=Config.SIGNAL_TIMEOUT
     )
 
-    if success:
+    if success and send_alert:
         try:
-            # VCP 시그널 상위 10개 텔레그램 전송
             send_vcp_telegram_summary()
         except Exception as e:
             logger.error(f"❌ VCP 텔레그램 전송 실패: {e}")
@@ -584,59 +587,142 @@ asyncio.run(run_screener(capital=50_000_000, markets=["KOSPI", "KOSDAQ"], target
     return success
 
 
-def run_full_update():
-    """전체 업데이트 (순차 실행)"""
+def run_round1():
+    """1차 업데이트 (15:10) — 종가베팅 + AI 분석 → 텔레그램 1회 전송"""
     logger.info("=" * 60)
-    logger.info("🔄 KR Market 전체 업데이트 시작")
-    logger.info(f"   BASE_DIR: {Config.BASE_DIR}")
-    logger.info(f"   PYTHON: {Config.PYTHON_PATH}")
+    logger.info("🔔 [1차] 종가베팅 + AI 분석 시작 (15:10)")
     logger.info("=" * 60)
-    
+
     results = []
-    
-    # 1. 가격 데이터
-    results.append(('daily_prices', update_daily_prices()))
-    
-    # 2. 수급 데이터
-    results.append(('institutional', update_institutional_data()))
-    
-    # 3. VCP 스캔
-    results.append(('vcp_signals', run_vcp_signal_scan()))
-    
-    # 4. AI 분석 (NEW)
-    results.append(('ai_analysis', run_ai_analysis_scan()))
-    
-    # 5. 종가베팅 스캔 (Legacy V1)
+
+    # 1. 종가베팅 V1 (Legacy)
     results.append(('closing_bet_v1', update_closing_bet()))
 
-    # 6. 종가베팅 V2 스캔 (AI)
+    # 2. 종가베팅 V2 (AI) — 내부에서 S/A급 상세 알림 전송
     results.append(('closing_bet_v2', update_jongga_v2()))
 
-    # 7. 리포트 생성
-    results.append(('daily_report', generate_daily_report()))
-    
-    # 결과 요약
+    # 결과 로깅 (텔레그램은 update_jongga_v2 내부에서 상세 전송)
+    success_count = sum(1 for _, s in results if s)
+    logger.info(f"📋 [1차] 완료: {success_count}/{len(results)} 성공")
+
+    return all(r[1] for r in results)
+
+
+def run_round2():
+    """2차 업데이트 (16:00) — 데이터 갱신 + VCP + AI → 텔레그램 1회 전송 (VCP Top10 포함)"""
     logger.info("=" * 60)
-    logger.info("📋 업데이트 결과")
+    logger.info("🔔 [2차] 데이터 갱신 + VCP 시그널 시작 (16:00)")
+    logger.info("=" * 60)
+
+    results = []
+
+    # 1. 가격 데이터
+    results.append(('daily_prices', update_daily_prices()))
+
+    # 2. 수급 데이터
+    results.append(('institutional', update_institutional_data()))
+
+    # 3. VCP 스캔 (send_alert=False → 별도 알림 안 보냄)
+    results.append(('vcp_signals', run_vcp_signal_scan(send_alert=False)))
+
+    # 4. AI 분석
+    results.append(('ai_analysis', run_ai_analysis_scan()))
+
+    # 5. 리포트 생성
+    results.append(('daily_report', generate_daily_report()))
+
+    # VCP Top10 데이터 가져오기 (요약 메시지에 포함)
+    vcp_summary = _build_vcp_top10_text()
+
+    # 결과 요약 — 텔레그램 1회 전송 (VCP Top10 포함)
+    success_count = sum(1 for _, s in results if s)
+    total_count = len(results)
     summary_lines = []
     for name, success in results:
         status = "✅" if success else "❌"
-        logger.info(f"   {status} {name}")
         summary_lines.append(f"{status} {name}")
-    logger.info("=" * 60)
 
-    # 텔레그램 결과 전송
-    success_count = sum(1 for _, s in results if s)
-    total_count = len(results)
+    logger.info(f"📋 [2차] 완료: {success_count}/{total_count} 성공")
+
     msg = (
-        f"<b>📋 전체 업데이트 완료</b>\n"
+        f"<b>📊 16시 데이터 업데이트 완료</b>\n"
         f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
-        f"📊 결과: {success_count}/{total_count} 성공\n\n"
+        f"결과: {success_count}/{total_count}\n"
         + "\n".join(summary_lines)
     )
+    if vcp_summary:
+        msg += f"\n\n{vcp_summary}"
+
     send_telegram(msg)
 
     return all(r[1] for r in results)
+
+
+def _build_vcp_top10_text() -> str:
+    """VCP Top10 텍스트 생성 (텔레그램 전송 없이 텍스트만 반환)"""
+    try:
+        import pandas as pd
+        signals_path = os.path.join(Config.DATA_DIR, 'signals_log.csv')
+        if not os.path.exists(signals_path):
+            return ""
+
+        df = pd.read_csv(signals_path, encoding='utf-8-sig')
+        if 'status' in df.columns:
+            df = df[df['status'] == 'OPEN']
+        if df.empty:
+            return ""
+
+        # 종목명 매핑
+        ticker_name_map = {}
+        prices_path = os.path.join(Config.DATA_DIR, 'daily_prices.csv')
+        if os.path.exists(prices_path):
+            try:
+                prices_df = pd.read_csv(prices_path, encoding='utf-8-sig')
+                if 'ticker' in prices_df.columns and 'name' in prices_df.columns:
+                    ticker_name_map = dict(zip(prices_df['ticker'].astype(str).str.zfill(6), prices_df['name']))
+            except Exception:
+                pass
+
+        if 'score' in df.columns:
+            df = df.sort_values('score', ascending=False)
+
+        top_10 = df.head(10)
+        today = datetime.now().strftime('%m/%d')
+        text = f"<b>📈 VCP Top 10 ({today})</b>\n"
+
+        for i, (_, row) in enumerate(top_10.iterrows(), 1):
+            ticker = str(row.get('ticker', '')).zfill(6)
+            name = row.get('name', '') or ticker_name_map.get(ticker, ticker)
+            score = row.get('score', 0)
+            foreign = row.get('foreign_5d', 0)
+            inst = row.get('inst_5d', 0)
+
+            icon = ""
+            if foreign > 0 and inst > 0:
+                icon = "🔥"
+            elif foreign > 0:
+                icon = "🌍"
+            elif inst > 0:
+                icon = "🏛"
+
+            text += f"{i}. <b>{name}</b> {score:.0f}점 {icon}\n"
+
+        return text
+    except Exception as e:
+        logger.error(f"VCP Top10 텍스트 생성 실패: {e}")
+        return ""
+
+
+def run_full_update():
+    """전체 업데이트 (--now 수동 실행용)"""
+    logger.info("=" * 60)
+    logger.info("🔄 KR Market 전체 업데이트 시작 (수동)")
+    logger.info("=" * 60)
+
+    run_round1()
+    run_round2()
+
+    return True
 
 
 # ============================================================
@@ -659,28 +745,21 @@ class Scheduler:
         self.running = False
     
     def setup_schedules(self):
-        """스케줄 등록"""
+        """스케줄 등록 — 평일 2회만 (15:10, 16:00)"""
         weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
-        
+
         for day in weekdays:
-            getattr(schedule.every(), day).at(Config.FULL_UPDATE_TIME).do(run_full_update)
-            getattr(schedule.every(), day).at(Config.CLOSING_BET_TIME).do(update_closing_bet)
-            getattr(schedule.every(), day).at(Config.CLOSING_BET_TIME).do(update_jongga_v2)
-            getattr(schedule.every(), day).at(Config.PRICE_UPDATE_TIME).do(update_daily_prices)
-            getattr(schedule.every(), day).at(Config.INST_UPDATE_TIME).do(update_institutional_data)
-            getattr(schedule.every(), day).at(Config.SIGNAL_SCAN_TIME).do(run_vcp_signal_scan)
-            getattr(schedule.every(), day).at(Config.REPORT_TIME).do(generate_daily_report)
+            # 1차 15:10 — 종가베팅 V2 + AI → 텔레그램 알림 1회
+            getattr(schedule.every(), day).at(Config.ROUND1_TIME).do(run_round1)
+            # 2차 16:00 — 가격/수급/VCP/AI/리포트 → 텔레그램 요약 1회
+            getattr(schedule.every(), day).at(Config.ROUND2_TIME).do(run_round2)
 
         # 토요일 히스토리 수집
         schedule.every().saturday.at(Config.HISTORY_TIME).do(collect_historical_institutional)
 
-        logger.info("📅 스케줄 등록 완료:")
-        logger.info(f"   - 평일 {Config.FULL_UPDATE_TIME} 전체 업데이트 (update_all_ordered)")
-        logger.info(f"   - 평일 {Config.CLOSING_BET_TIME} 종가베팅 스캔")
-        logger.info(f"   - 평일 {Config.PRICE_UPDATE_TIME} 가격 데이터 업데이트")
-        logger.info(f"   - 평일 {Config.INST_UPDATE_TIME} 수급 데이터 업데이트")
-        logger.info(f"   - 평일 {Config.SIGNAL_SCAN_TIME} VCP 시그널 스캔")
-        logger.info(f"   - 평일 {Config.REPORT_TIME} 일일 리포트")
+        logger.info("📅 스케줄 등록 완료 (텔레그램 알림 2회/일):")
+        logger.info(f"   - 평일 {Config.ROUND1_TIME} [1차] 종가베팅 V2 + AI 분석")
+        logger.info(f"   - 평일 {Config.ROUND2_TIME} [2차] 데이터 갱신 + VCP + 요약 리포트")
         logger.info(f"   - 토요일 {Config.HISTORY_TIME} 히스토리 수집")
     
     def run(self):
