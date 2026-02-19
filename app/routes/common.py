@@ -78,7 +78,7 @@ def get_portfolio_data():
                                     elif isinstance(closes, pd.Series) and closes.name == yf_t:
                                         val = closes.iloc[-1]
                                         current_prices[orig_t] = float(val) if not pd.isna(val) else 0
-                                except:
+                                except Exception:
                                     current_prices[orig_t] = 0
                 except Exception as e:
                     print(f"Error fetching historical prices: {e}")
@@ -118,10 +118,11 @@ def get_portfolio_data():
             csv_path = os.path.join('data', 'wave_transition_analysis_results.csv')
             if not os.path.exists(csv_path):
                 return jsonify({
-                    'key_stats': {'qtd_return': '+5.2%', 'ytd_return': '+12.8%', 'one_year_return': '+15.4%', 'div_yield': '2.1%', 'expense_ratio': '0.45%'},
-                    'holdings_distribution': [{'label': 'Equity', 'value': 65, 'color': '#3b82f6'}],
+                    'data_missing': True,
+                    'key_stats': {'qtd_return': 'N/A', 'ytd_return': 'N/A', 'one_year_return': 'N/A', 'div_yield': 'N/A', 'expense_ratio': 'N/A'},
+                    'holdings_distribution': [],
                     'top_holdings': [],
-                    'style_box': {'large_value': 15, 'large_core': 20, 'large_growth': 15, 'mid_value': 10, 'mid_core': 15, 'mid_growth': 10, 'small_value': 5, 'small_core': 5, 'small_growth': 5}
+                    'style_box': {}
                 })
     
             df = pd.read_csv(csv_path, dtype={'ticker': str})
@@ -313,7 +314,7 @@ def get_realtime_prices():
                                 elif isinstance(closes, pd.Series):
                                     val = closes.iloc[-1]
                                     prices[orig_t] = float(val) if not pd.isna(val) else 0
-                            except:
+                            except Exception:
                                 prices[orig_t] = 0
             except Exception as e:
                 print(f"Error fetching realtime prices: {e}")
@@ -333,7 +334,7 @@ def get_realtime_prices():
                                 elif isinstance(closes, pd.Series):
                                     val = closes.iloc[-1]
                                     prices[t] = float(val) if not pd.isna(val) else 0
-                            except:
+                            except Exception:
                                 prices[t] = 0
             except Exception as e:
                 print(f"Error fetching US realtime prices: {e}")
@@ -354,11 +355,11 @@ def run_analysis():
             print("🚀 Starting Analysis...")
             try:
                 # 1. Run Analysis
-                subprocess.run(['python3', 'analysis2.py'], check=True)
+                subprocess.run([sys.executable, 'analysis2.py'], check=True)
                 print("✅ Analysis Complete.")
-                
+
                 # 2. Run Performance Tracking
-                subprocess.run(['python3', 'track_performance.py'], check=True)
+                subprocess.run([sys.executable, 'track_performance.py'], check=True)
                 print("✅ Performance Tracking Complete.")
                 
             except Exception as e:
@@ -448,7 +449,7 @@ def _fetch_performance_data():
     return performance_data
 
 
-print(">>> [SYSTEM] common.py PATCH V3 LOADED (Binary Mode) <<<")
+# common.py loaded successfully
 
 
 @common_bp.route('/system/data-status')
@@ -490,6 +491,49 @@ def get_data_status():
             'link': '/dashboard/kr/closing-bet',
             'menu': 'Closing Bet'
         },
+        # ── Crypto Analytics ──
+        {
+            'name': 'Crypto Market Gate',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'market_gate.json'),
+            'link': '/dashboard/crypto',
+            'menu': 'Crypto Overview'
+        },
+        {
+            'name': 'Crypto Briefing',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'crypto_briefing.json'),
+            'link': '/dashboard/crypto/briefing',
+            'menu': 'Crypto Briefing'
+        },
+        {
+            'name': 'BTC Prediction',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'btc_prediction.json'),
+            'link': '/dashboard/crypto/prediction',
+            'menu': 'Crypto Prediction'
+        },
+        {
+            'name': 'Crypto Risk',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'crypto_risk.json'),
+            'link': '/dashboard/crypto/risk',
+            'menu': 'Crypto Risk'
+        },
+        {
+            'name': 'Lead-Lag Analysis',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'lead_lag', 'results.json'),
+            'link': '/dashboard/crypto/leadlag',
+            'menu': 'Crypto Lead-Lag'
+        },
+        {
+            'name': 'Crypto VCP Signals',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'signals.sqlite3'),
+            'link': '/dashboard/crypto/signals',
+            'menu': 'Crypto Signals'
+        },
+        {
+            'name': 'Crypto Backtest',
+            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'backtest_result.json'),
+            'link': '/dashboard/crypto/backtest',
+            'menu': 'Crypto Backtest'
+        },
     ]
     
     files_status = []
@@ -517,7 +561,7 @@ def get_data_status():
                 try:
                     df = pd.read_csv(path, nrows=0)
                     row_count = sum(1 for _ in open(path)) - 1  # -1 for header
-                except:
+                except Exception:
                     pass
             elif path.endswith('.json'):
                 try:
@@ -525,7 +569,7 @@ def get_data_status():
                         data = json.load(f)
                     if 'signals' in data:
                         row_count = len(data['signals'])
-                except:
+                except Exception:
                     pass
             
             files_status.append({
@@ -601,7 +645,38 @@ def update_single_data():
             'name': 'Jongga V2 (Closing Bet)',
             'module': 'engine.generator',
             'function': 'run_screener'
-        }
+        },
+        # ── Crypto Analytics ──
+        'crypto_gate': {
+            'name': 'Crypto Market Gate',
+            'script': os.path.join('crypto-analytics', 'crypto_market', 'market_gate.py'),
+            'args': []
+        },
+        'crypto_scan': {
+            'name': 'Crypto VCP Scan',
+            'script': os.path.join('crypto-analytics', 'crypto_market', 'run_scan.py'),
+            'args': []
+        },
+        'crypto_briefing': {
+            'name': 'Crypto Briefing',
+            'script': os.path.join('crypto-analytics', 'crypto_market', 'crypto_briefing.py'),
+            'args': []
+        },
+        'crypto_prediction': {
+            'name': 'Crypto Prediction',
+            'script': os.path.join('crypto-analytics', 'crypto_market', 'crypto_prediction.py'),
+            'args': []
+        },
+        'crypto_risk': {
+            'name': 'Crypto Risk',
+            'script': os.path.join('crypto-analytics', 'crypto_market', 'crypto_risk.py'),
+            'args': []
+        },
+        'crypto_leadlag': {
+            'name': 'Crypto Lead-Lag',
+            'script': os.path.join('crypto-analytics', 'crypto_market', 'lead_lag', 'lead_lag_analysis.py'),
+            'args': []
+        },
     }
     
     if data_type not in update_commands:
@@ -668,7 +743,7 @@ asyncio.run(run_screener(capital=50_000_000))
                         clean_line = buffer.decode('utf-8', errors='replace').strip()
                         if clean_line:
                             yield f"data: {clean_line}\n\n"
-                    except:
+                    except Exception:
                         pass
                     buffer = b""
                 elif char == b'\r':
@@ -678,7 +753,7 @@ asyncio.run(run_screener(capital=50_000_000))
                         if clean_line and clean_line != last_progress_line:
                             yield f"data: {clean_line}\n\n"
                             last_progress_line = clean_line
-                    except:
+                    except Exception:
                         pass
                     buffer = b""
                 else:
@@ -688,7 +763,7 @@ asyncio.run(run_screener(capital=50_000_000))
             if buffer.strip():
                 try:
                     yield f"data: {buffer.decode('utf-8', errors='replace').strip()}\n\n"
-                except:
+                except Exception:
                     pass
             
             process.wait()
@@ -854,7 +929,7 @@ def get_backtest_summary():
                     for signal in data.get('signals', []):
                         signal['file_date'] = data.get('date', '')
                         all_signals.append(signal)
-                except:
+                except Exception:
                     continue
             
             debug_info['total_signals'] = len(all_signals)
@@ -921,4 +996,26 @@ def get_backtest_summary():
     response = summary.copy()
     response['debug'] = debug_info
     return jsonify(response)
+
+
+@common_bp.route('/data-version')
+def data_version():
+    """주요 데이터 파일의 최종 수정 시간 반환 (프론트 변경 감지용)"""
+    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+    target_files = [
+        'jongga_v2_latest.json',
+        'signals_log.csv',
+        'daily_prices.csv',
+        'kr_ai_analysis.json',
+        'daily_report.json',
+    ]
+    versions = {}
+    for fname in target_files:
+        fpath = os.path.join(data_dir, fname)
+        if os.path.exists(fpath):
+            versions[fname] = os.path.getmtime(fpath)
+        else:
+            versions[fname] = 0
+
+    return jsonify({'versions': versions, 'timestamp': __import__('time').time()})
 

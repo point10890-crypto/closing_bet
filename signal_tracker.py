@@ -24,6 +24,19 @@ import yfinance as yf
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# 파일 동시접근 보호
+try:
+    from app.utils.file_lock import safe_write, safe_read
+except ImportError:
+    # 직접 실행 시 fallback
+    from contextlib import contextmanager
+    @contextmanager
+    def safe_write(filepath, timeout=30):
+        yield filepath
+    @contextmanager
+    def safe_read(filepath, timeout=10):
+        yield filepath
+
 
 class SignalTracker:
     """시그널 추적 및 성과 기록"""
@@ -185,27 +198,38 @@ class SignalTracker:
         return signals_df
     
     def _append_to_log(self, new_signals: pd.DataFrame):
-        """시그널 로그에 추가"""
+        """시그널 로그에 추가 (OPEN 상태 종목 중복 방지)"""
         if os.path.exists(self.signals_log_path):
             try:
                 existing = pd.read_csv(self.signals_log_path, encoding='utf-8-sig')
             except UnicodeDecodeError:
                 existing = pd.read_csv(self.signals_log_path, encoding='cp949')
-            
-            # 중복 제거 (같은 날짜+종목)
+
+            existing['ticker'] = existing['ticker'].astype(str).str.zfill(6)
+            new_signals['ticker'] = new_signals['ticker'].astype(str).str.zfill(6)
+
+            # 1차 중복 제거: 같은 날짜+종목 (기존 로직)
             new_signals['key'] = new_signals['signal_date'] + '_' + new_signals['ticker']
-            existing['key'] = existing['signal_date'] + '_' + existing['ticker'].astype(str).str.zfill(6)
-            
+            existing['key'] = existing['signal_date'] + '_' + existing['ticker']
             new_only = new_signals[~new_signals['key'].isin(existing['key'])]
             new_only = new_only.drop(columns=['key'])
             existing = existing.drop(columns=['key'])
-            
+
+            # 2차 중복 제거: 이미 OPEN 상태인 종목은 새로 추가하지 않음
+            open_tickers = set(existing[existing['status'] == 'OPEN']['ticker'].unique())
+            before_count = len(new_only)
+            new_only = new_only[~new_only['ticker'].isin(open_tickers)]
+            skipped = before_count - len(new_only)
+            if skipped > 0:
+                logger.info(f"   ⏭️ 이미 OPEN 상태인 {skipped}개 종목 스킵")
+
             combined = pd.concat([existing, new_only], ignore_index=True)
         else:
             combined = new_signals
-        
-        combined.to_csv(self.signals_log_path, index=False, encoding='utf-8-sig')
-        logger.info(f"📁 시그널 로그 저장: {self.signals_log_path}")
+
+        with safe_write(self.signals_log_path):
+            combined.to_csv(self.signals_log_path, index=False, encoding='utf-8-sig')
+        logger.info(f"📁 시그널 로그 저장: {self.signals_log_path} ({len(combined)}건)")
     
     def update_open_signals(self):
         """열린 시그널 성과 업데이트 (로컬 데이터 사용)"""
@@ -268,7 +292,8 @@ class SignalTracker:
                 else:
                     df.at[idx, 'hold_days'] = hold_days
         
-        df.to_csv(self.signals_log_path, index=False, encoding='utf-8-sig')
+        with safe_write(self.signals_log_path):
+            df.to_csv(self.signals_log_path, index=False, encoding='utf-8-sig')
         logger.info(f"✅ {updated}개 시그널 청산됨")
     
     def get_performance_report(self) -> Dict:
@@ -311,8 +336,9 @@ class SignalTracker:
         }
         
         # 저장
-        with open(self.performance_path, 'w', encoding='utf-8') as f:
-            json.dump(report, f, ensure_ascii=False, indent=2)
+        with safe_write(self.performance_path):
+            with open(self.performance_path, 'w', encoding='utf-8') as f:
+                json.dump(report, f, ensure_ascii=False, indent=2)
         
         return report
     

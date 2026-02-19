@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-통합 워치독 - 서버 감시 + 스케줄러 감시 + 텔레그램 알림
-Flask(5001) / Next.js(4000) / Scheduler 가 죽으면 자동 재시작
+통합 워치독 - 서버 감시 + 텔레그램 알림
+Flask(5001) / Next.js(4000) 가 죽으면 자동 재시작
 상태 변경 시 텔레그램으로 알림 전송
 
 사용법:
@@ -15,16 +15,15 @@ import time
 import subprocess
 import socket
 import argparse
-import json
 from datetime import datetime
 
 if sys.platform.startswith('win'):
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')
 
-# ─── 고정 설정 ───
-BASE_DIR = r"C:\closing_bet"
-PYTHON = os.path.join(BASE_DIR, ".venv", "Scripts", "python.exe")
+# ─── 설정 (스크립트 위치 기반 자동 감지) ───
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PYTHON = sys.executable  # 현재 venv의 Python 사용
 FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 
 FLASK_PORT = 5001
@@ -32,7 +31,6 @@ NEXTJS_PORT = 4000
 CHECK_INTERVAL = 30  # 초
 
 LOG_FILE = os.path.join(BASE_DIR, "logs", "watchdog.log")
-PID_FILE = os.path.join(BASE_DIR, "logs", "scheduler.pid")
 
 # .env 로드
 try:
@@ -102,51 +100,20 @@ def is_port_alive(port, host="127.0.0.1", timeout=3):
         return False
 
 
-def is_process_alive(pid):
-    """PID가 살아있는지 확인"""
-    if not pid:
-        return False
-    try:
-        result = subprocess.run(
-            ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"],
-            capture_output=True, text=True, timeout=5
-        )
-        return str(pid) in result.stdout
-    except Exception:
-        return False
-
-
-def get_scheduler_pid():
-    """저장된 스케줄러 PID 읽기"""
-    try:
-        if os.path.exists(PID_FILE):
-            with open(PID_FILE, "r") as f:
-                return int(f.read().strip())
-    except Exception:
-        pass
-    return None
-
-
-def save_scheduler_pid(pid):
-    """스케줄러 PID 저장"""
-    try:
-        os.makedirs(os.path.dirname(PID_FILE), exist_ok=True)
-        with open(PID_FILE, "w") as f:
-            f.write(str(pid))
-    except Exception:
-        pass
-
-
 # ─── 서버 시작 함수 ───
 
 def start_flask():
     """Flask 서버 시작"""
     log(f"[FLASK] Starting on port {FLASK_PORT}...")
+    log_path = os.path.join(BASE_DIR, "logs", "flask.log")
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    log_f = open(log_path, "a", encoding="utf-8")
     proc = subprocess.Popen(
-        [PYTHON, "flask_app.py"],
+        [PYTHON, os.path.join(BASE_DIR, "flask_app.py")],
         cwd=BASE_DIR,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        stdout=log_f,
+        stderr=log_f,
+        env={**os.environ, 'PYTHONIOENCODING': 'utf-8'},
         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
     )
     log(f"[FLASK] Started PID={proc.pid}")
@@ -171,28 +138,10 @@ def start_nextjs():
     return proc
 
 
-def start_scheduler():
-    """스케줄러 데몬 시작"""
-    log("[SCHEDULER] Starting daemon mode...")
-    log_path = os.path.join(BASE_DIR, "logs", "scheduler.log")
-    os.makedirs(os.path.dirname(log_path), exist_ok=True)
-    log_f = open(log_path, "a", encoding="utf-8")
-    proc = subprocess.Popen(
-        [PYTHON, "scheduler.py", "--daemon"],
-        cwd=BASE_DIR,
-        stdout=log_f,
-        stderr=log_f,
-        creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
-    )
-    save_scheduler_pid(proc.pid)
-    log(f"[SCHEDULER] Started PID={proc.pid}")
-    return proc
-
-
 # ─── 메인 감시 루프 ───
 
 def check_and_restart():
-    """서버 + 스케줄러 상태 확인, 필요 시 재시작 + 텔레그램 알림"""
+    """서버 상태 확인, 필요 시 재시작 + 텔레그램 알림"""
     restarted = []
 
     # 1. Flask 체크
@@ -202,7 +151,7 @@ def check_and_restart():
         time.sleep(5)
         if is_port_alive(FLASK_PORT):
             log(f"[OK] Flask(:{FLASK_PORT}) recovered")
-            restarted.append("Flask(:5001)")
+            restarted.append(f"Flask(:{FLASK_PORT})")
         else:
             log(f"[ERROR] Flask(:{FLASK_PORT}) failed to restart")
 
@@ -213,24 +162,11 @@ def check_and_restart():
         time.sleep(8)
         if is_port_alive(NEXTJS_PORT):
             log(f"[OK] Next.js(:{NEXTJS_PORT}) recovered")
-            restarted.append("Next.js(:4000)")
+            restarted.append(f"Next.js(:{NEXTJS_PORT})")
         else:
             log(f"[ERROR] Next.js(:{NEXTJS_PORT}) failed to restart")
 
-    # 3. Scheduler 체크
-    scheduler_pid = get_scheduler_pid()
-    if not is_process_alive(scheduler_pid):
-        log(f"[WARN] Scheduler(PID={scheduler_pid}) DOWN - restarting...")
-        start_scheduler()
-        time.sleep(3)
-        new_pid = get_scheduler_pid()
-        if is_process_alive(new_pid):
-            log(f"[OK] Scheduler recovered (PID={new_pid})")
-            restarted.append("Scheduler")
-        else:
-            log(f"[ERROR] Scheduler failed to restart")
-
-    # 4. 재시작된 것이 있으면 텔레그램 알림
+    # 3. 재시작된 것이 있으면 텔레그램 알림
     if restarted:
         ts = datetime.now().strftime("%H:%M:%S")
         msg = (
@@ -238,8 +174,7 @@ def check_and_restart():
             f"⏰ {ts}\n"
             f"🔧 재시작: {', '.join(restarted)}\n"
             f"📊 Flask: {'✅' if is_port_alive(FLASK_PORT) else '❌'}\n"
-            f"🖥 Frontend: {'✅' if is_port_alive(NEXTJS_PORT) else '❌'}\n"
-            f"⏰ Scheduler: {'✅' if is_process_alive(get_scheduler_pid()) else '❌'}"
+            f"🖥 Frontend: {'✅' if is_port_alive(NEXTJS_PORT) else '❌'}"
         )
         send_telegram(msg)
 
@@ -252,18 +187,17 @@ def main():
     args = parser.parse_args()
 
     log("=" * 50)
-    log("Watchdog started (Flask + Next.js + Scheduler)")
+    log("Watchdog started (Flask + Next.js)")
     log(f"  BASE: {BASE_DIR}")
     log(f"  Flask: :{FLASK_PORT}  Next.js: :{NEXTJS_PORT}")
-    log(f"  Scheduler: daemon mode")
     log(f"  Interval: {CHECK_INTERVAL}s")
     log("=" * 50)
 
     # 시작 알림
     send_telegram(
-        f"<b>🚀 KR Market 워치독 시작</b>\n"
+        f"<b>🚀 MarketFlow 워치독 시작</b>\n"
         f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
-        f"📍 C:\\closing_bet\n"
+        f"📍 {BASE_DIR}\n"
         f"🔄 감시 간격: {CHECK_INTERVAL}초"
     )
 
@@ -271,8 +205,7 @@ def main():
         check_and_restart()
         flask_ok = is_port_alive(FLASK_PORT)
         next_ok = is_port_alive(NEXTJS_PORT)
-        sched_ok = is_process_alive(get_scheduler_pid())
-        log(f"Flask: {'OK' if flask_ok else 'DOWN'} | Next.js: {'OK' if next_ok else 'DOWN'} | Scheduler: {'OK' if sched_ok else 'DOWN'}")
+        log(f"Flask: {'OK' if flask_ok else 'DOWN'} | Next.js: {'OK' if next_ok else 'DOWN'}")
         return
 
     # 데몬 모드 - 무한 루프
@@ -282,7 +215,7 @@ def main():
             time.sleep(CHECK_INTERVAL)
     except KeyboardInterrupt:
         log("Watchdog stopped by user")
-        send_telegram("⛔ KR Market 워치독 종료됨")
+        send_telegram("⛔ MarketFlow 워치독 종료됨")
 
 
 if __name__ == "__main__":

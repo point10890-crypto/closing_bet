@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 
 interface NavItem {
     name: string;
@@ -43,8 +44,18 @@ const navigation: NavItem[] = [
         color: 'text-green-400',
         children: [
             { name: 'Overview', href: '/dashboard/us', color: 'bg-green-500' },
+            { name: 'Briefing', href: '/dashboard/us/briefing', color: 'bg-amber-500' },
+            { name: 'Top Picks', href: '/dashboard/us/top-picks', color: 'bg-indigo-500' },
+            { name: 'Smart Money', href: '/dashboard/us/smart-money', color: 'bg-blue-500' },
+            { name: 'Heatmap', href: '/dashboard/us/heatmap', color: 'bg-red-500' },
+            { name: 'Prediction', href: '/dashboard/us/prediction', color: 'bg-pink-500' },
+            { name: 'Regime', href: '/dashboard/us/regime', color: 'bg-cyan-500' },
+            { name: 'Risk', href: '/dashboard/us/risk', color: 'bg-orange-500' },
+            { name: 'Sectors', href: '/dashboard/us/sector-rotation', color: 'bg-teal-500' },
+            { name: 'Earnings', href: '/dashboard/us/earnings', color: 'bg-yellow-500' },
+            { name: 'Calendar', href: '/dashboard/us/calendar', color: 'bg-lime-500' },
+            { name: 'Track Record', href: '/dashboard/us/track-record', color: 'bg-violet-500' },
             { name: 'Night Preview', href: '/dashboard/us/preview', color: 'bg-purple-500' },
-            { name: 'US Heatmap', href: '/dashboard/us/heatmap', color: 'bg-red-500' },
         ],
     },
     {
@@ -52,6 +63,15 @@ const navigation: NavItem[] = [
         href: '/dashboard/crypto',
         icon: 'fa-bitcoin',
         color: 'text-yellow-500',
+        children: [
+            { name: 'Overview', href: '/dashboard/crypto', color: 'bg-yellow-500' },
+            { name: 'Briefing', href: '/dashboard/crypto/briefing', color: 'bg-amber-500' },
+            { name: 'VCP Signals', href: '/dashboard/crypto/signals', color: 'bg-orange-500' },
+            { name: 'Prediction', href: '/dashboard/crypto/prediction', color: 'bg-red-500' },
+            { name: 'Risk', href: '/dashboard/crypto/risk', color: 'bg-rose-500' },
+            { name: 'Lead-Lag', href: '/dashboard/crypto/leadlag', color: 'bg-cyan-500' },
+            { name: 'Backtest', href: '/dashboard/crypto/backtest', color: 'bg-indigo-500' },
+        ],
     },
     {
         name: 'Economy',
@@ -67,8 +87,39 @@ const navigation: NavItem[] = [
     },
 ];
 
+const adminNavigation: NavItem[] = [
+    {
+        name: 'Admin Dashboard',
+        href: '/admin',
+        icon: 'fa-shield-alt',
+        color: 'text-red-400',
+    },
+    {
+        name: 'Users',
+        href: '/admin/users',
+        icon: 'fa-users-cog',
+        color: 'text-red-400',
+    },
+    {
+        name: 'Subscriptions',
+        href: '/admin/subscriptions',
+        icon: 'fa-credit-card',
+        color: 'text-red-400',
+    },
+    {
+        name: 'System',
+        href: '/admin/system',
+        icon: 'fa-server',
+        color: 'text-red-400',
+    },
+];
+
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
+    const { data: session } = useSession();
+    const userName = (session?.user as any)?.name || 'Guest';
+    const userTier = (session?.user as any)?.tier || 'free';
+    const userRole = (session?.user as any)?.role || 'user';
 
     return (
         <>
@@ -135,17 +186,51 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                         </div>
                     );
                 })}
+
+                {/* Admin Section */}
+                {userRole === 'admin' && (
+                    <>
+                        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-red-500 uppercase tracking-wider">
+                            Admin
+                        </div>
+                        {adminNavigation.map((item) => {
+                            const isActive = pathname === item.href;
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    onClick={onNavigate}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
+                                        ? 'text-white bg-red-500/10 border border-red-500/20'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                        }`}
+                                >
+                                    <i className={`fas ${item.icon} w-5 text-center ${item.color}`}></i>
+                                    <span>{item.name}</span>
+                                </Link>
+                            );
+                        })}
+                    </>
+                )}
             </nav>
 
             {/* Profile */}
             <div className="p-4 border-t border-white/5">
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 ring-2 ring-white/10"></div>
-                    <div className="flex flex-col">
-                        <span className="text-xs font-bold text-white">Pro User</span>
-                        <span className="text-[10px] text-gray-500">Premium Plan</span>
+                <div className="flex items-center gap-3 p-2 rounded-lg">
+                    <div className={`w-8 h-8 rounded-full ring-2 ring-white/10 flex items-center justify-center text-white text-xs font-bold ${userTier === 'pro' ? 'bg-gradient-to-tr from-indigo-500 to-purple-500' : 'bg-gradient-to-tr from-gray-600 to-gray-500'}`}>
+                        {userName.charAt(0).toUpperCase()}
                     </div>
-                    <i className="fas fa-cog ml-auto text-gray-500 hover:text-white transition-colors"></i>
+                    <div className="flex flex-col flex-1 min-w-0">
+                        <span className="text-xs font-bold text-white truncate">{userName}</span>
+                        <span className={`text-[10px] ${userTier === 'pro' ? 'text-purple-400' : 'text-gray-500'}`}>
+                            {userTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <span className="text-[10px] px-2 py-1 rounded bg-purple-500/10 text-purple-400 font-bold">
+                            Pro
+                        </span>
+                    </div>
                 </div>
             </div>
         </>

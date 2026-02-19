@@ -48,6 +48,15 @@ if sys.platform.startswith('win'):
     sys.stdout.reconfigure(encoding='utf-8')
     sys.stderr.reconfigure(encoding='utf-8')
 
+# 파일 동시접근 보호
+try:
+    from app.utils.file_lock import safe_read
+except ImportError:
+    from contextlib import contextmanager
+    @contextmanager
+    def safe_read(filepath, timeout=10):
+        yield filepath
+
 # 선택적 import (배포 시 설치 필요)
 try:
     import schedule
@@ -121,16 +130,21 @@ logger = setup_logging()
 # 작업 함수들
 # ============================================================
 
-def run_command(cmd: list, description: str, timeout: int = 600, notify: bool = False) -> bool:
+def run_command(cmd: list, description: str, timeout: int = 600, notify: bool = False, env_extra: dict = None) -> bool:
     """명령 실행 헬퍼 (실시간 출력 스트리밍)
 
     Args:
         notify: True일 때만 텔레그램 알림 전송 (기본: False → 로그만)
+        env_extra: 추가 환경변수 dict (기존 환경변수에 병합)
     """
     logger.info(f"🚀 시작: {description}")
     start = time.time()
 
     try:
+        env = {**os.environ, 'PYTHONPATH': Config.BASE_DIR, 'PYTHONIOENCODING': 'utf-8'}
+        if env_extra:
+            env.update(env_extra)
+
         # Popen으로 실행하여 실시간 출력 캡처
         process = subprocess.Popen(
             cmd,
@@ -140,7 +154,7 @@ def run_command(cmd: list, description: str, timeout: int = 600, notify: bool = 
             text=True,
             encoding='utf-8', # Windows CP949 이슈 해결
             errors='replace', # 인코딩 오류 무시
-            env={**os.environ, 'PYTHONPATH': Config.BASE_DIR, 'PYTHONIOENCODING': 'utf-8'},
+            env=env,
             bufsize=1
         )
 
@@ -219,27 +233,23 @@ def send_telegram(message: str) -> bool:
 
 def update_daily_prices():
     """일별 가격 데이터 업데이트"""
-    script_path = os.path.join(Config.BASE_DIR, 'scripts', 'create_complete_daily_prices.py').replace("\\", "\\\\")
-    data_dir_escaped = Config.DATA_DIR.replace("\\", "\\\\")
-    base_dir_escaped = Config.BASE_DIR.replace("\\", "\\\\")
-    script = f"import os; os.environ['DATA_DIR'] = '{data_dir_escaped}'; os.chdir('{base_dir_escaped}'); exec(open('{script_path}', encoding='utf-8').read())"
+    script_path = os.path.join(Config.BASE_DIR, 'scripts', 'create_complete_daily_prices.py')
     return run_command(
-        [Config.PYTHON_PATH, '-c', script],
+        [Config.PYTHON_PATH, script_path],
         '일별 가격 데이터 업데이트',
-        timeout=Config.PRICE_TIMEOUT
+        timeout=Config.PRICE_TIMEOUT,
+        env_extra={'DATA_DIR': Config.DATA_DIR}
     )
 
 
 def update_institutional_data():
     """수급 데이터 업데이트"""
-    script_path = os.path.join(Config.BASE_DIR, 'all_institutional_trend_data.py').replace("\\", "\\\\")
-    data_dir_escaped = Config.DATA_DIR.replace("\\", "\\\\")
-    base_dir_escaped = Config.BASE_DIR.replace("\\", "\\\\")
-    script = f"import os; os.environ['DATA_DIR'] = '{data_dir_escaped}'; os.chdir('{base_dir_escaped}'); exec(open('{script_path}', encoding='utf-8').read())"
+    script_path = os.path.join(Config.BASE_DIR, 'all_institutional_trend_data.py')
     return run_command(
-        [Config.PYTHON_PATH, '-c', script],
+        [Config.PYTHON_PATH, script_path],
         '외인/기관 수급 데이터 업데이트',
-        timeout=Config.INST_TIMEOUT
+        timeout=Config.INST_TIMEOUT,
+        env_extra={'DATA_DIR': Config.DATA_DIR}
     )
 
 
@@ -265,7 +275,7 @@ def run_vcp_signal_scan(send_alert: bool = False):
 
 
 def send_vcp_telegram_summary():
-    """VCP 시그널 상위 10개 텔레그램 전송"""
+    """VCP 시그널 상위 10개 텔레그램 전송 (종목 중복 제거)"""
     import pandas as pd
 
     signals_path = os.path.join(Config.DATA_DIR, 'signals_log.csv')
@@ -273,7 +283,9 @@ def send_vcp_telegram_summary():
         logger.warning("⚠️ signals_log.csv가 없어 VCP 알림을 건너뜁니다.")
         return
 
-    df = pd.read_csv(signals_path, encoding='utf-8-sig')
+    with safe_read(signals_path):
+        df = pd.read_csv(signals_path, encoding='utf-8-sig')
+    df['ticker'] = df['ticker'].astype(str).str.zfill(6)
 
     # OPEN 상태만 필터
     if 'status' in df.columns:
@@ -294,15 +306,17 @@ def send_vcp_telegram_summary():
         except Exception as e:
             logger.warning(f"종목명 매핑 실패: {e}")
 
-    # 점수 기준 정렬 후 상위 10개
+    # 점수 기준 정렬 후 종목 중복 제거 (최고 점수만 유지)
     if 'score' in df.columns:
         df = df.sort_values('score', ascending=False)
+    df = df.drop_duplicates(subset='ticker', keep='first')
 
+    unique_count = len(df)
     top_10 = df.head(10)
 
     today = datetime.now().strftime('%m/%d')
     msg = f"<b>📈 VCP 시그널 Top 10 ({today})</b>\n"
-    msg += f"총 {len(df)}개 중 상위 10개\n"
+    msg += f"총 {unique_count}개 종목 중 상위 10개\n"
     msg += "────────────────────\n"
 
     for i, (_, row) in enumerate(top_10.iterrows(), 1):
@@ -332,19 +346,19 @@ def send_vcp_telegram_summary():
 
 def collect_historical_institutional():
     """과거 수급 데이터 수집 (히스토리 축적용)"""
-    data_dir_escaped = Config.DATA_DIR.replace("\\", "\\\\")
-    script = f"""
-from collect_historical_data import HistoricalInstitutionalCollector
-collector = HistoricalInstitutionalCollector(data_dir='{data_dir_escaped}')
-df = collector.collect_all(max_stocks=None, max_workers=15)
-if not df.empty:
-    collector.generate_signals_from_history(lookback_days=5)
-print(f'수집 완료: {{len(df)}}개 레코드')
-"""
+    script = (
+        "from collect_historical_data import HistoricalInstitutionalCollector; "
+        "import os; "
+        "collector = HistoricalInstitutionalCollector(data_dir=os.environ['DATA_DIR']); "
+        "df = collector.collect_all(max_stocks=None, max_workers=15); "
+        "df.empty or collector.generate_signals_from_history(lookback_days=5); "
+        "print(f'수집 완료: {len(df)}개 레코드')"
+    )
     return run_command(
         [Config.PYTHON_PATH, '-c', script],
         '과거 수급 히스토리 수집',
-        timeout=Config.HISTORY_TIMEOUT
+        timeout=Config.HISTORY_TIMEOUT,
+        env_extra={'DATA_DIR': Config.DATA_DIR}
     )
 
 
@@ -364,7 +378,8 @@ def run_ai_analysis_scan():
             logger.warning("⚠️ 시그널 로그가 없어 AI 분석을 건너뜁니다.")
             return True 
             
-        df = pd.read_csv(signals_path)
+        with safe_read(signals_path):
+            df = pd.read_csv(signals_path)
         if 'status' not in df.columns:
             return True
             
@@ -435,8 +450,9 @@ def generate_daily_report():
         signals_path = os.path.join(Config.DATA_DIR, 'signals_log.csv')
         
         if os.path.exists(signals_path):
-            df = pd.read_csv(signals_path, encoding='utf-8-sig')
-            
+            with safe_read(signals_path):
+                df = pd.read_csv(signals_path, encoding='utf-8-sig')
+
             open_signals = len(df[df['status'] == 'OPEN'])
             closed_signals = len(df[df['status'] == 'CLOSED'])
             
@@ -473,11 +489,9 @@ def generate_daily_report():
 
 def update_closing_bet():
     """종가베팅 데이터 업데이트 (summary.json) - legacy V1"""
-    script_path = os.path.join(Config.BASE_DIR, 'scripts', 'run_closing_bet.py').replace("\\", "\\\\")
-    base_dir_escaped = Config.BASE_DIR.replace("\\", "\\\\")
-    script = f"import os; os.chdir('{base_dir_escaped}'); exec(open('{script_path}', encoding='utf-8').read())"
+    script_path = os.path.join(Config.BASE_DIR, 'scripts', 'run_closing_bet.py')
     return run_command(
-        [Config.PYTHON_PATH, '-c', script],
+        [Config.PYTHON_PATH, script_path],
         '종가베팅 스캔 및 요약 생성 (V1)',
         timeout=300
     )
@@ -485,32 +499,18 @@ def update_closing_bet():
 
 def update_jongga_v2():
     """종가베팅 V2 데이터 업데이트 (jongga_v2_latest.json)"""
-    # Windows 경로 인코딩 문제 해결을 위해 os.path.join 대신 raw string 또는 유니코드 처리
-    base_dir_escaped = Config.BASE_DIR.replace("\\", "\\\\")
-    script = f"""
-import os
-import sys
-import asyncio
-from datetime import datetime, timedelta, date
-
-sys.path.append(r'{base_dir_escaped}')
-from engine.generator import run_screener
-
-# 새벽(0~9시)에 실행된 경우, 어제 날짜 기준으로 분석
-now = datetime.now()
-target_date = date.today()
-if now.hour < 9:
-    target_date = target_date - timedelta(days=1)
-    # 주말 처리 (월요일 새벽이면 금요일로)
-    if target_date.weekday() == 6: # 일요일이면 금요일로
-        target_date = target_date - timedelta(days=2)
-    elif target_date.weekday() == 5: # 토요일이면 금요일로
-        target_date = target_date - timedelta(days=1)
-
-print(f"📅 분석 기준일: {{target_date}}")
-asyncio.run(run_screener(capital=50_000_000, markets=["KOSPI", "KOSDAQ"], target_date=target_date))
-
-"""
+    script = (
+        "import asyncio; "
+        "from datetime import datetime, timedelta, date; "
+        "from engine.generator import run_screener; "
+        "now = datetime.now(); "
+        "target_date = date.today(); "
+        "target_date = (target_date - timedelta(days=1)) if now.hour < 9 else target_date; "
+        "target_date = (target_date - timedelta(days=2)) if target_date.weekday() == 6 else "
+        "((target_date - timedelta(days=1)) if target_date.weekday() == 5 else target_date); "
+        "print(f'분석 기준일: {target_date}'); "
+        "asyncio.run(run_screener(capital=50_000_000, markets=['KOSPI', 'KOSDAQ'], target_date=target_date))"
+    )
     success = run_command(
         [Config.PYTHON_PATH, '-c', script],
         '종가베팅 V2 분석 엔진 실행',
@@ -578,7 +578,6 @@ asyncio.run(run_screener(capital=50_000_000, markets=["KOSPI", "KOSDAQ"], target
                             send_telegram(msg + messages[1] if len(messages) > 1 else msg)
                         elif i > 1:
                             send_telegram(f"<b>🎯 종가베팅 V2 계속 ({i}/{len(messages)-1})</b>\n" + msg)
-                        import time
                         time.sleep(0.5)  # 텔레그램 rate limit 방지
 
         except Exception as e:
@@ -659,14 +658,16 @@ def run_round2():
 
 
 def _build_vcp_top10_text() -> str:
-    """VCP Top10 텍스트 생성 (텔레그램 전송 없이 텍스트만 반환)"""
+    """VCP Top10 텍스트 생성 (종목 중복 제거, 텔레그램 전송 없이 텍스트만 반환)"""
     try:
         import pandas as pd
         signals_path = os.path.join(Config.DATA_DIR, 'signals_log.csv')
         if not os.path.exists(signals_path):
             return ""
 
-        df = pd.read_csv(signals_path, encoding='utf-8-sig')
+        with safe_read(signals_path):
+            df = pd.read_csv(signals_path, encoding='utf-8-sig')
+        df['ticker'] = df['ticker'].astype(str).str.zfill(6)
         if 'status' in df.columns:
             df = df[df['status'] == 'OPEN']
         if df.empty:
@@ -683,8 +684,10 @@ def _build_vcp_top10_text() -> str:
             except Exception:
                 pass
 
+        # 점수 정렬 후 종목 중복 제거 (최고 점수만 유지)
         if 'score' in df.columns:
             df = df.sort_values('score', ascending=False)
+        df = df.drop_duplicates(subset='ticker', keep='first')
 
         top_10 = df.head(10)
         today = datetime.now().strftime('%m/%d')
@@ -713,14 +716,82 @@ def _build_vcp_top10_text() -> str:
         return ""
 
 
+def run_us_market_pro_update():
+    """US Market Pro 전체 데이터 파이프라인 실행 (update_all.py)"""
+    logger.info("🇺🇸 US Market Pro 데이터 파이프라인 시작...")
+
+    update_script = os.path.join(Config.BASE_DIR, 'us_market_preview', 'update_all.py')
+    if not os.path.exists(update_script):
+        logger.warning(f"⚠️ update_all.py 없음: {update_script}")
+        return False
+
+    success = run_command(
+        [Config.PYTHON_PATH, update_script],
+        'US Market Pro 전체 데이터 갱신',
+        timeout=1200  # 20분 (병렬 실행으로 8-15분 소요)
+    )
+
+    if success:
+        logger.info("✅ US Market Pro 데이터 갱신 완료")
+        # Track Record도 갱신
+        save_us_track_record_snapshot()
+    else:
+        logger.error("❌ US Market Pro 데이터 갱신 실패")
+
+    return success
+
+
+def save_us_track_record_snapshot():
+    """US Market Smart Money - Track Record 스냅샷 저장 + 성과 추적"""
+    logger.info("📊 US Track Record 스냅샷 저장 시작...")
+
+    try:
+        # 1. API를 통해 현재 Top Picks 스냅샷 저장
+        import urllib.request
+        req = urllib.request.Request(
+            'http://localhost:5001/api/us/track-record/save-snapshot',
+            method='POST',
+            headers={'Content-Type': 'application/json'}
+        )
+        try:
+            resp = urllib.request.urlopen(req, timeout=30)
+            result = json.loads(resp.read().decode('utf-8'))
+            logger.info(f"✅ US 스냅샷 저장: {result.get('date', 'unknown')} ({result.get('picks_count', 0)}종목)")
+        except Exception as e:
+            logger.warning(f"⚠️ US 스냅샷 API 실패 (Flask 미실행?): {e}")
+
+        # 2. Performance Tracker 실행 (수익률 계산 + 리포트 갱신)
+        tracker_path = os.path.join(Config.BASE_DIR, 'us_market_preview', 'performance_tracker.py')
+        if os.path.exists(tracker_path):
+            success = run_command(
+                [Config.PYTHON_PATH, tracker_path],
+                'US Smart Money 성과 추적',
+                timeout=300
+            )
+            if success:
+                logger.info("✅ US Performance Report 갱신 완료")
+            return success
+        else:
+            logger.warning(f"⚠️ performance_tracker.py 없음: {tracker_path}")
+            return False
+
+    except Exception as e:
+        logger.error(f"❌ US Track Record 실패: {e}")
+        return False
+
+
 def run_full_update():
     """전체 업데이트 (--now 수동 실행용)"""
     logger.info("=" * 60)
-    logger.info("🔄 KR Market 전체 업데이트 시작 (수동)")
+    logger.info("🔄 전체 업데이트 시작 (수동)")
     logger.info("=" * 60)
 
+    # KR Market
     run_round1()
     run_round2()
+
+    # US Market Pro
+    run_us_market_pro_update()
 
     return True
 
@@ -745,10 +816,14 @@ class Scheduler:
         self.running = False
     
     def setup_schedules(self):
-        """스케줄 등록 — 평일 2회만 (15:10, 16:00)"""
+        """스케줄 등록 — 평일 4회 (06:30 US Pro, 09:30 US Track, 15:10 종가베팅, 16:00 데이터갱신)"""
         weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
 
         for day in weekdays:
+            # 06:30 — US Market Pro 전체 데이터 파이프라인 (미국 장 마감 후 데이터 수집)
+            getattr(schedule.every(), day).at("06:30").do(run_us_market_pro_update)
+            # 09:30 — US Track Record 스냅샷 + 성과 추적
+            getattr(schedule.every(), day).at("09:30").do(save_us_track_record_snapshot)
             # 1차 15:10 — 종가베팅 V2 + AI → 텔레그램 알림 1회
             getattr(schedule.every(), day).at(Config.ROUND1_TIME).do(run_round1)
             # 2차 16:00 — 가격/수급/VCP/AI/리포트 → 텔레그램 요약 1회
@@ -757,7 +832,9 @@ class Scheduler:
         # 토요일 히스토리 수집
         schedule.every().saturday.at(Config.HISTORY_TIME).do(collect_historical_institutional)
 
-        logger.info("📅 스케줄 등록 완료 (텔레그램 알림 2회/일):")
+        logger.info("📅 스케줄 등록 완료:")
+        logger.info(f"   - 평일 06:30 US Market Pro 전체 데이터 갱신")
+        logger.info(f"   - 평일 09:30 US Track Record 스냅샷 + 성과 추적")
         logger.info(f"   - 평일 {Config.ROUND1_TIME} [1차] 종가베팅 V2 + AI 분석")
         logger.info(f"   - 평일 {Config.ROUND2_TIME} [2차] 데이터 갱신 + VCP + 요약 리포트")
         logger.info(f"   - 토요일 {Config.HISTORY_TIME} 히스토리 수집")
@@ -786,6 +863,8 @@ def main():
     parser.add_argument('--closing-bet', action='store_true', help='종가베팅(V1) 스캔만 실행')
     parser.add_argument('--jongga-v2', action='store_true', help='종가베팅 V2분석만 실행')
     parser.add_argument('--history', action='store_true', help='히스토리 수집만 실행')
+    parser.add_argument('--us-track', action='store_true', help='US Track Record 스냅샷 + 성과 추적')
+    parser.add_argument('--us-pro', action='store_true', help='US Market Pro 전체 데이터 파이프라인 실행')
     parser.add_argument('--daemon', action='store_true', help='데몬 모드 (스케줄러만 실행)')
     
     args = parser.parse_args()
@@ -828,6 +907,16 @@ def main():
     
     if args.history:
         collect_historical_institutional()
+        if not args.daemon:
+            return
+
+    if args.us_track:
+        save_us_track_record_snapshot()
+        if not args.daemon:
+            return
+
+    if args.us_pro:
+        run_us_market_pro_update()
         if not args.daemon:
             return
     
