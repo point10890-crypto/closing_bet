@@ -27,7 +27,7 @@ from engine.models import (
 from engine.collectors import KRXCollector, EnhancedNewsCollector
 from engine.scorer import Scorer
 from engine.position_sizer import PositionSizer
-from engine.llm_analyzer import LLMAnalyzer
+from engine.llm_analyzer import LLMAnalyzer, ClaudeScreener
 
 
 class SignalGenerator:
@@ -103,7 +103,7 @@ class SignalGenerator:
                 
                 signal = await self._analyze_stock(stock, target_date)
                 
-                if signal and signal.grade != Grade.C:
+                if signal and signal.grade in (Grade.S, Grade.A):
                     all_signals.append(signal)
                     print(f"\n    ✅ {stock.name}: {signal.grade.value}급 시그널 생성! (점수: {signal.score.total})")
                 
@@ -139,7 +139,11 @@ class SignalGenerator:
             
             # 3. 뉴스 조회 (본문 포함, 종목명 전달)
             # EnhancedNewsCollector: get_stock_news(code, limit, name)
-            news_list = await self._news.get_stock_news(stock.code, 3, stock.name)
+            try:
+                news_list = await self._news.get_stock_news(stock.code, 3, stock.name)
+            except Exception as e:
+                print(f"    ⚠ News fetch failed ({type(e).__name__}): {e}")
+                news_list = []
             print(f"    -> News fetched: {len(news_list)}")
             
             # 4. LLM 뉴스 분석 (Rate Limit 방지 Sleep)
@@ -266,9 +270,25 @@ async def run_screener(
         processing_time_ms=processing_time,
     )
     
+    # Claude AI 독립 종목 스크리닝
+    claude_picks = {}
+    try:
+        screener = ClaudeScreener()
+        if screener.client:
+            print("🤖 Claude AI 독립 스크리닝 시작...", flush=True)
+            signals_data = [s.to_dict() for s in signals]
+            claude_picks = await screener.screen_candidates(signals_data)
+            pick_count = len(claude_picks.get("picks", []))
+            print(f"✅ Claude AI {pick_count}개 종목 선별 완료", flush=True)
+        else:
+            print("⚠ Claude API Key 미설정 - 독립 스크리닝 스킵", flush=True)
+    except Exception as e:
+        print(f"⚠ Claude Screener failed: {e}", flush=True)
+        claude_picks = {"picks": [], "error": str(e)}
+
     # 결과 저장
     print("💾 결과 저장 중...", flush=True)
-    save_result_to_json(result)
+    save_result_to_json(result, claude_picks=claude_picks)
     
     print(f"🎉 완료! ({processing_time/1000:.1f}초 소요)", flush=True)
     
@@ -362,11 +382,11 @@ async def analyze_single_stock_by_code(
             print("Re-analysis failed or grade too low.")
             return None
 
-def save_result_to_json(result: ScreenerResult):
+def save_result_to_json(result: ScreenerResult, claude_picks: dict = None):
     """결과 JSON 저장 (Daily + Latest)"""
     import json
     import shutil
-    
+
     data = {
         "date": result.date.isoformat(),
         "total_candidates": result.total_candidates,
@@ -375,7 +395,8 @@ def save_result_to_json(result: ScreenerResult):
         "by_grade": result.by_grade,
         "by_market": result.by_market,
         "processing_time_ms": result.processing_time_ms,
-        "updated_at": datetime.now().isoformat()
+        "updated_at": datetime.now().isoformat(),
+        "claude_picks": claude_picks or {}
     }
     
     # 1. 날짜별 파일 저장

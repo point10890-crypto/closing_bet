@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 // Interfaces (Based on backend models)
 interface ScoreDetail {
@@ -11,7 +12,26 @@ interface ScoreDetail {
     consolidation: number;
     supply: number;
     llm_reason: string;
+    llm_source?: string;
     total: number;
+}
+
+interface ClaudePick {
+    stock_code: string;
+    stock_name: string;
+    rank: number;
+    confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+    reason: string;
+    risk: string;
+    expected_return: string;
+}
+
+interface ClaudePicks {
+    picks: ClaudePick[];
+    market_view?: string;
+    top_themes?: string[];
+    generated_at?: string;
+    model?: string;
 }
 
 interface ChecklistDetail {
@@ -56,6 +76,7 @@ interface ScreenerResult {
     filtered_count: number;
     signals: Signal[];
     updated_at: string;
+    claude_picks?: ClaudePicks;
 }
 
 // 3. Naver Chart Image Component (Bypass iframe restriction)
@@ -214,6 +235,7 @@ export default function JonggaV2Page() {
     const [loading, setLoading] = useState(true);
     const [dates, setDates] = useState<string[]>([]);
     const [selectedDate, setSelectedDate] = useState<string>('latest');
+    const [isUserSelected, setIsUserSelected] = useState(false); // 사용자가 직접 날짜를 선택했는지
 
     // 차트 모달 상태
     const [chartModal, setChartModal] = useState<{ isOpen: boolean, symbol: string, name: string }>({
@@ -227,31 +249,60 @@ export default function JonggaV2Page() {
             .then((data) => {
                 if (Array.isArray(data)) {
                     setDates(data);
+                } else if (data?.dates && Array.isArray(data.dates)) {
+                    setDates(data.dates);
                 }
             })
             .catch((err) => console.error('Failed to fetch dates:', err));
     }, []);
 
     // 2. Load Data (Latest or Specific Date)
-    useEffect(() => {
-        setLoading(true);
-        let url = '/api/kr/jongga-v2/latest';
-        if (selectedDate !== 'latest') {
-            url = `/api/kr/jongga-v2/history/${selectedDate}`;
-        }
+    const fetchData = useCallback(async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            let url = '/api/kr/jongga-v2/latest';
+            if (isUserSelected && selectedDate !== 'latest') {
+                url = `/api/kr/jongga-v2/history/${selectedDate}`;
+            }
 
-        fetch(url)
-            .then((res) => res.json())
-            .then((data) => {
-                setData(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error('Failed to fetch data:', err);
-                setLoading(false);
-                setData(null);
-            });
-    }, [selectedDate]);
+            const res = await fetch(url);
+            const result = await res.json();
+
+            // Fallback: latest에 시그널이 없으면 과거 날짜에서 시그널 탐색
+            if (!isUserSelected && (!result?.signals || result.signals.length === 0) && dates.length > 0) {
+                const latestDateStr = result?.date?.replace(/-/g, '') || '';
+                for (const d of dates) {
+                    if (d === latestDateStr) continue;
+                    try {
+                        const histRes = await fetch(`/api/kr/jongga-v2/history/${d}`);
+                        const histData = await histRes.json();
+                        if (histData?.signals && histData.signals.length > 0) {
+                            setData(histData);
+                            setLoading(false);
+                            return;
+                        }
+                    } catch { /* skip */ }
+                }
+            }
+            setData(result);
+        } catch (err) {
+            console.error('Failed to fetch data:', err);
+            if (!silent) setData(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedDate, dates, isUserSelected]);
+
+    useEffect(() => {
+        fetchData(false);
+    }, [selectedDate, dates, fetchData]);
+
+    // 사일런트 자동 갱신 (60초) - 사용자가 직접 날짜를 선택하지 않은 경우에만
+    const silentRefresh = useCallback(async () => {
+        if (isUserSelected) return;
+        await fetchData(true);
+    }, [fetchData, isUserSelected]);
+    useAutoRefresh(silentRefresh, 60000, !isUserSelected);
 
     if (loading) {
         return (
@@ -277,7 +328,7 @@ export default function JonggaV2Page() {
                         Closing <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Bet V2</span>
                     </h2>
                     <p className="text-gray-400 text-sm md:text-lg">
-                        Gemini 3.0 Analysis + Institutional Supply Trend
+                        Multi-AI Analysis (Gemini + Claude) + Institutional Supply Trend
                     </p>
                 </div>
 
@@ -298,13 +349,17 @@ export default function JonggaV2Page() {
                 <div className="flex items-center gap-3">
                     <select
                         value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            setSelectedDate(val);
+                            setIsUserSelected(val !== 'latest');
+                        }}
                         className="bg-[#1c1c1e] border border-white/10 text-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all hover:border-white/20"
                     >
                         <option value="latest">Latest Report</option>
                         {dates.map((d) => (
                             <option key={d} value={d}>
-                                {d}
+                                {d.length === 8 ? `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}` : d}
                             </option>
                         ))}
                     </select>
@@ -318,7 +373,12 @@ export default function JonggaV2Page() {
                 </div>
             </div>
 
-            {/* 3. Signal Grid */}
+            {/* 3. Claude AI Top Picks */}
+            {data?.claude_picks?.picks && data.claude_picks.picks.length > 0 && (
+                <ClaudePicksSection claudePicks={data.claude_picks} />
+            )}
+
+            {/* 4. Signal Grid */}
             <div className="grid grid-cols-1 gap-4 md:gap-6">
                 {!data || !data.signals || data.signals.length === 0 ? (
                     <div className="bg-[#1c1c1e] rounded-2xl p-16 text-center border border-white/5 flex flex-col items-center">
@@ -343,7 +403,7 @@ export default function JonggaV2Page() {
             </div>
 
             <div className="text-center text-xs text-gray-600 pt-8">
-                Engine: v2.0.1 (Gemini 3.0 Flash) • Updated: {data?.updated_at || '-'}
+                Engine: v2.1.0 (Gemini 3.0 + Claude AI) • Updated: {data?.updated_at || '-'}
             </div>
 
             {/* Chart Modal */}
@@ -601,8 +661,16 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                 {/* Middle: AI Analysis + News References */}
                 <div className="p-6 lg:w-5/12 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col">
                     <div className="mb-3 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full"></span>
-                        <span className="text-xs font-bold text-gray-300">Gemini 3.0 Analysis</span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                            signal.score.llm_source?.includes('claude') ? 'bg-gradient-to-r from-orange-400 to-amber-400' :
+                            signal.score.llm_source?.includes('openai') ? 'bg-gradient-to-r from-emerald-400 to-green-400' :
+                            'bg-gradient-to-r from-blue-400 to-indigo-400'
+                        }`}></span>
+                        <span className="text-xs font-bold text-gray-300">
+                            {signal.score.llm_source?.includes('claude') ? 'Claude AI Analysis' :
+                             signal.score.llm_source?.includes('openai') ? 'OpenAI Analysis' :
+                             'Gemini 3.0 Analysis'}
+                        </span>
                     </div>
                     {/* Analysis Text */}
                     <div className="bg-black/20 rounded-xl p-5 text-sm text-gray-300 leading-relaxed border border-white/5 mb-4">
@@ -657,6 +725,84 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                     </div>
                 </div>
 
+            </div>
+        </div>
+    );
+}
+
+function ClaudePicksSection({ claudePicks }: { claudePicks: ClaudePicks }) {
+    const confidenceStyles: Record<string, { bg: string; text: string; border: string }> = {
+        HIGH: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20' },
+        MEDIUM: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
+        LOW: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20' },
+    };
+
+    return (
+        <div className="bg-[#1c1c1e] rounded-2xl border border-orange-500/20 overflow-hidden relative">
+            {/* Background glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+            {/* Header */}
+            <div className="p-5 pb-0 relative z-10">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-xs text-orange-400 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                            Claude AI Top Picks
+                        </div>
+                        {claudePicks.model && (
+                            <span className="text-[10px] text-gray-600 font-mono">{claudePicks.model}</span>
+                        )}
+                    </div>
+                    {claudePicks.generated_at && (
+                        <span className="text-[10px] text-gray-600 font-mono">
+                            {new Date(claudePicks.generated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                    )}
+                </div>
+
+                {/* Market View */}
+                {claudePicks.market_view && (
+                    <p className="text-sm text-gray-400 leading-relaxed mb-3">{claudePicks.market_view}</p>
+                )}
+
+                {/* Hot Themes */}
+                {claudePicks.top_themes && claudePicks.top_themes.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                        {claudePicks.top_themes.map((theme, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/15 text-orange-400 text-[10px] font-bold">
+                                {theme}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Picks List */}
+            <div className="px-5 pb-5 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {claudePicks.picks.map((pick) => {
+                        const cs = confidenceStyles[pick.confidence] || confidenceStyles.LOW;
+                        return (
+                            <div key={pick.stock_code} className="bg-black/20 rounded-xl p-4 border border-white/5 hover:border-orange-500/20 transition-all">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-orange-400 font-mono text-xs font-bold">#{pick.rank}</span>
+                                        <span className="text-white font-bold text-sm">{pick.stock_name}</span>
+                                    </div>
+                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${cs.bg} ${cs.text} ${cs.border}`}>
+                                        {pick.confidence}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-400 leading-relaxed mb-2">{pick.reason}</p>
+                                <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-gray-500">Risk: <span className="text-amber-400">{pick.risk}</span></span>
+                                    <span className="text-gray-500">Return: <span className="text-emerald-400">{pick.expected_return}</span></span>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );

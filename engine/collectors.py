@@ -390,7 +390,13 @@ class EnhancedNewsCollector:
         self._session: Optional[aiohttp.ClientSession] = None
     
     async def __aenter__(self):
-        self._session = aiohttp.ClientSession(headers=self.HEADERS)
+        timeout = aiohttp.ClientTimeout(total=10, connect=5)
+        # Use ThreadedResolver to avoid aiodns/c-ares DNS issues on Windows
+        resolver = aiohttp.resolver.ThreadedResolver()
+        connector = aiohttp.TCPConnector(resolver=resolver)
+        self._session = aiohttp.ClientSession(
+            headers=self.HEADERS, timeout=timeout, connector=connector
+        )
         return self
     
     async def __aexit__(self, *args):

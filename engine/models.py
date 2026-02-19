@@ -119,7 +119,8 @@ class ScoreDetail:
     supply: int = 0                    # 수급 (0~2점)
 
     llm_reason: str = ""               # LLM 분석 결과
-    
+    llm_source: str = ""               # LLM 소스 (gemini/claude/openai/keyword_fallback)
+
     @property
     def total(self) -> int:
         """총점"""
@@ -128,8 +129,8 @@ class ScoreDetail:
     
     @property
     def mandatory_passed(self) -> bool:
-        """필수 조건 충족 여부"""
-        return self.news >= 1 and self.volume >= 1
+        """필수 조건 충족 여부 - 뉴스 OR 거래대금 중 하나 이상 충족"""
+        return self.news >= 1 or self.volume >= 1
     
     def to_dict(self) -> Dict:
         return {
@@ -140,6 +141,7 @@ class ScoreDetail:
             "consolidation": self.consolidation,
             "supply": self.supply,
             "llm_reason": self.llm_reason,
+            "llm_source": self.llm_source,
             "total": self.total,
         }
 

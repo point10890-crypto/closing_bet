@@ -44,9 +44,10 @@ class Scorer:
         # 1. 뉴스/재료 점수 (0~3점) - LLM 반영
         news_score, news_check = self._score_news(news_list, llm_result)
         score.news = news_score
-        # LLM 결과가 있으면 이유 저장
+        # LLM 결과가 있으면 이유 및 소스 저장
         if llm_result:
             score.llm_reason = llm_result.get("reason", "")
+            score.llm_source = llm_result.get("source", "")
             
         checklist.has_news = news_check["has_news"]
         checklist.news_sources = news_check["sources"]
