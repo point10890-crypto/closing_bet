@@ -3,11 +3,20 @@
 
 import os
 import json
+import math
 import traceback
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 
 us_bp = Blueprint('us', __name__)
+
+# ─── 경로 고정 (__file__ 기반 절대경로) ───
+_ROUTES_DIR = os.path.dirname(os.path.abspath(__file__))       # app/routes/
+_APP_DIR = os.path.dirname(_ROUTES_DIR)                         # app/
+_BASE_DIR = os.path.dirname(_APP_DIR)                           # /c/closing_bet
+US_DATA_DIR = os.path.join(_BASE_DIR, 'us_market', 'data')
+US_HISTORY_DIR = os.path.join(_BASE_DIR, 'us_market', 'history')
+PREVIEW_OUTPUT_DIR = os.path.join(_BASE_DIR, 'us_market_preview', 'output')
 
 
 def _safe_float(val, default=0):
@@ -15,11 +24,19 @@ def _safe_float(val, default=0):
     if val is None:
         return default
     try:
-        import math
         f = float(val)
         return default if math.isnan(f) else f
     except (ValueError, TypeError):
         return default
+
+
+def _load_preview_json(filename):
+    """Load a JSON file from the preview output directory"""
+    path = os.path.join(PREVIEW_OUTPUT_DIR, filename)
+    if os.path.exists(path):
+        with open(path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}
 
 
 @us_bp.route('/portfolio')
@@ -232,78 +249,120 @@ def get_us_stock_chart(ticker):
 
 # ─── US Market Data Endpoints (from us_market/ scripts) ───
 
-US_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'us_market', 'data')
-US_HISTORY_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'us_market', 'history')
-
 
 @us_bp.route('/smart-money')
 def get_us_smart_money():
-    """Smart Money Picks with performance tracking"""
+    """Smart Money Picks — frontend expects { picks: SmartMoneyStock[], count: number }"""
     try:
-        import yfinance as yf
-        import pandas as pd
-        import math
-
-        current_file = os.path.join(US_DATA_DIR, 'smart_money_current.json')
+        # 1) Try PREVIEW_OUTPUT_DIR first (us_market_preview/output/)
+        current_file = os.path.join(PREVIEW_OUTPUT_DIR, 'smart_money_current.json')
+        # 2) Fallback to US_DATA_DIR (us_market/data/)
+        if not os.path.exists(current_file):
+            current_file = os.path.join(US_DATA_DIR, 'smart_money_current.json')
 
         if os.path.exists(current_file):
             with open(current_file, 'r', encoding='utf-8') as f:
                 snapshot = json.load(f)
 
-            tickers = [p['ticker'] for p in snapshot.get('picks', [])]
-            current_prices = {}
-            for ticker in tickers:
-                try:
-                    stock = yf.Ticker(ticker)
-                    hist = stock.history(period='5d')
-                    if not hist.empty:
-                        current_prices[ticker] = round(float(hist['Close'].dropna().iloc[-1]), 2)
-                except:
-                    pass
-
-            picks_with_perf = []
+            picks = []
             for pick in snapshot.get('picks', []):
-                ticker = pick['ticker']
                 price_at_rec = _safe_float(pick.get('price_at_analysis', 0))
-                current_price = current_prices.get(ticker, price_at_rec) or price_at_rec
-                change_pct = ((current_price / price_at_rec) - 1) * 100 if price_at_rec > 0 else 0
-
-                picks_with_perf.append({
-                    **pick,
-                    'current_price': round(current_price, 2),
+                picks.append({
+                    'ticker': pick.get('ticker', ''),
+                    'name': pick.get('name', ''),
+                    'sector': pick.get('sector', ''),
+                    'price': _safe_float(pick.get('price_at_analysis', 0)),
                     'price_at_rec': round(price_at_rec, 2),
-                    'change_since_rec': round(change_pct, 2)
+                    'change_pct': _safe_float(pick.get('target_upside', 0)),
+                    'composite_score': _safe_float(pick.get('final_score', 0)),
+                    'swing_score': _safe_float(pick.get('quant_score', 0)),
+                    'trend_score': _safe_float(pick.get('ai_bonus', 0)),
+                    'grade': pick.get('sd_stage', 'N/A'),
+                    'recommendation': pick.get('ai_recommendation', ''),
+                    'ai_summary': pick.get('ai_summary', ''),
+                    'rank': pick.get('rank', 0),
+                    'inst_pct': _safe_float(pick.get('inst_pct', 0)),
+                    'rsi': _safe_float(pick.get('rsi', 0)),
                 })
 
             return jsonify({
+                'picks': picks,
+                'count': len(picks),
                 'analysis_date': snapshot.get('analysis_date', ''),
                 'analysis_timestamp': snapshot.get('analysis_timestamp', ''),
-                'top_picks': picks_with_perf,
-                'summary': {
-                    'total_analyzed': len(picks_with_perf),
-                    'avg_score': round(sum(p.get('final_score', 0) for p in picks_with_perf) / max(len(picks_with_perf), 1), 1)
-                }
             })
 
         # Fallback to CSV
-        csv_path = os.path.join(US_DATA_DIR, 'smart_money_picks_v2.csv')
+        import pandas as pd
+        csv_path = os.path.join(PREVIEW_OUTPUT_DIR, 'smart_money_picks_v2.csv')
+        if not os.path.exists(csv_path):
+            csv_path = os.path.join(US_DATA_DIR, 'smart_money_picks_v2.csv')
         if not os.path.exists(csv_path):
             return jsonify({'error': 'Smart money picks not found. Run screener first.'}), 404
 
         df = pd.read_csv(csv_path)
-        top_picks = []
+        picks = []
         for _, row in df.head(20).iterrows():
-            top_picks.append({
-                'ticker': row['ticker'],
-                'name': row.get('name', row['ticker']),
-                'final_score': _safe_float(row.get('composite_score', 0)),
-                'current_price': _safe_float(row.get('current_price', 0)),
+            picks.append({
+                'ticker': row.get('ticker', ''),
+                'name': row.get('name', row.get('ticker', '')),
+                'sector': row.get('sector', ''),
+                'price': _safe_float(row.get('current_price', 0)),
+                'price_at_rec': _safe_float(row.get('current_price', 0)),
+                'change_pct': 0,
+                'composite_score': _safe_float(row.get('composite_score', 0)),
+                'swing_score': 0,
+                'trend_score': 0,
                 'grade': row.get('grade', 'N/A'),
+                'recommendation': '',
+                'ai_summary': '',
             })
 
+        return jsonify({'picks': picks, 'count': len(picks)})
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/smart-money/<ticker>/detail')
+def get_smart_money_detail(ticker):
+    """Smart Money individual stock detail"""
+    try:
+        current_file = os.path.join(PREVIEW_OUTPUT_DIR, 'smart_money_current.json')
+        if not os.path.exists(current_file):
+            current_file = os.path.join(US_DATA_DIR, 'smart_money_current.json')
+
+        if not os.path.exists(current_file):
+            return jsonify({'error': 'Smart money data not found'}), 404
+
+        with open(current_file, 'r', encoding='utf-8') as f:
+            snapshot = json.load(f)
+
+        pick = None
+        for p in snapshot.get('picks', []):
+            if p.get('ticker', '').upper() == ticker.upper():
+                pick = p
+                break
+
+        if not pick:
+            return jsonify({'error': f'Ticker {ticker} not found in smart money picks'}), 404
+
         return jsonify({
-            'top_picks': top_picks,
-            'summary': {'total_analyzed': len(df)}
+            'ticker': pick.get('ticker', ''),
+            'name': pick.get('name', ''),
+            'sector': pick.get('sector', ''),
+            'price': _safe_float(pick.get('price_at_analysis', 0)),
+            'change_pct': _safe_float(pick.get('target_upside', 0)),
+            'composite_score': _safe_float(pick.get('final_score', 0)),
+            'quant_score': _safe_float(pick.get('quant_score', 0)),
+            'ai_bonus': _safe_float(pick.get('ai_bonus', 0)),
+            'recommendation': pick.get('ai_recommendation', ''),
+            'ai_summary': pick.get('ai_summary', ''),
+            'sd_stage': pick.get('sd_stage', ''),
+            'inst_pct': _safe_float(pick.get('inst_pct', 0)),
+            'rsi': _safe_float(pick.get('rsi', 0)),
+            'rank': pick.get('rank', 0),
         })
 
     except Exception as e:
@@ -549,17 +608,6 @@ def get_us_calendar():
 
 # ─── US Market Night Preview Endpoints ───
 
-PREVIEW_OUTPUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'us_market_preview', 'output')
-
-
-def _load_preview_json(filename):
-    """Load a JSON file from the preview output directory"""
-    path = os.path.join(PREVIEW_OUTPUT_DIR, filename)
-    if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
-
 
 @us_bp.route('/preview/market-data')
 def get_preview_market_data():
@@ -616,6 +664,303 @@ def get_preview_sector_heatmap():
         data = _load_preview_json('sector_heatmap.json')
         if not data:
             return jsonify({'error': 'Sector heatmap not available. Run sector_heatmap.py first.'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ─── US Market Full Endpoints (Frontend pages) ───
+# These serve JSON from us_market_preview/output/ for each dashboard page
+
+@us_bp.route('/market-briefing')
+def get_market_briefing():
+    """Full market briefing (combines briefing + market_data + smart_money)"""
+    try:
+        briefing = _load_preview_json('briefing.json')
+        if not briefing:
+            return jsonify({'error': 'Briefing not available'}), 404
+        # Merge market_data if briefing doesn't have it
+        if 'market_data' not in briefing:
+            md = _load_preview_json('market_data.json')
+            if md:
+                briefing['market_data'] = md.get('market_data', md)
+                briefing.setdefault('vix', md.get('vix'))
+                briefing.setdefault('fear_greed', md.get('fear_greed'))
+        # Merge smart_money
+        if 'smart_money' not in briefing:
+            sm = _load_preview_json('top_picks.json')
+            if sm:
+                briefing['smart_money'] = {'top_picks': sm}
+        briefing.setdefault('timestamp', datetime.now().isoformat())
+        return jsonify(briefing)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/market-regime')
+def get_market_regime():
+    """Market regime analysis"""
+    try:
+        data = _load_preview_json('regime_config.json')
+        if not data:
+            return jsonify({'error': 'Market regime data not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/backtest')
+def get_backtest():
+    """Backtest results"""
+    try:
+        data = _load_preview_json('backtest_results.json')
+        if not data:
+            return jsonify({'error': 'Backtest results not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/decision-signal')
+def get_decision_signal():
+    """Decision signal (market gate + prediction combined)"""
+    try:
+        gate = _load_preview_json('market_data.json')
+        pred = _load_preview_json('prediction.json')
+        regime = _load_preview_json('regime_config.json')
+        data = {
+            'market_gate': gate,
+            'prediction': pred,
+            'regime': regime,
+            'timestamp': datetime.now().isoformat(),
+        }
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/top-picks-report')
+def get_top_picks_report():
+    """Top 10 stock picks full report"""
+    try:
+        data = _load_preview_json('final_top10_report.json')
+        if not data:
+            data = _load_preview_json('top_picks.json')
+        if not data:
+            return jsonify({'error': 'Top picks report not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/cumulative-performance')
+def get_cumulative_performance():
+    """Cumulative performance data"""
+    try:
+        data = _load_preview_json('performance_report.json')
+        if not data:
+            return jsonify({'error': 'Performance data not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/track-record')
+def get_track_record():
+    """Track record — historical performance of recommendations (same data as cumulative-performance)"""
+    try:
+        data = _load_preview_json('performance_report.json')
+        if not data:
+            return jsonify({'error': 'Track record data not available. Run performance_tracker.py first.'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/insider-trading')
+def get_insider_trading():
+    """Insider trading data"""
+    try:
+        data = _load_preview_json('insider_trading.json')
+        if not data:
+            return jsonify({'error': 'Insider trading data not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/options-flow-analysis')
+def get_options_flow_analysis():
+    """Options flow analysis"""
+    try:
+        data = _load_preview_json('options_flow.json')
+        if not data:
+            return jsonify({'error': 'Options flow analysis not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/news-analysis')
+def get_news_analysis():
+    """News sentiment analysis"""
+    try:
+        data = _load_preview_json('news_analysis.json')
+        if not data:
+            return jsonify({'error': 'News analysis not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/etf-flow-analysis')
+def get_etf_flow_analysis():
+    """ETF flow analysis"""
+    try:
+        data = _load_preview_json('etf_flow_analysis.json')
+        if not data:
+            return jsonify({'error': 'ETF flow analysis not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/13f-holdings')
+def get_13f_holdings():
+    """13F institutional holdings"""
+    try:
+        # Try JSON first, fall back to CSV
+        data = _load_preview_json('sec_filings.json')
+        if data:
+            return jsonify(data)
+        # CSV fallback
+        csv_path = os.path.join(PREVIEW_OUTPUT_DIR, 'us_13f_holdings.csv')
+        if os.path.exists(csv_path):
+            import csv
+            holdings = []
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    holdings.append(row)
+            return jsonify({'holdings': holdings, 'count': len(holdings)})
+        return jsonify({'error': '13F holdings data not available'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/earnings-analysis')
+def get_earnings_analysis():
+    """Earnings analysis"""
+    try:
+        data = _load_preview_json('earnings_analysis.json')
+        if not data:
+            return jsonify({'error': 'Earnings analysis not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/portfolio-risk')
+def get_portfolio_risk():
+    """Portfolio risk analysis"""
+    try:
+        data = _load_preview_json('portfolio_risk.json')
+        if not data:
+            return jsonify({'error': 'Portfolio risk data not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/prediction-history')
+def get_prediction_history():
+    """Prediction history"""
+    try:
+        data = _load_preview_json('prediction_history.json')
+        if not data:
+            return jsonify({'error': 'Prediction history not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/data-status')
+def get_data_status():
+    """Check data file freshness"""
+    try:
+        files = []
+        if os.path.isdir(PREVIEW_OUTPUT_DIR):
+            for fname in sorted(os.listdir(PREVIEW_OUTPUT_DIR)):
+                fpath = os.path.join(PREVIEW_OUTPUT_DIR, fname)
+                if os.path.isfile(fpath):
+                    stat = os.stat(fpath)
+                    files.append({
+                        'name': fname,
+                        'size': stat.st_size,
+                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    })
+        return jsonify({'files': files, 'count': len(files), 'directory': PREVIEW_OUTPUT_DIR})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/sector-rotation')
+def get_sector_rotation():
+    """Sector rotation analysis"""
+    try:
+        data = _load_preview_json('sector_rotation.json')
+        if not data:
+            return jsonify({'error': 'Sector rotation data not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/risk-alerts')
+def get_risk_alerts():
+    """Risk alerts"""
+    try:
+        data = _load_preview_json('risk_alerts.json')
+        if not data:
+            return jsonify({'error': 'Risk alerts not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/earnings-impact')
+def get_earnings_impact():
+    """Earnings impact analysis"""
+    try:
+        data = _load_preview_json('earnings_impact.json')
+        if not data:
+            return jsonify({'error': 'Earnings impact data not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/index-prediction')
+def get_index_prediction():
+    """Index prediction (ML model)"""
+    try:
+        data = _load_preview_json('index_prediction.json')
+        if not data:
+            data = _load_preview_json('prediction.json')
+        if not data:
+            return jsonify({'error': 'Index prediction not available'}), 404
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/heatmap-data')
+def get_heatmap_data():
+    """S&P 500 heatmap data"""
+    try:
+        data = _load_preview_json('sector_heatmap.json')
+        if not data:
+            return jsonify({'error': 'Heatmap data not available'}), 404
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500

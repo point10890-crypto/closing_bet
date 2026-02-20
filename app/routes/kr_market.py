@@ -248,7 +248,6 @@ def get_kr_signals():
 
 
 @kr_bp.route('/stock-chart/<ticker>')
-@kr_bp.route('/stock-chart/<ticker>')
 def get_kr_stock_chart(ticker):
     """KR 종목 차트 데이터 (실시간 포함)"""
     try:

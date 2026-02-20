@@ -281,14 +281,9 @@ def send_telegram_long(message: str) -> bool:
 # ============================================================
 
 def update_daily_prices():
-    """일별 가격 데이터 업데이트"""
-    script_path = os.path.join(Config.BASE_DIR, 'scripts', 'create_complete_daily_prices.py')
-    return run_command(
-        [Config.PYTHON_PATH, script_path],
-        'KR 일별 가격 데이터 업데이트',
-        timeout=Config.PRICE_TIMEOUT,
-        env_extra={'DATA_DIR': Config.DATA_DIR}
-    )
+    """일별 가격 데이터 업데이트 — legacy script 제거됨, V2 엔진에서 자동 처리"""
+    logger.info("⏭️ update_daily_prices: V2 엔진이 자체 수집하므로 skip")
+    return True
 
 
 def update_institutional_data():
@@ -509,13 +504,9 @@ def generate_daily_report():
 
 
 def update_closing_bet():
-    """종가베팅 데이터 업데이트 (summary.json) - legacy V1"""
-    script_path = os.path.join(Config.BASE_DIR, 'scripts', 'run_closing_bet.py')
-    return run_command(
-        [Config.PYTHON_PATH, script_path],
-        'KR 종가베팅 스캔 (V1)',
-        timeout=300
-    )
+    """종가베팅 V1 — 제거됨, V2로 완전 대체"""
+    logger.info("⏭️ update_closing_bet: V1 제거됨, V2(update_jongga_v2)로 대체")
+    return True
 
 
 def update_jongga_v2():
@@ -540,7 +531,7 @@ def update_jongga_v2():
 
     if success:
         try:
-            json_path = os.path.join(Config.BASE_DIR, "data", "jongga_v2_latest.json")
+            json_path = os.path.join(Config.DATA_DIR, "jongga_v2_latest.json")
             if os.path.exists(json_path):
                 with open(json_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
