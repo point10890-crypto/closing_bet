@@ -4,18 +4,24 @@
 import os
 import json
 import traceback
-from datetime import datetime
+from datetime import datetime, date
 import pandas as pd
 from flask import Blueprint, jsonify, request, current_app
 
 kr_bp = Blueprint('kr', __name__)
+
+# ── 고정 경로 ──────────────────────────────────────────────
+_ROUTES_DIR = os.path.dirname(os.path.abspath(__file__))  # app/routes/
+_APP_DIR = os.path.dirname(_ROUTES_DIR)                    # app/
+_BASE_DIR = os.path.dirname(_APP_DIR)                      # /c/closing_bet
+DATA_DIR = os.path.join(_BASE_DIR, 'data')
 
 
 @kr_bp.route('/market-status')
 def get_kr_market_status():
     """한국 시장 상태"""
     try:
-        prices_path = os.path.join('data', 'daily_prices.csv')
+        prices_path = os.path.join(DATA_DIR, 'daily_prices.csv')
         if not os.path.exists(prices_path):
             return jsonify({'status': 'UNKNOWN', 'reason': 'No price data'}), 404
             
@@ -81,7 +87,10 @@ def get_kr_signals():
         # Load ticker name mapping
         name_map = {}
         # Flexible path resolution
-        candidates = ['ticker_to_yahoo_map.csv', 'data/ticker_to_yahoo_map.csv']
+        candidates = [
+            os.path.join(_BASE_DIR, 'ticker_to_yahoo_map.csv'),
+            os.path.join(DATA_DIR, 'ticker_to_yahoo_map.csv'),
+        ]
         ticker_map_path = 'ticker_to_yahoo_map.csv'
         for p in candidates:
             if os.path.exists(p):
@@ -94,7 +103,7 @@ def get_kr_signals():
             except:
                 pass
         
-        json_path = 'data/kr_ai_analysis.json'
+        json_path = os.path.join(DATA_DIR, 'kr_ai_analysis.json')
         
         if os.path.exists(json_path):
             try:
@@ -192,7 +201,7 @@ def get_kr_signals():
                 pass
             
         # Fallback to CSV
-        signals_path = 'data/signals_log.csv'
+        signals_path = os.path.join(DATA_DIR, 'signals_log.csv')
         
         if not os.path.exists(signals_path):
             return jsonify({
@@ -244,7 +253,7 @@ def get_kr_stock_chart(ticker):
     """KR 종목 차트 데이터 (실시간 포함)"""
     try:
         # Load from daily_prices.csv
-        prices_path = os.path.join('data', 'daily_prices.csv')
+        prices_path = os.path.join(DATA_DIR, 'daily_prices.csv')
         if not os.path.exists(prices_path):
             return jsonify({'error': 'Price data not found'}), 404
         
@@ -317,7 +326,7 @@ def get_kr_stock_chart(ticker):
 def get_kr_ai_summary(ticker):
     """KR AI 종목 요약"""
     try:
-        json_path = 'data/kr_ai_analysis.json'
+        json_path = os.path.join(DATA_DIR, 'kr_ai_analysis.json')
         if os.path.exists(json_path):
             with open(json_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -341,7 +350,7 @@ def get_kr_ai_summary(ticker):
 def get_kr_ai_analysis():
     """KR AI 분석 전체"""
     try:
-        json_path = 'data/kr_ai_analysis.json'
+        json_path = os.path.join(DATA_DIR, 'kr_ai_analysis.json')
         if os.path.exists(json_path):
             with open(json_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -355,7 +364,7 @@ def get_kr_ai_analysis():
 def get_kr_ai_history_dates():
     """AI 분석 히스토리 날짜"""
     try:
-        history_dir = os.path.join('data', 'history')
+        history_dir = os.path.join(DATA_DIR, 'history')
         if not os.path.exists(history_dir):
             return jsonify({'dates': []})
         
@@ -374,7 +383,7 @@ def get_kr_ai_history_dates():
 def get_kr_ai_history(date):
     """특정 날짜 AI 분석"""
     try:
-        history_file = os.path.join('data', 'history', f'{date}.json')
+        history_file = os.path.join(DATA_DIR, 'history', f'{date}.json')
         if os.path.exists(history_file):
             with open(history_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -388,7 +397,7 @@ def get_kr_ai_history(date):
 def get_kr_cumulative_return():
     """누적 수익률"""
     try:
-        perf_path = os.path.join('data', 'performance.json')
+        perf_path = os.path.join(DATA_DIR, 'performance.json')
         if os.path.exists(perf_path):
             with open(perf_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -402,7 +411,7 @@ def get_kr_cumulative_return():
 def get_kr_performance():
     """KR 퍼포먼스"""
     try:
-        perf_path = os.path.join('data', 'performance.json')
+        perf_path = os.path.join(DATA_DIR, 'performance.json')
         if os.path.exists(perf_path):
             with open(perf_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -440,10 +449,15 @@ def kr_update():
 
 
 @kr_bp.route('/market-gate')
-@kr_bp.route('/market-gate')
 def kr_market_gate():
     """KR Market Gate 상태 (Enhanced)"""
     try:
+        # sys.path 오염 방지: 프로젝트 루트를 확실히 맨 앞에
+        import sys as _sys
+        _base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        if _sys.path[0] != _base:
+            _sys.path.insert(0, _base)
+
         from market_gate import run_kr_market_gate
         
         # Run enhanced analysis
@@ -505,7 +519,7 @@ def kr_market_gate():
         traceback.print_exc()
         # Fallback to simple logic if enhanced fails
         try:
-            prices_path = os.path.join('data', 'daily_prices.csv')
+            prices_path = os.path.join(DATA_DIR, 'daily_prices.csv')
             if not os.path.exists(prices_path):
                 return jsonify({'status': 'NEUTRAL', 'score': 50, 'sectors': []})
             
@@ -545,7 +559,10 @@ def get_kr_realtime_prices():
         # 1. Load Ticker Map
         yahoo_map = {}
         # Flexible path resolution
-        candidates = ['ticker_to_yahoo_map.csv', 'data/ticker_to_yahoo_map.csv']
+        candidates = [
+            os.path.join(_BASE_DIR, 'ticker_to_yahoo_map.csv'),
+            os.path.join(DATA_DIR, 'ticker_to_yahoo_map.csv'),
+        ]
         ticker_map_path = 'ticker_to_yahoo_map.csv'
         for p in candidates:
             if os.path.exists(p):
@@ -698,7 +715,7 @@ def get_jongga_v2_latest():
     """종가베팅 v2 최신 결과 조회"""
     try:
         # data 디렉토리 경로 (패키지 루트 기준)
-        data_dir = os.path.join(os.path.dirname(current_app.root_path), 'data')
+        data_dir = DATA_DIR
         latest_file = os.path.join(data_dir, 'jongga_v2_latest.json')
         
         if not os.path.exists(latest_file):
@@ -722,23 +739,28 @@ def get_jongga_v2_latest():
 
 @kr_bp.route('/jongga-v2/dates', methods=['GET'])
 def get_jongga_v2_dates():
-    """데이터가 존재하는 날짜 목록 조회"""
+    """데이터가 존재하는 날짜 목록 조회 (빈 파일 제외)"""
     try:
-        data_dir = os.path.join(os.path.dirname(current_app.root_path), 'data')
+        data_dir = DATA_DIR
         # jongga_v2_results_YYYYMMDD.json 패턴 검색
         import glob
         files = glob.glob(os.path.join(data_dir, 'jongga_v2_results_*.json'))
-        
+
         dates = []
         for f in files:
             # 파일명에서 날짜 추출 (jongga_v2_results_20240115.json)
             basename = os.path.basename(f)
-            if len(basename) >= 26: # 최소 길이 체크
-                input_date = basename[18:26] # 20240115
+            if len(basename) >= 26:  # 최소 길이 체크
+                input_date = basename[18:26]  # 20240115
+
+                # 빈 파일(0 시그널 = 휴장일) 제외: 500바이트 미만이면 데이터 없음
+                if os.path.getsize(f) < 500:
+                    continue
+
                 formatted = f"{input_date[:4]}-{input_date[4:6]}-{input_date[6:]}"
                 dates.append(formatted)
-        
-        dates.sort(reverse=True) # 최신순 정렬
+
+        dates.sort(reverse=True)  # 최신순 정렬
         return jsonify(dates)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -747,21 +769,25 @@ def get_jongga_v2_dates():
 def get_jongga_v2_history(date_str):
     """
     특정 날짜의 종가베팅 v2 결과 조회
+    date_str: YYYYMMDD 또는 YYYY-MM-DD 둘 다 지원
     """
     try:
-        base_dir = os.path.join(os.path.dirname(current_app.root_path), 'data')
-        filename = f"jongga_v2_results_{date_str}.json"
-        
+        base_dir = DATA_DIR
+
+        # YYYY-MM-DD → YYYYMMDD 변환 (프론트에서 둘 다 올 수 있음)
+        clean_date = date_str.replace('-', '')
+        filename = f"jongga_v2_results_{clean_date}.json"
+
         file_path = os.path.join(base_dir, filename)
-        
+
         if not os.path.exists(file_path):
-            return jsonify({"error": "Data not found for this date"}), 404
-            
+            return jsonify({"error": f"Data not found for {date_str}"}), 404
+
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            
+
         return jsonify(data)
-        
+
     except Exception as e:
         print(f"Error reading historical data: {e}")
         return jsonify({"error": str(e)}), 500

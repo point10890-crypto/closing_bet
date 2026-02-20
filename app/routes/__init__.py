@@ -31,4 +31,12 @@ def register_blueprints(app):
     from app.routes.dividend import dividend_bp
     app.register_blueprint(dividend_bp, url_prefix='/api/dividend')
 
-    print("[OK] All Blueprints registered (KR + US + Crypto + Econ + Dividend)")
+    # Auth routes
+    from app.routes.auth import auth_bp
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+
+    # Stripe routes
+    from app.routes.stripe_routes import stripe_bp
+    app.register_blueprint(stripe_bp, url_prefix='/api/stripe')
+
+    print("[OK] All Blueprints registered (KR + US + Crypto + Econ + Dividend + Auth + Stripe)")

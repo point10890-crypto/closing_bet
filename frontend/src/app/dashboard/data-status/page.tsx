@@ -23,6 +23,13 @@ const UPDATE_TYPE_MAP: Record<string, string> = {
     'AI Analysis': 'ai_analysis',
     'VCP Signals': 'vcp_signals',
     'AI Jongga V2': 'jongga_v2',
+    // Crypto Analytics
+    'Crypto Market Gate': 'crypto_gate',
+    'Crypto VCP Signals': 'crypto_scan',
+    'Crypto Briefing': 'crypto_briefing',
+    'BTC Prediction': 'crypto_prediction',
+    'Crypto Risk': 'crypto_risk',
+    'Lead-Lag Analysis': 'crypto_leadlag',
 };
 
 export default function DataStatusPage() {

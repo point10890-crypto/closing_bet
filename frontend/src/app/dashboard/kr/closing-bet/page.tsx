@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { useAutoRefresh, useSmartRefresh } from '@/hooks/useAutoRefresh';
 
 // Interfaces (Based on backend models)
 interface ScoreDetail {
@@ -11,12 +11,13 @@ interface ScoreDetail {
     candle: number;
     consolidation: number;
     supply: number;
+    disclosure: number;
     llm_reason: string;
     llm_source?: string;
     total: number;
 }
 
-interface ClaudePick {
+interface AIPick {
     stock_code: string;
     stock_name: string;
     rank: number;
@@ -24,23 +25,39 @@ interface ClaudePick {
     reason: string;
     risk: string;
     expected_return: string;
+    source?: string;           // "consensus" | "gemini_only" | "openai_only"
+    gemini_rank?: number;
+    openai_rank?: number;
 }
 
-interface ClaudePicks {
-    picks: ClaudePick[];
+interface AIPicks {
+    picks: AIPick[];
     market_view?: string;
     top_themes?: string[];
     generated_at?: string;
     model?: string;
+    models?: string[];
+    consensus_count?: number;
+    gemini_count?: number;
+    openai_count?: number;
+    consensus_method?: string;
 }
 
 interface ChecklistDetail {
     has_news: boolean;
     news_sources: string[];
+    volume_sufficient: boolean;
     is_new_high: boolean;
     is_breakout: boolean;
+    ma_aligned: boolean;
+    good_candle: boolean;
+    has_consolidation: boolean;
     supply_positive: boolean;
-    volume_surge: boolean;
+    has_disclosure?: boolean;
+    disclosure_types?: string[];
+    negative_news: boolean;
+    upper_wick_long: boolean;
+    volume_suspicious: boolean;
 }
 
 interface NewsItem {
@@ -54,7 +71,8 @@ interface Signal {
     stock_code: string;
     stock_name: string;
     market: string;
-    sector: string;
+    sector?: string;
+    signal_date?: string;
     grade: string; // 'S', 'A', 'B', 'C'
     score: ScoreDetail;
     checklist: ChecklistDetail;
@@ -62,8 +80,13 @@ interface Signal {
     entry_price: number;
     stop_price: number;
     target_price: number;
+    quantity?: number;
+    position_size?: number;
+    r_value?: number;
+    r_multiplier?: number;
     change_pct: number;
     trading_value: number;
+    volume_ratio?: number;
     foreign_5d: number;
     inst_5d: number;
     news_items?: NewsItem[];
@@ -75,8 +98,11 @@ interface ScreenerResult {
     total_candidates: number;
     filtered_count: number;
     signals: Signal[];
+    by_grade?: Record<string, number>;
+    by_market?: Record<string, number>;
+    processing_time_ms?: number;
     updated_at: string;
-    claude_picks?: ClaudePicks;
+    claude_picks?: AIPicks;
 }
 
 // 3. Naver Chart Image Component (Bypass iframe restriction)
@@ -297,12 +323,15 @@ export default function JonggaV2Page() {
         fetchData(false);
     }, [selectedDate, dates, fetchData]);
 
-    // 사일런트 자동 갱신 (60초) - 사용자가 직접 날짜를 선택하지 않은 경우에만
+    // 사일런트 자동 갱신 (60초 fallback) - 사용자가 직접 날짜를 선택하지 않은 경우에만
     const silentRefresh = useCallback(async () => {
         if (isUserSelected) return;
         await fetchData(true);
     }, [fetchData, isUserSelected]);
     useAutoRefresh(silentRefresh, 60000, !isUserSelected);
+
+    // 스마트 갱신 (15초 버전 체크) - 파일 변경 감지 시에만 refetch (로컬+모바일 동시 갱신)
+    useSmartRefresh(silentRefresh, ['jongga_v2_latest.json'], 15000, !isUserSelected);
 
     if (loading) {
         return (
@@ -328,7 +357,7 @@ export default function JonggaV2Page() {
                         Closing <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">Bet V2</span>
                     </h2>
                     <p className="text-gray-400 text-sm md:text-lg">
-                        Multi-AI Analysis (Gemini + Claude) + Institutional Supply Trend
+                        Multi-AI Consensus (Gemini + GPT-4o) + DART Disclosure + Supply Trend
                     </p>
                 </div>
 
@@ -373,9 +402,9 @@ export default function JonggaV2Page() {
                 </div>
             </div>
 
-            {/* 3. Claude AI Top Picks */}
+            {/* 3. Multi-AI Consensus Top Picks */}
             {data?.claude_picks?.picks && data.claude_picks.picks.length > 0 && (
-                <ClaudePicksSection claudePicks={data.claude_picks} />
+                <AIConsensusSection aiPicks={data.claude_picks} />
             )}
 
             {/* 4. Signal Grid */}
@@ -403,7 +432,7 @@ export default function JonggaV2Page() {
             </div>
 
             <div className="text-center text-xs text-gray-600 pt-8">
-                Engine: v2.1.0 (Gemini 3.0 + Claude AI) • Updated: {data?.updated_at || '-'}
+                Engine: v2.2.0 (Multi-AI Consensus + DART) • Updated: {data?.updated_at || '-'}
             </div>
 
             {/* Chart Modal */}
@@ -593,6 +622,11 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                             {signal.checklist.has_news && (
                                 <span className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">NEWS</span>
                             )}
+                            {signal.checklist.has_disclosure && signal.checklist.disclosure_types && signal.checklist.disclosure_types.map((dtype, i) => (
+                                <span key={`disc-${i}`} className="px-2 py-1 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold">
+                                    📋 {dtype}
+                                </span>
+                            ))}
                         </div>
 
                         {/* 가격 정보 */}
@@ -711,7 +745,7 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                     <div className="text-center mb-6">
                         <div className="inline-flex items-baseline gap-1">
                             <span className="text-4xl font-mono font-bold text-white">{signal.score.total}</span>
-                            <span className="text-sm text-gray-500">/ 10</span>
+                            <span className="text-sm text-gray-500">/ 14</span>
                         </div>
                         <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Total Score</div>
                     </div>
@@ -720,8 +754,10 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                         <ScoreBar label="News" score={signal.score.news} max={3} />
                         <ScoreBar label="Supply" score={signal.score.supply} max={2} />
                         <ScoreBar label="Chart" score={signal.score.chart} max={2} />
-                        <ScoreBar label="Volume" score={signal.score.volume} max={2} />
+                        <ScoreBar label="Volume" score={signal.score.volume} max={3} />
                         <ScoreBar label="Candle" score={signal.score.candle} max={1} />
+                        <ScoreBar label="Consol" score={signal.score.consolidation} max={1} />
+                        <ScoreBar label="DART" score={signal.score.disclosure || 0} max={2} />
                     </div>
                 </div>
 
@@ -730,47 +766,61 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
     );
 }
 
-function ClaudePicksSection({ claudePicks }: { claudePicks: ClaudePicks }) {
+function AIConsensusSection({ aiPicks }: { aiPicks: AIPicks }) {
     const confidenceStyles: Record<string, { bg: string; text: string; border: string }> = {
         HIGH: { bg: 'bg-rose-500/10', text: 'text-rose-400', border: 'border-rose-500/20' },
         MEDIUM: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/20' },
         LOW: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20' },
     };
 
+    const sourceBadge = (source?: string) => {
+        if (source === 'consensus') return { label: 'CONSENSUS', bg: 'bg-violet-500/15', text: 'text-violet-400', border: 'border-violet-500/25' };
+        if (source === 'gemini_only') return { label: 'GEMINI', bg: 'bg-blue-500/15', text: 'text-blue-400', border: 'border-blue-500/25' };
+        if (source === 'openai_only') return { label: 'GPT-4o', bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/25' };
+        return { label: 'AI', bg: 'bg-gray-500/15', text: 'text-gray-400', border: 'border-gray-500/25' };
+    };
+
     return (
-        <div className="bg-[#1c1c1e] rounded-2xl border border-orange-500/20 overflow-hidden relative">
+        <div className="bg-[#1c1c1e] rounded-2xl border border-violet-500/20 overflow-hidden relative">
             {/* Background glow */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
             {/* Header */}
             <div className="p-5 pb-0 relative z-10">
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-xs text-orange-400 font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                            Claude AI Top Picks
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/5 text-xs text-violet-400 font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse"></span>
+                            Multi-AI Consensus Picks
                         </div>
-                        {claudePicks.model && (
-                            <span className="text-[10px] text-gray-600 font-mono">{claudePicks.model}</span>
+                        {aiPicks.consensus_count !== undefined && (
+                            <span className="text-[10px] text-violet-400 font-mono font-bold">
+                                {aiPicks.consensus_count} consensus
+                            </span>
                         )}
                     </div>
-                    {claudePicks.generated_at && (
-                        <span className="text-[10px] text-gray-600 font-mono">
-                            {new Date(claudePicks.generated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {aiPicks.models && aiPicks.models.map((m, i) => (
+                            <span key={i} className="text-[10px] text-gray-600 font-mono bg-white/5 px-1.5 py-0.5 rounded">{m}</span>
+                        ))}
+                        {aiPicks.generated_at && (
+                            <span className="text-[10px] text-gray-600 font-mono">
+                                {new Date(aiPicks.generated_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Market View */}
-                {claudePicks.market_view && (
-                    <p className="text-sm text-gray-400 leading-relaxed mb-3">{claudePicks.market_view}</p>
+                {aiPicks.market_view && (
+                    <p className="text-sm text-gray-400 leading-relaxed mb-3">{aiPicks.market_view}</p>
                 )}
 
                 {/* Hot Themes */}
-                {claudePicks.top_themes && claudePicks.top_themes.length > 0 && (
+                {aiPicks.top_themes && aiPicks.top_themes.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
-                        {claudePicks.top_themes.map((theme, i) => (
-                            <span key={i} className="px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/15 text-orange-400 text-[10px] font-bold">
+                        {aiPicks.top_themes.map((theme, i) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/15 text-violet-400 text-[10px] font-bold">
                                 {theme}
                             </span>
                         ))}
@@ -781,20 +831,26 @@ function ClaudePicksSection({ claudePicks }: { claudePicks: ClaudePicks }) {
             {/* Picks List */}
             <div className="px-5 pb-5 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {claudePicks.picks.map((pick) => {
+                    {aiPicks.picks.map((pick) => {
                         const cs = confidenceStyles[pick.confidence] || confidenceStyles.LOW;
+                        const sb = sourceBadge(pick.source);
                         return (
-                            <div key={pick.stock_code} className="bg-black/20 rounded-xl p-4 border border-white/5 hover:border-orange-500/20 transition-all">
+                            <div key={pick.stock_code} className={`bg-black/20 rounded-xl p-4 border ${pick.source === 'consensus' ? 'border-violet-500/20 hover:border-violet-500/40' : 'border-white/5 hover:border-white/10'} transition-all`}>
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-orange-400 font-mono text-xs font-bold">#{pick.rank}</span>
+                                        <span className="text-violet-400 font-mono text-xs font-bold">#{pick.rank}</span>
                                         <span className="text-white font-bold text-sm">{pick.stock_name}</span>
                                     </div>
-                                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${cs.bg} ${cs.text} ${cs.border}`}>
-                                        {pick.confidence}
-                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${sb.bg} ${sb.text} ${sb.border}`}>
+                                            {sb.label}
+                                        </span>
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${cs.bg} ${cs.text} ${cs.border}`}>
+                                            {pick.confidence}
+                                        </span>
+                                    </div>
                                 </div>
-                                <p className="text-xs text-gray-400 leading-relaxed mb-2">{pick.reason}</p>
+                                <p className="text-xs text-gray-400 leading-relaxed mb-2 line-clamp-3">{pick.reason}</p>
                                 <div className="flex items-center justify-between text-[10px]">
                                     <span className="text-gray-500">Risk: <span className="text-amber-400">{pick.risk}</span></span>
                                     <span className="text-gray-500">Return: <span className="text-emerald-400">{pick.expected_return}</span></span>

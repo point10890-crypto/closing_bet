@@ -25,20 +25,36 @@ try:
 except Exception:
     pass
 
-# ── CWD를 프로젝트 루트로 강제 고정 ──
+# ── 경로 강제 고정 (프로젝트 루트 = flask_app.py 위치) ──
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(BASE_DIR)
 
+# sys.path 오염 방지: 프로젝트 내 하위 패키지(korean market/, crypto-analytics/ 등)와
+# 외부 프로젝트(C:\Projects 등)의 app/config 패키지 충돌을 차단
+_blocked = ['korean market', 'crypto-analytics', 'us-market-pro', 'kr_market_package']
+sys.path = [p for p in sys.path if not any(b in p for b in _blocked)]
+sys.path.insert(0, BASE_DIR)
+
 from app import create_app
+
+# 로드된 모듈 검증: 잘못된 app 패키지를 import했으면 즉시 중단
+import app as _app_mod
+_expected = os.path.normpath(os.path.join(BASE_DIR, 'app', '__init__.py'))
+_actual = os.path.normpath(_app_mod.__file__)
+if _expected != _actual:
+    print(f"[FATAL] Wrong app module loaded!")
+    print(f"  Expected: {_expected}")
+    print(f"  Actual:   {_actual}")
+    sys.exit(1)
 
 # Create the Flask app using the factory
 app = create_app()
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("[START] Flask App Starting (Blueprint Version)")
+    print(f"[START] Flask App (port 5001)")
     print(f"   BASE_DIR: {BASE_DIR}")
-    print("   Original code backed up to: flask_app_backup.py")
+    print(f"   app module: {_actual}")
     print("="*60 + "\n")
     
     app.run(

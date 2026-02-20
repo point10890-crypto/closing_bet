@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { fetchAPI } from '@/lib/api';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import MarketOverview from '@/components/us-preview/MarketOverview';
 import FearGreedGauge from '@/components/us-preview/FearGreedGauge';
 import TopPicks from '@/components/us-preview/TopPicks';
@@ -51,6 +52,30 @@ export default function USPreviewPage() {
       setLoading(false);
     }
   };
+
+  // 사일런트 자동 갱신 (60초)
+  const silentRefresh = useCallback(async () => {
+    try {
+      const results = await Promise.allSettled([
+        fetchAPI<any>('/api/us/preview/market-data'),
+        fetchAPI<any>('/api/us/preview/top-picks'),
+        fetchAPI<any>('/api/us/preview/prediction'),
+        fetchAPI<any>('/api/us/preview/sector-heatmap'),
+        fetchAPI<any>('/api/us/preview/briefing'),
+      ]);
+      if (results[0].status === 'fulfilled') {
+        const md = results[0].value;
+        setMarketData(md);
+        if (md.fear_greed) setFearGreed(md.fear_greed);
+      }
+      if (results[1].status === 'fulfilled') setTopPicks(results[1].value);
+      if (results[2].status === 'fulfilled') setPrediction(results[2].value);
+      if (results[3].status === 'fulfilled') setSectorData(results[3].value);
+      if (results[4].status === 'fulfilled') setBriefing(results[4].value);
+      setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+    } catch { /* silent */ }
+  }, []);
+  useAutoRefresh(silentRefresh, 60000);
 
   return (
     <div className="space-y-6">

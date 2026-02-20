@@ -1,9 +1,25 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#000000",
+};
+
 export const metadata: Metadata = {
-  title: "Korean Market - AI Stock Analysis",
-  description: "VCP Pattern & Institutional Flow Tracking",
+  title: "MarketFlow - AI Stock & Crypto Analysis",
+  description: "VCP Pattern Scanner, Institutional Flow Tracking & AI Market Intelligence",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "MarketFlow",
+  },
 };
 
 export default function RootLayout({
@@ -18,8 +34,22 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <SessionProvider>{children}</SessionProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js');
+                });
+              }
+            `,
+          }}
+        />
+      </body>
     </html>
   );
 }

@@ -117,6 +117,7 @@ class ScoreDetail:
     candle: int = 0                    # 캔들형태 (0~1점)
     consolidation: int = 0             # 기간조정 (0~1점)
     supply: int = 0                    # 수급 (0~2점)
+    disclosure: int = 0                # 공시 (0~2점) - DART 호재공시
 
     llm_reason: str = ""               # LLM 분석 결과
     llm_source: str = ""               # LLM 소스 (gemini/claude/openai/keyword_fallback)
@@ -124,8 +125,9 @@ class ScoreDetail:
     @property
     def total(self) -> int:
         """총점"""
-        return (self.news + self.volume + self.chart + 
-                self.candle + self.consolidation + self.supply)
+        return (self.news + self.volume + self.chart +
+                self.candle + self.consolidation + self.supply +
+                max(0, self.disclosure))
     
     @property
     def mandatory_passed(self) -> bool:
@@ -140,6 +142,7 @@ class ScoreDetail:
             "candle": self.candle,
             "consolidation": self.consolidation,
             "supply": self.supply,
+            "disclosure": self.disclosure,
             "llm_reason": self.llm_reason,
             "llm_source": self.llm_source,
             "total": self.total,
@@ -162,6 +165,10 @@ class ChecklistDetail:
     has_consolidation: bool = False    # 기간조정 있음
     supply_positive: bool = False      # 수급 양호
     
+    # 공시 정보
+    has_disclosure: bool = False       # DART 공시 있음
+    disclosure_types: List[str] = field(default_factory=list)  # 공시 유형
+
     # 부정적 요소
     negative_news: bool = False        # 부정적 뉴스
     upper_wick_long: bool = False      # 윗꼬리 김
@@ -169,21 +176,21 @@ class ChecklistDetail:
     
     def to_dict(self) -> Dict:
         return {
-            "mandatory": {
-                "news": self.has_news,
-                "volume": self.volume_sufficient,
-            },
-            "optional": {
-                "chart": self.is_new_high or self.is_breakout or self.ma_aligned,
-                "candle": self.good_candle,
-                "consolidation": self.has_consolidation,
-                "supply": self.supply_positive,
-            },
-            "negative": {
-                "negative_news": self.negative_news,
-                "upper_wick_long": self.upper_wick_long,
-                "volume_suspicious": self.volume_spike_suspicious,
-            }
+            # 플랫 구조 (프론트엔드 직접 접근용)
+            "has_news": self.has_news,
+            "news_sources": self.news_sources,
+            "volume_sufficient": self.volume_sufficient,
+            "is_new_high": self.is_new_high,
+            "is_breakout": self.is_breakout,
+            "ma_aligned": self.ma_aligned,
+            "good_candle": self.good_candle,
+            "has_consolidation": self.has_consolidation,
+            "supply_positive": self.supply_positive,
+            "has_disclosure": self.has_disclosure,
+            "disclosure_types": self.disclosure_types,
+            "negative_news": self.negative_news,
+            "upper_wick_long": self.upper_wick_long,
+            "volume_suspicious": self.volume_spike_suspicious,
         }
 
 
@@ -246,18 +253,22 @@ class Signal:
             "stock_code": self.stock_code,
             "stock_name": self.stock_name,
             "market": self.market,
+            "sector": self.sector,
             "signal_date": str(self.signal_date),
             "grade": self.grade.value,
             "score": self.score.to_dict(),
             "checklist": self.checklist.to_dict(),
+            "current_price": self.current_price,
             "entry_price": self.entry_price,
             "stop_price": self.stop_price,
             "target_price": self.target_price,
             "quantity": self.quantity,
             "position_size": self.position_size,
             "r_value": self.r_value,
+            "r_multiplier": self.r_multiplier,
             "trading_value": self.trading_value,
             "change_pct": self.change_pct,
+            "volume_ratio": self.volume_ratio,
             "foreign_5d": self.foreign_5d,
             "inst_5d": self.inst_5d,
             "status": self.status.value,

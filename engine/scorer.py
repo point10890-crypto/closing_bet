@@ -34,6 +34,7 @@ class Scorer:
         news_list: List[NewsData],
         supply: Optional[SupplyData],
         llm_result: Optional[dict] = None,
+        dart_result: Optional[dict] = None,
     ) -> Tuple[ScoreDetail, ChecklistDetail]:
         """
         전체 점수 계산
@@ -80,7 +81,18 @@ class Scorer:
         supply_score, supply_check = self._score_supply(supply)
         score.supply = supply_score
         checklist.supply_positive = supply_check
-        
+
+        # 7. 공시 점수 (0~2점) — DART 호재공시
+        disclosure_score, disclosure_check = self._score_disclosure(dart_result)
+        score.disclosure = disclosure_score
+        checklist.has_disclosure = disclosure_check["has_disclosure"]
+        checklist.disclosure_types = disclosure_check.get("types", [])
+
+        # 악재 공시 시 뉴스 점수도 0으로 초기화
+        if disclosure_check.get("negative"):
+            score.news = 0
+            checklist.negative_news = True
+
         return score, checklist
     
     def _score_news(self, news_list: List[NewsData], llm_result: Optional[dict] = None) -> Tuple[int, dict]:
@@ -368,7 +380,38 @@ class Scorer:
             return 1, True
         
         return 0, False
-    
+
+    def _score_disclosure(self, dart_result: Optional[dict]) -> Tuple[int, dict]:
+        """
+        DART 호재공시 점수 계산
+
+        기준:
+        - 2점: 강한 호재 (자사주취득, 무상증자, 대규모수주)
+        - 1점: 보통 호재 (배당, 합병, 영업양수도)
+        - 0점: 공시 없음
+        - -2점: 악재 (감자, 부도, 상장폐지) → 뉴스 점수도 리셋
+        """
+        check = {
+            "has_disclosure": False,
+            "types": [],
+            "negative": False,
+        }
+
+        if not dart_result or not dart_result.get("has_disclosure"):
+            return 0, check
+
+        check["has_disclosure"] = True
+        check["types"] = dart_result.get("types", [])
+
+        score = dart_result.get("score", 0)
+
+        if dart_result.get("negative"):
+            check["negative"] = True
+            return -2, check
+
+        # score는 DARTCollector가 이미 계산 (0, 1, 2)
+        return max(0, min(2, score)), check
+
     def determine_grade(
         self,
         stock: StockData,

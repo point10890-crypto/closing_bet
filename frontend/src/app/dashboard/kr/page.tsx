@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { krAPI, KRMarketGate, KRSignalsResponse } from '@/lib/api';
+import { useAutoRefresh, useSmartRefresh } from '@/hooks/useAutoRefresh';
 
 interface BacktestStats {
     status: string;
@@ -33,7 +34,6 @@ export default function KRMarketOverview() {
         setLoading(true);
         setIsRefreshing(true);
         try {
-            // Load core data
             const [gate, signals] = await Promise.all([
                 krAPI.getMarketGate(),
                 krAPI.getSignals(),
@@ -41,7 +41,6 @@ export default function KRMarketOverview() {
             setGateData(gate);
             setSignalsData(signals);
 
-            // Load Backtest Summary
             const btRes = await fetch('/api/kr/backtest-summary');
             if (btRes.ok) {
                 setBacktestData(await btRes.json());
@@ -52,9 +51,26 @@ export default function KRMarketOverview() {
             console.error('Failed to load KR Market data:', error);
         } finally {
             setLoading(false);
-            setTimeout(() => setIsRefreshing(false), 500); // Animation delay
+            setTimeout(() => setIsRefreshing(false), 500);
         }
     };
+
+    // 사일런트 자동 갱신 (30초)
+    const silentRefresh = useCallback(async () => {
+        try {
+            const [gate, signals] = await Promise.all([
+                krAPI.getMarketGate(),
+                krAPI.getSignals(),
+            ]);
+            setGateData(gate);
+            setSignalsData(signals);
+            const btRes = await fetch('/api/kr/backtest-summary');
+            if (btRes.ok) setBacktestData(await btRes.json());
+            setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+        } catch { /* silent */ }
+    }, []);
+    useAutoRefresh(silentRefresh, 30000);
+    useSmartRefresh(silentRefresh, ['jongga_v2_latest.json', 'kr_ai_analysis.json', 'daily_prices.csv'], 15000);
 
     // Color Helpers (Korean Market Standard: Red=Up/Good, Blue=Down/Bad)
     const getSentimentColor = (score: number) => {

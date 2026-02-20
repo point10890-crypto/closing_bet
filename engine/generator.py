@@ -27,7 +27,8 @@ from engine.models import (
 from engine.collectors import KRXCollector, EnhancedNewsCollector
 from engine.scorer import Scorer
 from engine.position_sizer import PositionSizer
-from engine.llm_analyzer import LLMAnalyzer, ClaudeScreener
+from engine.llm_analyzer import LLMAnalyzer, MultiAIConsensusScreener
+from engine.dart_collector import DARTCollector
 
 
 class SignalGenerator:
@@ -49,7 +50,8 @@ class SignalGenerator:
         self.scorer = Scorer(self.config)
         self.position_sizer = PositionSizer(capital, self.config)
         self.llm_analyzer = LLMAnalyzer() # API Key from env
-        
+        self.dart_collector = DARTCollector()  # OpenDART 호재공시 수집기
+
         self._collector: Optional[KRXCollector] = None
         self._news: Optional[EnhancedNewsCollector] = None
     
@@ -137,24 +139,42 @@ class SignalGenerator:
             # 2. 차트 데이터 조회
             charts = await self._collector.get_chart_data(stock.code, 60)
             
-            # 3. 뉴스 조회 (본문 포함, 종목명 전달)
+            # 3. 뉴스 + DART 공시 병렬 조회
             # EnhancedNewsCollector: get_stock_news(code, limit, name)
+            news_list = []
+            dart_result = None
             try:
-                news_list = await self._news.get_stock_news(stock.code, 3, stock.name)
+                news_coro = self._news.get_stock_news(stock.code, 3, stock.name)
+                dart_coro = self.dart_collector.get_positive_disclosures(stock.code)
+                news_list, dart_result = await asyncio.gather(
+                    news_coro, dart_coro, return_exceptions=True
+                )
+                # 예외 처리
+                if isinstance(news_list, Exception):
+                    print(f"    ⚠ News fetch failed ({type(news_list).__name__}): {news_list}")
+                    news_list = []
+                if isinstance(dart_result, Exception):
+                    print(f"    ⚠ DART fetch failed ({type(dart_result).__name__}): {dart_result}")
+                    dart_result = None
             except Exception as e:
-                print(f"    ⚠ News fetch failed ({type(e).__name__}): {e}")
+                print(f"    ⚠ News/DART fetch failed ({type(e).__name__}): {e}")
                 news_list = []
+                dart_result = None
+
             print(f"    -> News fetched: {len(news_list)}")
-            
-            # 4. LLM 뉴스 분석 (Rate Limit 방지 Sleep)
+            if dart_result and dart_result.get("has_disclosure"):
+                print(f"    -> DART 공시: {', '.join(dart_result.get('types', []))}")
+
+            # 4. LLM 뉴스 분석 (Rate Limit 방지 Sleep) + DART 공시 정보 포함
             llm_result = None
-            if news_list and self.llm_analyzer.model:
+            dart_text = self.dart_collector.format_for_llm(dart_result) if dart_result else ""
+            if (news_list or dart_text) and self.llm_analyzer.model:
                 # Gemini Rate Limit 방지 (3.0 유료 모델 테스트: 2초)
                 await asyncio.sleep(2)
-                
+
                 print(f"    [LLM] Analyzing {stock.name} news...")
                 news_dicts = [{"title": n.title, "summary": n.summary} for n in news_list]
-                llm_result = await self.llm_analyzer.analyze_news_sentiment(stock.name, news_dicts)
+                llm_result = await self.llm_analyzer.analyze_news_sentiment(stock.name, news_dicts, dart_text)
                 if llm_result:
                    print(f"      -> Score: {llm_result.get('score')}, Reason: {llm_result.get('reason')}")
 
@@ -163,8 +183,8 @@ class SignalGenerator:
             if supply:
                 print(f"      -> Supply 5d: Foreign {supply.foreign_buy_5d}, Inst {supply.inst_buy_5d}")
             
-            # 6. 점수 계산 (LLM 결과 반영)
-            score, checklist = self.scorer.calculate(stock, charts, news_list, supply, llm_result)
+            # 6. 점수 계산 (LLM 결과 + DART 공시 반영)
+            score, checklist = self.scorer.calculate(stock, charts, news_list, supply, llm_result, dart_result)
             
             # 7. 등급 결정
             grade = self.scorer.determine_grade(stock, score)
@@ -270,20 +290,21 @@ async def run_screener(
         processing_time_ms=processing_time,
     )
     
-    # Claude AI 독립 종목 스크리닝
-    claude_picks = {}
+    # Multi-AI Consensus 독립 종목 스크리닝 (Gemini + GPT-4o)
+    claude_picks = {}  # 키 이름 유지 (하위 호환)
     try:
-        screener = ClaudeScreener()
-        if screener.client:
-            print("🤖 Claude AI 독립 스크리닝 시작...", flush=True)
+        screener = MultiAIConsensusScreener()
+        if screener.gemini_screener.model or screener.openai_screener.client:
+            print("🤖 Multi-AI Consensus 스크리닝 시작 (Gemini + GPT-4o)...", flush=True)
             signals_data = [s.to_dict() for s in signals]
             claude_picks = await screener.screen_candidates(signals_data)
             pick_count = len(claude_picks.get("picks", []))
-            print(f"✅ Claude AI {pick_count}개 종목 선별 완료", flush=True)
+            consensus_count = claude_picks.get("consensus_count", 0)
+            print(f"✅ Multi-AI {pick_count}개 종목 선별 완료 (Consensus: {consensus_count}개)", flush=True)
         else:
-            print("⚠ Claude API Key 미설정 - 독립 스크리닝 스킵", flush=True)
+            print("⚠ Gemini/OpenAI API Key 미설정 - 독립 스크리닝 스킵", flush=True)
     except Exception as e:
-        print(f"⚠ Claude Screener failed: {e}", flush=True)
+        print(f"⚠ Multi-AI Screener failed: {e}", flush=True)
         claude_picks = {"picks": [], "error": str(e)}
 
     # 결과 저장

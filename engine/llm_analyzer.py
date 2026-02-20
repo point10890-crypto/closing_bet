@@ -104,7 +104,7 @@ class OpenAIAnalyzer:
         else:
             self.client = None
             
-    async def analyze_news(self, stock_name: str, perplexity_news: str, traditional_news: List[Dict] = None) -> Dict:
+    async def analyze_news(self, stock_name: str, perplexity_news: str, traditional_news: List[Dict] = None, dart_text: str = "") -> Dict:
         global API_STATUS
 
         if not self.client:
@@ -112,12 +112,19 @@ class OpenAIAnalyzer:
 
         if not API_STATUS['openai']['available']:
             return {"score": 0, "reason": f"Rate Limited: {API_STATUS['openai']['last_error']}", "themes": []}
-            
+
         trad_text = ""
         if traditional_news:
             for i, item in enumerate(traditional_news[:5], 1):
                 trad_text += f"[{i}] {item.get('title')} - {item.get('summary', '')[:100]}\n"
-        
+
+        dart_section = ""
+        if dart_text:
+            dart_section = f"""
+        [공식 공시 정보 (DART 전자공시)]
+        {dart_text}
+        """
+
         prompt = f"""
         당신은 주식 투자 전문가입니다. 다음 '{stock_name}' 종목의 정보를 분석하여 호재 강도와 테마를 추출하세요.
 
@@ -126,11 +133,12 @@ class OpenAIAnalyzer:
 
         [기존 뉴스 정보]
         {trad_text}
-
-        위 정보를 종합 분석하여 아래 형식을 따르는 JSON 객체로만 출력하세요. 
+        {dart_section}
+        위 정보를 종합 분석하여 아래 형식을 따르는 JSON 객체로만 출력하세요.
         - score: 0~3점 (3:확실한 호재/수주/실적, 2:긍정 기대감, 1:중립, 0:악재/무소식)
         - reason: 분석 핵심 이유 (한 문장)
         - themes: 핵심 투자 테마 1~3개 (리스트 형식)
+        * 공식 공시(DART)가 있으면 뉴스보다 높은 신뢰도로 반영하세요 (자사주취득, 무상증자, 대규모수주 = 3점 수준)
 
         JSON Format: {{"score": 2, "reason": "...", "themes": ["...", "..."]}}
         """
@@ -171,7 +179,7 @@ class GeminiAnalyzer:
         else:
             self.model = None
             
-    async def analyze_news(self, stock_name: str, perplexity_news: str, traditional_news: List[Dict] = None) -> Dict:
+    async def analyze_news(self, stock_name: str, perplexity_news: str, traditional_news: List[Dict] = None, dart_text: str = "") -> Dict:
         """Perplexity 결과와 네이버 뉴스를 통합 분석하여 점수화"""
         global API_STATUS
 
@@ -180,12 +188,19 @@ class GeminiAnalyzer:
 
         if not API_STATUS['gemini']['available']:
             return {"score": 0, "reason": f"Rate Limited: {API_STATUS['gemini']['last_error']}", "themes": []}
-            
+
         trad_text = ""
         if traditional_news:
             for i, item in enumerate(traditional_news[:5], 1):
                 trad_text += f"[{i}] {item.get('title')} - {item.get('summary', '')[:100]}\n"
-        
+
+        dart_section = ""
+        if dart_text:
+            dart_section = f"""
+        [공식 공시 정보 (DART 전자공시)]
+        {dart_text}
+        """
+
         prompt = f"""
         당신은 주식 투자 전문가입니다. 다음 '{stock_name}' 종목의 정보를 분석하여 호재 강도와 테마를 추출하세요.
 
@@ -194,11 +209,12 @@ class GeminiAnalyzer:
 
         [기존 뉴스 정보]
         {trad_text}
-
-        위 정보를 종합 분석하여 아래 형식을 따르는 JSON 객체로만 출력하세요. 
+        {dart_section}
+        위 정보를 종합 분석하여 아래 형식을 따르는 JSON 객체로만 출력하세요.
         - score: 0~3점 (3:확실한 호재/수주/실적, 2:긍정 기대감, 1:중립, 0:악재/무소식)
         - reason: 분석 핵심 이유 (한 문장)
         - themes: 핵심 투자 테마 1~3개 (리스트 형식)
+        * 공식 공시(DART)가 있으면 뉴스보다 높은 신뢰도로 반영하세요 (자사주취득, 무상증자, 대규모수주 = 3점 수준)
 
         JSON Format: {{"score": 2, "reason": "...", "themes": ["...", "..."]}}
         """
@@ -247,7 +263,7 @@ class ClaudeAnalyzer:
         else:
             self.client = None
 
-    async def analyze_news(self, stock_name: str, perplexity_news: str, traditional_news: List[Dict] = None) -> Dict:
+    async def analyze_news(self, stock_name: str, perplexity_news: str, traditional_news: List[Dict] = None, dart_text: str = "") -> Dict:
         """Perplexity 결과와 네이버 뉴스를 통합 분석하여 점수화"""
         global API_STATUS
 
@@ -262,6 +278,13 @@ class ClaudeAnalyzer:
             for i, item in enumerate(traditional_news[:5], 1):
                 trad_text += f"[{i}] {item.get('title')} - {item.get('summary', '')[:100]}\n"
 
+        dart_section = ""
+        if dart_text:
+            dart_section = f"""
+[공식 공시 정보 (DART 전자공시)]
+{dart_text}
+"""
+
         prompt = f"""당신은 주식 투자 전문가입니다. 다음 '{stock_name}' 종목의 정보를 분석하여 호재 강도와 테마를 추출하세요.
 
 [Perplexity 실시간 검색 결과]
@@ -269,11 +292,12 @@ class ClaudeAnalyzer:
 
 [기존 뉴스 정보]
 {trad_text}
-
+{dart_section}
 위 정보를 종합 분석하여 아래 형식을 따르는 JSON 객체로만 출력하세요.
 - score: 0~3점 (3:확실한 호재/수주/실적, 2:긍정 기대감, 1:중립, 0:악재/무소식)
 - reason: 분석 핵심 이유 (한 문장)
 - themes: 핵심 투자 테마 1~3개 (리스트 형식)
+* 공식 공시(DART)가 있으면 뉴스보다 높은 신뢰도로 반영하세요 (자사주취득, 무상증자, 대규모수주 = 3점 수준)
 
 JSON Format: {{"score": 2, "reason": "...", "themes": ["...", "..."]}}"""
 
@@ -335,8 +359,8 @@ class LLMAnalyzer:
             'errors': {k: v['error_count'] for k, v in API_STATUS.items()}
         }
 
-    async def analyze_news_sentiment(self, stock_name: str, news_items: List[Dict] = None) -> Dict:
-        """뉴스 감성 분석 통합 프로세스 (3중 폴백 시스템)"""
+    async def analyze_news_sentiment(self, stock_name: str, news_items: List[Dict] = None, dart_text: str = "") -> Dict:
+        """뉴스 감성 분석 통합 프로세스 (3중 폴백 시스템) + DART 공시 정보"""
         news_summary = ""
         citations = []
         analysis_source = "none"
@@ -362,7 +386,7 @@ class LLMAnalyzer:
 
         # 2. Main Analysis (Gemini Attempt) - Rate Limit 시 스킵
         if API_STATUS['gemini']['available']:
-            analysis = await self.gemini.analyze_news(stock_name, news_summary, news_items)
+            analysis = await self.gemini.analyze_news(stock_name, news_summary, news_items, dart_text)
             if analysis.get("score") > 0 or "Error" not in analysis.get("reason", ""):
                 analysis["source"] = f"{analysis_source}+gemini" if analysis_source else "gemini_only"
             else:
@@ -373,7 +397,7 @@ class LLMAnalyzer:
         # 2.5 Claude Fallback (Gemini 실패 시) - Rate Limit 시 스킵
         if analysis is None and API_STATUS['claude']['available']:
             print(f"[FALLBACK] Gemini Failed for {stock_name}, trying Claude...")
-            analysis = await self.claude.analyze_news(stock_name, news_summary, news_items)
+            analysis = await self.claude.analyze_news(stock_name, news_summary, news_items, dart_text)
             if analysis.get("score") > 0 or "Error" not in analysis.get("reason", ""):
                 analysis["source"] = f"{analysis_source}+claude" if analysis_source else "claude_only"
             else:
@@ -384,7 +408,7 @@ class LLMAnalyzer:
         # 3. Fallback Analysis (OpenAI Attempt) - Rate Limit 시 스킵
         if analysis is None and API_STATUS['openai']['available']:
             print(f"[FALLBACK] Claude Failed for {stock_name}, trying OpenAI...")
-            analysis = await self.openai.analyze_news(stock_name, news_summary, news_items)
+            analysis = await self.openai.analyze_news(stock_name, news_summary, news_items, dart_text)
             if analysis.get("score") > 0 or "Error" not in analysis.get("reason", ""):
                 analysis["source"] = f"{analysis_source}+openai" if analysis_source else "openai_only"
             else:
@@ -552,6 +576,324 @@ class ClaudeScreener:
                 f"| 테마: {', '.join(s.get('themes', []))}"
             )
         return "\n".join(lines)
+
+
+# ─────────────────────────────────────────────────────────────
+# Multi-AI Consensus Screening System
+# ─────────────────────────────────────────────────────────────
+
+class BaseScreener:
+    """AI 스크리너 공통 베이스 클래스"""
+
+    def _build_candidates_summary(self, signals_data: List[Dict]) -> str:
+        """시그널 데이터를 AI에 전달할 간결한 텍스트로 변환"""
+        lines = []
+        for i, s in enumerate(signals_data, 1):
+            score = s.get("score", {})
+            disc = s.get("disclosure_info", {})
+            disc_text = ""
+            if disc.get("has_disclosure"):
+                disc_text = f" | 공시: {', '.join(disc.get('types', []))}"
+            lines.append(
+                f"#{i} [{s.get('grade','?')}] {s.get('stock_name','')}({s.get('stock_code','')}) "
+                f"| 등락: {s.get('change_pct', 0):+.1f}% "
+                f"| 거래대금: {s.get('trading_value', 0) / 100_000_000:.0f}억 "
+                f"| 점수: {score.get('total', 0)} "
+                f"(뉴스{score.get('news',0)} 수급{score.get('supply',0)} 차트{score.get('chart',0)} "
+                f"거래량{score.get('volume',0)} 공시{score.get('disclosure',0)}) "
+                f"| 외인5d: {s.get('foreign_5d', 0):+,} 기관5d: {s.get('inst_5d', 0):+,} "
+                f"| AI: {score.get('llm_reason', 'N/A')[:80]} "
+                f"| 테마: {', '.join(s.get('themes', []))}"
+                f"{disc_text}"
+            )
+        return "\n".join(lines)
+
+    def _build_screening_prompt(self, candidates_text: str, count: int) -> str:
+        """스크리닝 프롬프트 생성"""
+        return f"""당신은 한국 주식시장 전문 포트폴리오 매니저입니다.
+아래는 오늘의 종가베팅(Closing Bet) 시그널 후보 종목 {count}개의 데이터입니다.
+
+[후보 종목 데이터]
+{candidates_text}
+
+위 데이터를 종합적으로 분석하여 최종 Top 10~15 종목을 선별해주세요.
+
+선별 기준:
+1. 뉴스/재료의 질적 수준 (단순 테마 vs 실적/수주)
+2. 수급 흐름 (외인+기관 동시 매수 우선)
+3. 차트 기술적 위치 (신고가/돌파/정배열)
+4. 거래대금 충분성
+5. 리스크 대비 보상 (Risk/Reward)
+6. DART 공시 정보 (자사주취득, 무상증자, 대규모수주 등 호재공시 우선)
+
+다음 JSON 형식으로만 응답하세요:
+{{
+    "picks": [
+        {{
+            "stock_code": "코드",
+            "stock_name": "종목명",
+            "rank": 순위,
+            "confidence": "HIGH/MEDIUM/LOW",
+            "reason": "선별 이유 (한국어, 2~3문장)",
+            "risk": "주요 리스크 (한 문장)",
+            "expected_return": "기대 수익률 범위"
+        }}
+    ],
+    "market_view": "오늘 시장에 대한 전체적 평가 (한국어, 한 문장)",
+    "top_themes": ["오늘의 핫 테마 1", "테마 2", "테마 3"]
+}}"""
+
+    def _parse_json_response(self, content: str) -> dict:
+        """JSON 응답 파싱 (regex fallback 포함)"""
+        try:
+            result = json.loads(content)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", content, re.DOTALL)
+            if match:
+                try:
+                    result = json.loads(match.group())
+                except json.JSONDecodeError:
+                    result = {"picks": [], "error": "JSON parse failed"}
+            else:
+                result = {"picks": [], "error": "JSON parse failed"}
+        return result
+
+
+class GeminiScreener(BaseScreener):
+    """Gemini 2.5 Flash 기반 독립적 종목 선별기"""
+
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        self.model_name = os.getenv("GEMINI_SCREENER_MODEL", "gemini-2.5-flash")
+        self.model = None
+        if self.api_key:
+            genai.configure(api_key=self.api_key)
+            self.model = genai.GenerativeModel(self.model_name)
+
+    async def screen_candidates(self, signals_data: List[Dict]) -> Dict:
+        if not self.model:
+            return {"picks": [], "error": "No Gemini Client", "generated_at": datetime.now().isoformat()}
+        if not signals_data:
+            return {"picks": [], "error": "No signals", "generated_at": datetime.now().isoformat()}
+
+        candidates_text = self._build_candidates_summary(signals_data)
+        prompt = self._build_screening_prompt(candidates_text, len(signals_data))
+
+        try:
+            response = await asyncio.to_thread(
+                self.model.generate_content,
+                prompt,
+                generation_config={"response_mime_type": "application/json"}
+            )
+            content = response.text.strip()
+            result = self._parse_json_response(content)
+            result["generated_at"] = datetime.now().isoformat()
+            result["model"] = self.model_name
+            return result
+        except Exception as e:
+            print(f"[ERROR] Gemini Screener Failed: {e}")
+            return {"picks": [], "error": str(e), "generated_at": datetime.now().isoformat(), "model": self.model_name}
+
+
+class OpenAIScreener(BaseScreener):
+    """GPT-4o 기반 독립적 종목 선별기"""
+
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        self.model_name = os.getenv("OPENAI_SCREENER_MODEL", "gpt-4o")
+        self.client = None
+        if self.api_key:
+            from openai import AsyncOpenAI
+            self.client = AsyncOpenAI(api_key=self.api_key)
+
+    async def screen_candidates(self, signals_data: List[Dict]) -> Dict:
+        if not self.client:
+            return {"picks": [], "error": "No OpenAI Client", "generated_at": datetime.now().isoformat()}
+        if not signals_data:
+            return {"picks": [], "error": "No signals", "generated_at": datetime.now().isoformat()}
+
+        candidates_text = self._build_candidates_summary(signals_data)
+        prompt = self._build_screening_prompt(candidates_text, len(signals_data))
+
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model_name,
+                max_tokens=4096,
+                messages=[
+                    {"role": "system", "content": "You are a professional Korean stock market portfolio manager. Respond only in valid JSON. Analyze all candidates comprehensively."},
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"}
+            )
+            content = response.choices[0].message.content.strip()
+            result = self._parse_json_response(content)
+            result["generated_at"] = datetime.now().isoformat()
+            result["model"] = self.model_name
+            return result
+        except Exception as e:
+            print(f"[ERROR] OpenAI Screener Failed: {e}")
+            return {"picks": [], "error": str(e), "generated_at": datetime.now().isoformat(), "model": self.model_name}
+
+
+class MultiAIConsensusScreener:
+    """Multi-AI Consensus 종목 선별기
+
+    Gemini + OpenAI 두 AI가 독립적으로 종목을 선별한 뒤,
+    양쪽 모두 선택한 종목(Consensus)을 우선 추천합니다.
+    """
+
+    def __init__(self):
+        self.gemini_screener = GeminiScreener()
+        self.openai_screener = OpenAIScreener()
+
+    async def screen_candidates(self, signals_data: List[Dict]) -> Dict:
+        """두 AI를 병렬 실행하고 Consensus 결과 반환"""
+        if not signals_data:
+            return {
+                "picks": [], "consensus_count": 0,
+                "gemini_count": 0, "openai_count": 0,
+                "market_view": "", "top_themes": [],
+                "generated_at": datetime.now().isoformat(),
+                "models": [], "consensus_method": "multi_ai"
+            }
+
+        # 1. 병렬 실행
+        gemini_result, openai_result = await asyncio.gather(
+            self._safe_screen(self.gemini_screener, signals_data),
+            self._safe_screen(self.openai_screener, signals_data),
+        )
+
+        # 2. 합의 도출
+        return self._build_consensus(gemini_result, openai_result)
+
+    async def _safe_screen(self, screener, signals_data: List[Dict], timeout: int = 60) -> Dict:
+        """개별 스크리너 (타임아웃 + 에러 핸들링)"""
+        try:
+            return await asyncio.wait_for(
+                screener.screen_candidates(signals_data),
+                timeout=timeout
+            )
+        except asyncio.TimeoutError:
+            model_name = getattr(screener, 'model_name', 'unknown')
+            print(f"[TIMEOUT] {model_name} Screener timed out after {timeout}s")
+            return {"picks": [], "error": f"Timeout after {timeout}s", "model": model_name}
+        except Exception as e:
+            model_name = getattr(screener, 'model_name', 'unknown')
+            print(f"[ERROR] {model_name} Screener Failed: {e}")
+            return {"picks": [], "error": str(e), "model": model_name}
+
+    def _build_consensus(self, gemini_result: Dict, openai_result: Dict) -> Dict:
+        """두 AI 결과를 합의 알고리즘으로 병합"""
+        gemini_picks = gemini_result.get("picks", [])
+        openai_picks = openai_result.get("picks", [])
+
+        # stock_code 기반 매핑
+        gemini_map = {p.get("stock_code", ""): p for p in gemini_picks if p.get("stock_code")}
+        openai_map = {p.get("stock_code", ""): p for p in openai_picks if p.get("stock_code")}
+
+        gemini_codes = set(gemini_map.keys())
+        openai_codes = set(openai_map.keys())
+
+        # 교집합 = Consensus
+        consensus_codes = gemini_codes & openai_codes
+        gemini_only_codes = gemini_codes - openai_codes
+        openai_only_codes = openai_codes - gemini_codes
+
+        # Consensus picks (양쪽 합의 → confidence 상향)
+        consensus_picks = []
+        for code in sorted(consensus_codes, key=lambda c: self._consensus_sort_key(gemini_map[c], openai_map[c])):
+            merged = self._merge_pick(gemini_map[code], openai_map[code])
+            consensus_picks.append(merged)
+
+        # Single-AI picks (한쪽만 → confidence 하향)
+        gemini_only = []
+        for code in sorted(gemini_only_codes, key=lambda c: gemini_map[c].get("rank", 99)):
+            pick = gemini_map[code].copy()
+            pick["source"] = "gemini_only"
+            pick["confidence"] = self._downgrade_confidence(pick.get("confidence", "LOW"))
+            gemini_only.append(pick)
+
+        openai_only = []
+        for code in sorted(openai_only_codes, key=lambda c: openai_map[c].get("rank", 99)):
+            pick = openai_map[code].copy()
+            pick["source"] = "openai_only"
+            pick["confidence"] = self._downgrade_confidence(pick.get("confidence", "LOW"))
+            openai_only.append(pick)
+
+        # 통합 + 재순위
+        all_picks = consensus_picks + gemini_only + openai_only
+        for i, p in enumerate(all_picks, 1):
+            p["rank"] = i
+
+        # Market views 병합
+        views = []
+        if gemini_result.get("market_view"):
+            views.append(f"[Gemini] {gemini_result['market_view']}")
+        if openai_result.get("market_view"):
+            views.append(f"[GPT-4o] {openai_result['market_view']}")
+
+        # Themes 병합 (중복 제거)
+        all_themes = []
+        for t in (gemini_result.get("top_themes", []) + openai_result.get("top_themes", [])):
+            if t not in all_themes:
+                all_themes.append(t)
+
+        # 활성 모델
+        models_used = []
+        if gemini_picks:
+            models_used.append(gemini_result.get("model", "gemini-2.5-flash"))
+        if openai_picks:
+            models_used.append(openai_result.get("model", "gpt-4o"))
+
+        return {
+            "picks": all_picks,
+            "consensus_count": len(consensus_picks),
+            "gemini_count": len(gemini_picks),
+            "openai_count": len(openai_picks),
+            "market_view": " | ".join(views),
+            "top_themes": all_themes[:6],
+            "generated_at": datetime.now().isoformat(),
+            "models": models_used,
+            "consensus_method": "multi_ai",
+        }
+
+    def _consensus_sort_key(self, gp: Dict, op: Dict) -> tuple:
+        """Consensus 정렬 키 (높은 confidence + 낮은 avg rank 우선)"""
+        conf_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+        avg_rank = (gp.get("rank", 99) + op.get("rank", 99)) / 2
+        best_conf = min(
+            conf_order.get(gp.get("confidence", "LOW"), 2),
+            conf_order.get(op.get("confidence", "LOW"), 2)
+        )
+        return (best_conf, avg_rank)
+
+    def _merge_pick(self, gp: Dict, op: Dict) -> Dict:
+        """양쪽 AI 결과를 하나로 병합 (confidence 상향)"""
+        conf_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+        reverse = {0: "HIGH", 1: "MEDIUM", 2: "LOW"}
+
+        g_conf = conf_order.get(gp.get("confidence", "LOW"), 2)
+        o_conf = conf_order.get(op.get("confidence", "LOW"), 2)
+        best = min(g_conf, o_conf)
+        boosted = max(0, best - 1)  # 1단계 상향
+
+        return {
+            "stock_code": gp.get("stock_code", ""),
+            "stock_name": gp.get("stock_name", op.get("stock_name", "")),
+            "rank": 0,  # 나중에 재배정
+            "confidence": reverse[boosted],
+            "reason": f"[Gemini] {gp.get('reason', '')} [GPT-4o] {op.get('reason', '')}",
+            "risk": gp.get("risk", op.get("risk", "")),
+            "expected_return": gp.get("expected_return", op.get("expected_return", "")),
+            "source": "consensus",
+            "gemini_rank": gp.get("rank", 99),
+            "openai_rank": op.get("rank", 99),
+        }
+
+    def _downgrade_confidence(self, confidence: str) -> str:
+        """Single-AI picks confidence 1단계 하향"""
+        downgrades = {"HIGH": "MEDIUM", "MEDIUM": "LOW", "LOW": "LOW"}
+        return downgrades.get(confidence, "LOW")
 
 
 if __name__ == "__main__":

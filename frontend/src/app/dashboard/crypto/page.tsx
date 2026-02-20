@@ -1,11 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { cryptoAPI, CryptoAsset, CryptoDominance } from '@/lib/api';
+import { useEffect, useState, useCallback } from 'react';
+import { cryptoAPI, CryptoAsset, CryptoDominance, CryptoMarketGate, CryptoBriefingData } from '@/lib/api';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import MarketGateGauge from '@/components/crypto/MarketGateGauge';
+
+interface GateHistoryEntry {
+    date: string;
+    gate: string;
+    score: number;
+}
 
 export default function CryptoPage() {
     const [cryptos, setCryptos] = useState<CryptoAsset[]>([]);
     const [dominance, setDominance] = useState<CryptoDominance | null>(null);
+    const [gate, setGate] = useState<CryptoMarketGate | null>(null);
+    const [gateHistory, setGateHistory] = useState<GateHistoryEntry[]>([]);
+    const [briefing, setBriefing] = useState<CryptoBriefingData | null>(null);
     const [loading, setLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState('');
 
@@ -14,12 +25,18 @@ export default function CryptoPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const [overviewRes, domRes] = await Promise.allSettled([
+            const [overviewRes, domRes, gateRes, histRes, briefRes] = await Promise.allSettled([
                 cryptoAPI.getOverview(),
                 cryptoAPI.getDominance(),
+                cryptoAPI.getMarketGate(),
+                cryptoAPI.getGateHistory(),
+                cryptoAPI.getBriefing(),
             ]);
             if (overviewRes.status === 'fulfilled') setCryptos(overviewRes.value.cryptos);
             if (domRes.status === 'fulfilled') setDominance(domRes.value);
+            if (gateRes.status === 'fulfilled') setGate(gateRes.value);
+            if (histRes.status === 'fulfilled') setGateHistory(histRes.value.history || []);
+            if (briefRes.status === 'fulfilled') setBriefing(briefRes.value);
             setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
         } catch (e) {
             console.error('Failed to load crypto data:', e);
@@ -27,6 +44,26 @@ export default function CryptoPage() {
             setLoading(false);
         }
     };
+
+    // 사일런트 자동 갱신 (30초)
+    const silentRefresh = useCallback(async () => {
+        try {
+            const [overviewRes, domRes, gateRes, histRes, briefRes] = await Promise.allSettled([
+                cryptoAPI.getOverview(),
+                cryptoAPI.getDominance(),
+                cryptoAPI.getMarketGate(),
+                cryptoAPI.getGateHistory(),
+                cryptoAPI.getBriefing(),
+            ]);
+            if (overviewRes.status === 'fulfilled') setCryptos(overviewRes.value.cryptos);
+            if (domRes.status === 'fulfilled') setDominance(domRes.value);
+            if (gateRes.status === 'fulfilled') setGate(gateRes.value);
+            if (histRes.status === 'fulfilled') setGateHistory(histRes.value.history || []);
+            if (briefRes.status === 'fulfilled') setBriefing(briefRes.value);
+            setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+        } catch { /* silent */ }
+    }, []);
+    useAutoRefresh(silentRefresh, 30000);
 
     const getChangeColor = (val: number) => val >= 0 ? 'text-emerald-400' : 'text-red-400';
     const formatChange = (val: number) => val >= 0 ? `+${val.toFixed(2)}%` : `${val.toFixed(2)}%`;
@@ -45,6 +82,12 @@ export default function CryptoPage() {
         return { bg: 'bg-gray-500/20', border: 'border-gray-500/30', text: 'text-gray-400', label: 'Neutral' };
     };
 
+    const gateColor = (g: string) => {
+        if (g === 'GREEN') return 'bg-emerald-500';
+        if (g === 'YELLOW') return 'bg-yellow-500';
+        return 'bg-red-500';
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
@@ -57,6 +100,7 @@ export default function CryptoPage() {
     }
 
     const sentimentStyle = dominance ? getSentimentColor(dominance.sentiment) : getSentimentColor('NEUTRAL');
+    const fearGreedValue = briefing?.fear_greed?.score;
 
     return (
         <div className="space-y-6">
@@ -64,7 +108,7 @@ export default function CryptoPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-white">Crypto Market</h1>
-                    <p className="text-gray-500 text-sm mt-1">Top Coins &middot; BTC Dominance &middot; Market Sentiment</p>
+                    <p className="text-gray-500 text-sm mt-1">Market Gate &middot; Top Coins &middot; BTC Dominance &middot; Sentiment</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {lastUpdated && <span className="text-xs text-gray-500">{lastUpdated}</span>}
@@ -74,21 +118,75 @@ export default function CryptoPage() {
                 </div>
             </div>
 
-            {/* BTC Sentiment Panel */}
-            {dominance && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className={`rounded-xl ${sentimentStyle.bg} border ${sentimentStyle.border} p-5 md:col-span-2`}>
-                        <div className="text-xs text-gray-400 mb-1">BTC Sentiment</div>
-                        <div className={`text-xl font-black ${sentimentStyle.text}`}>{sentimentStyle.label}</div>
-                        <div className="text-xs text-gray-500 mt-2">RSI {dominance.btc_rsi} &middot; 30D {dominance.btc_30d_change >= 0 ? '+' : ''}{dominance.btc_30d_change.toFixed(1)}%</div>
+            {/* Market Gate + Fear & Greed + Sentiment */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Market Gate Gauge */}
+                {gate && gate.gate && (
+                    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-5 flex flex-col items-center">
+                        <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold">Market Gate (ULTRATHINK)</div>
+                        <MarketGateGauge score={gate.score} gate={gate.gate} size={180} />
+                        {gate.reasons && gate.reasons.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1 justify-center">
+                                {gate.reasons.slice(0, 4).map((r, i) => (
+                                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-gray-400">{r}</span>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    <div className="rounded-xl bg-orange-500/10 border border-orange-500/20 p-5">
-                        <div className="text-xs text-gray-400 mb-1">Bitcoin</div>
-                        <div className="text-xl font-bold text-white">${dominance.btc_price.toLocaleString()}</div>
+                )}
+
+                {/* Fear & Greed */}
+                {fearGreedValue !== undefined && fearGreedValue !== null && (
+                    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-5 flex flex-col items-center justify-center">
+                        <div className="text-xs text-gray-400 mb-3 uppercase tracking-wider font-bold">Fear & Greed Index</div>
+                        <div className={`text-5xl font-black ${fearGreedValue <= 25 ? 'text-red-400' : fearGreedValue <= 45 ? 'text-orange-400' : fearGreedValue <= 55 ? 'text-yellow-400' : fearGreedValue <= 75 ? 'text-green-400' : 'text-emerald-400'}`}>
+                            {fearGreedValue}
+                        </div>
+                        <div className={`text-sm font-bold mt-1 ${fearGreedValue <= 25 ? 'text-red-400' : fearGreedValue <= 45 ? 'text-orange-400' : fearGreedValue <= 55 ? 'text-yellow-400' : fearGreedValue <= 75 ? 'text-green-400' : 'text-emerald-400'}`}>
+                            {fearGreedValue <= 25 ? 'Extreme Fear' : fearGreedValue <= 45 ? 'Fear' : fearGreedValue <= 55 ? 'Neutral' : fearGreedValue <= 75 ? 'Greed' : 'Extreme Greed'}
+                        </div>
                     </div>
-                    <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-5">
-                        <div className="text-xs text-gray-400 mb-1">Ethereum</div>
-                        <div className="text-xl font-bold text-white">${dominance.eth_price.toLocaleString()}</div>
+                )}
+
+                {/* BTC Sentiment + Prices */}
+                <div className="space-y-4">
+                    {dominance && (
+                        <div className={`rounded-xl ${sentimentStyle.bg} border ${sentimentStyle.border} p-4`}>
+                            <div className="text-xs text-gray-400 mb-1">BTC Sentiment</div>
+                            <div className={`text-lg font-black ${sentimentStyle.text}`}>{sentimentStyle.label}</div>
+                            <div className="text-xs text-gray-500 mt-1">RSI {dominance.btc_rsi} &middot; 30D {dominance.btc_30d_change >= 0 ? '+' : ''}{dominance.btc_30d_change.toFixed(1)}%</div>
+                        </div>
+                    )}
+                    {dominance && (
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-xl bg-orange-500/10 border border-orange-500/20 p-3">
+                                <div className="text-[10px] text-gray-400">Bitcoin</div>
+                                <div className="text-lg font-bold text-white">${dominance.btc_price.toLocaleString()}</div>
+                            </div>
+                            <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-3">
+                                <div className="text-[10px] text-gray-400">Ethereum</div>
+                                <div className="text-lg font-bold text-white">${dominance.eth_price.toLocaleString()}</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Gate History Timeline */}
+            {gateHistory.length > 0 && (
+                <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-4">
+                    <div className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-3">Gate History</div>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                        {gateHistory.slice(-10).map((h, i) => (
+                            <div key={i} className="flex flex-col items-center min-w-[60px]">
+                                <div className={`w-3 h-3 rounded-full ${gateColor(h.gate)} shadow-lg`} title={`${h.gate} (${h.score})`} />
+                                <div className="text-[10px] text-gray-500 mt-1">{h.score}</div>
+                                <div className="text-[9px] text-gray-600">{h.date.split(' ')[0].slice(5)}</div>
+                            </div>
+                        ))}
+                        {gateHistory.length > 1 && (
+                            <div className="h-0.5 flex-1 bg-gradient-to-r from-gray-700/50 to-transparent absolute" style={{ display: 'none' }} />
+                        )}
                     </div>
                 </div>
             )}

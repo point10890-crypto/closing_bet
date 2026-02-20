@@ -1000,8 +1000,14 @@ def get_backtest_summary():
 
 @common_bp.route('/data-version')
 def data_version():
-    """주요 데이터 파일의 최종 수정 시간 반환 (프론트 변경 감지용)"""
-    data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
+    """주요 데이터 파일의 최종 수정 시간 반환 (프론트 변경 감지용)
+
+    모바일·로컬 동시 갱신의 핵심: 프론트엔드가 이 엔드포인트를 polling하여
+    파일 변경을 감지하면 실제 데이터를 refetch한다.
+    """
+    _base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    _data_dir = os.path.join(_base, 'data')
+
     target_files = [
         'jongga_v2_latest.json',
         'signals_log.csv',
@@ -1011,11 +1017,12 @@ def data_version():
     ]
     versions = {}
     for fname in target_files:
-        fpath = os.path.join(data_dir, fname)
+        fpath = os.path.join(_data_dir, fname)
         if os.path.exists(fpath):
             versions[fname] = os.path.getmtime(fpath)
         else:
             versions[fname] = 0
 
-    return jsonify({'versions': versions, 'timestamp': __import__('time').time()})
+    import time
+    return jsonify({'versions': versions, 'timestamp': time.time()})
 

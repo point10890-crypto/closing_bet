@@ -1,140 +1,246 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { usAPI } from '@/lib/api';
 
-const DATA_SOURCES = [
-  { label: 'S&P', param: 'SPX500', fullLabel: 'S&P 500' },
-  { label: 'NDQ', param: 'NASDAQ100', fullLabel: 'NASDAQ' },
-  { label: 'DOW', param: 'DJ30', fullLabel: 'Dow Jones' },
-  { label: 'ALL', param: 'AllUSA', fullLabel: 'Full Market' },
-];
+interface HeatmapItem {
+    x: string;  // ticker
+    y: number;  // market cap / volume
+    price: number;
+    change: number;
+    color: string;
+}
 
-const BLOCK_SIZES = [
-  { label: 'Cap', param: 'market_cap_basic', fullLabel: 'Market Cap' },
-  { label: 'Vol', param: 'volume|1', fullLabel: 'Volume' },
-  { label: 'Emp', param: 'number_of_employees', fullLabel: 'Employees' },
-];
+interface SectorSeries {
+    name: string;
+    data: HeatmapItem[];
+}
 
-export default function USHeatmapPage() {
-  const [activeSource, setActiveSource] = useState('SPX500');
-  const [blockSize, setBlockSize] = useState('market_cap_basic');
-  const containerRef = useRef<HTMLDivElement>(null);
+export function HeatmapView() {
+    const [loading, setLoading] = useState(true);
+    const [sectors, setSectors] = useState<SectorSeries[]>([]);
+    const [dataDate, setDataDate] = useState('');
+    const [tapped, setTapped] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+    const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+            // Use getHeatmapData() which returns {series: SectorSeries[]}
+            const res = await usAPI.getHeatmapData();
+            const data = res as unknown as { series: SectorSeries[]; data_date?: string; period?: string };
+            setSectors(data.series || []);
+            if (data.data_date) setDataDate(data.data_date);
+        } catch (error) {
+            console.error('Failed to load heatmap:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-    // Clear previous widget
-    containerRef.current.innerHTML = '';
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-stock-heatmap.js';
-    script.type = 'text/javascript';
-    script.async = true;
-    script.innerHTML = JSON.stringify({
-      exchanges: [],
-      dataSource: activeSource,
-      grouping: 'sector',
-      blockSize: blockSize,
-      blockColor: 'change',
-      locale: 'en',
-      symbolUrl: '',
-      colorTheme: 'dark',
-      hasTopBar: false,
-      isDataSet498: activeSource === 'SPX500',
-      isZoomEnabled: true,
-      hasSymbolTooltip: true,
-      isMonoSize: false,
-      width: '100%',
-      height: '100%',
-    });
+    // Close tooltip on outside tap (mobile)
+    useEffect(() => {
+        if (!tapped) return;
+        const handler = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            if (!target.closest('[data-heatmap-cell]')) {
+                setTapped(null);
+            }
+        };
+        document.addEventListener('click', handler);
+        return () => document.removeEventListener('click', handler);
+    }, [tapped]);
 
-    containerRef.current.appendChild(script);
-  }, [activeSource, blockSize]);
+    const getChangeColor = (change: number) => {
+        if (change >= 3) return 'bg-emerald-500';
+        if (change >= 1.5) return 'bg-emerald-500/80';
+        if (change >= 0.5) return 'bg-green-500/70';
+        if (change >= 0) return 'bg-green-800/40';
+        if (change >= -0.5) return 'bg-red-800/40';
+        if (change >= -1.5) return 'bg-red-500/70';
+        if (change >= -3) return 'bg-red-500/80';
+        return 'bg-red-600';
+    };
 
-  return (
-    <div className="min-h-0 bg-[#0a0a0a] text-white">
-      {/* Header - compact on mobile */}
-      <div className="flex flex-col gap-2 sm:gap-4 mb-2 sm:mb-4">
-        {/* Title Row */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-red-500/20 text-red-400 border border-red-500/30 whitespace-nowrap shrink-0">
-              Live
-            </span>
-            <h1 className="text-xl sm:text-3xl md:text-4xl font-black tracking-tight truncate">
-              US <span className="text-red-400">Heatmap</span>
-            </h1>
-          </div>
-          {/* Finviz link - top right on mobile */}
-          <a
-            href="https://finviz.com/map.ashx?t=sec_all&st=w1"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[10px] sm:text-xs text-red-400 hover:underline flex items-center gap-1 shrink-0 ml-2"
-          >
-            <i className="fas fa-external-link-alt text-[8px] sm:text-[10px]" />
-            <span className="hidden sm:inline">Open Finviz</span>
-            <span className="sm:hidden">Finviz</span>
-          </a>
+    const getChangeBorder = (change: number) => {
+        if (change >= 1.5) return 'border-emerald-400/30';
+        if (change >= 0) return 'border-green-400/10';
+        if (change >= -1.5) return 'border-red-400/10';
+        return 'border-red-400/30';
+    };
+
+    // Summary stats
+    const allItems = sectors.flatMap(s => s.data);
+    const gainers = allItems.filter(i => i.change > 0).length;
+    const losers = allItems.filter(i => i.change < 0).length;
+    const avgChange = allItems.length > 0 ? allItems.reduce((sum, i) => sum + i.change, 0) / allItems.length : 0;
+
+    return (
+        <div className="space-y-4 md:space-y-6">
+            {/* Header */}
+            <div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400 font-medium mb-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    Sector Heatmap
+                </div>
+                <div className="flex items-start justify-between gap-3">
+                    <div>
+                        <h2 className="text-2xl md:text-4xl font-bold tracking-tighter text-white leading-tight mb-1">
+                            Sector <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Heatmap</span>
+                        </h2>
+                        <p className="text-xs md:text-sm text-gray-500">
+                            S&P 500 섹터별 주가 변동 {dataDate && <span className="text-gray-600">({dataDate})</span>}
+                        </p>
+                    </div>
+                    <button
+                        onClick={loadData}
+                        disabled={loading}
+                        className="shrink-0 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs md:text-sm text-white hover:bg-white/10 transition-all disabled:opacity-50"
+                    >
+                        <i className={`fas fa-sync-alt ${loading ? 'animate-spin' : ''}`}></i>
+                        <span className="hidden sm:inline ml-2">Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Quick Summary */}
+            {!loading && allItems.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 md:gap-3">
+                    <div className="p-2.5 md:p-3 rounded-xl bg-[#1c1c1e] border border-white/5">
+                        <div className="text-[10px] md:text-xs text-gray-500 mb-0.5">Gainers</div>
+                        <div className="text-base md:text-xl font-bold text-emerald-400">{gainers}</div>
+                    </div>
+                    <div className="p-2.5 md:p-3 rounded-xl bg-[#1c1c1e] border border-white/5">
+                        <div className="text-[10px] md:text-xs text-gray-500 mb-0.5">Losers</div>
+                        <div className="text-base md:text-xl font-bold text-red-400">{losers}</div>
+                    </div>
+                    <div className="p-2.5 md:p-3 rounded-xl bg-[#1c1c1e] border border-white/5">
+                        <div className="text-[10px] md:text-xs text-gray-500 mb-0.5">Avg Change</div>
+                        <div className={`text-base md:text-xl font-bold ${avgChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {avgChange >= 0 ? '+' : ''}{avgChange.toFixed(2)}%
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Heatmap Grid */}
+            {loading ? (
+                <div className="space-y-4">
+                    {Array.from({ length: 4 }).map((_, si) => (
+                        <div key={si} className="space-y-2">
+                            <div className="h-4 w-32 rounded bg-white/5 animate-pulse"></div>
+                            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 lg:grid-cols-10 gap-1.5">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <div key={i} className="h-14 rounded-lg bg-white/5 animate-pulse"></div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : sectors.length === 0 ? (
+                <div className="p-8 md:p-12 rounded-2xl bg-[#1c1c1e] border border-white/10 text-center">
+                    <i className="fas fa-th-large text-3xl md:text-4xl text-gray-600 mb-3"></i>
+                    <div className="text-gray-500 text-sm md:text-lg">No heatmap data available</div>
+                    <div className="text-[10px] md:text-xs text-gray-600 mt-2">데이터 업데이트 후 다시 시도하세요</div>
+                </div>
+            ) : (
+                <div className="space-y-4 md:space-y-5">
+                    {sectors.map((sector) => {
+                        const sectorAvg = sector.data.length > 0
+                            ? sector.data.reduce((s, d) => s + d.change, 0) / sector.data.length
+                            : 0;
+
+                        return (
+                            <div key={sector.name} className="space-y-1.5 md:space-y-2">
+                                {/* Sector Header */}
+                                <div className="flex items-center justify-between px-0.5">
+                                    <h3 className="text-[11px] md:text-sm font-bold text-gray-300 flex items-center gap-1.5">
+                                        <span className="w-1 h-3 md:h-3.5 bg-emerald-500 rounded-full"></span>
+                                        {sector.name}
+                                        <span className="text-[10px] text-gray-600 font-normal">({sector.data.length})</span>
+                                    </h3>
+                                    <span className={`text-[10px] md:text-xs font-semibold ${sectorAvg >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        {sectorAvg >= 0 ? '+' : ''}{sectorAvg.toFixed(2)}%
+                                    </span>
+                                </div>
+
+                                {/* Stock Cells - 모바일 4열, 태블릿 5열, 데스크탑 8-10열 */}
+                                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-1 md:gap-1.5">
+                                    {sector.data.map((item) => {
+                                        const cellKey = `${sector.name}-${item.x}`;
+                                        const isActive = tapped === cellKey;
+
+                                        return (
+                                            <div
+                                                key={item.x}
+                                                data-heatmap-cell
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setTapped(isActive ? null : cellKey);
+                                                }}
+                                                className={`relative rounded-lg ${getChangeColor(item.change)} border ${getChangeBorder(item.change)}
+                                                    transition-all duration-150 cursor-pointer
+                                                    ${isActive ? 'ring-2 ring-white/50 scale-[1.05] z-10 shadow-lg' : 'active:scale-95 md:hover:scale-[1.03]'}
+                                                `}
+                                            >
+                                                {/* Main content */}
+                                                <div className="flex flex-col items-center justify-center py-2.5 md:py-3 px-1">
+                                                    <div className="text-[11px] md:text-sm font-black text-white leading-tight">
+                                                        {item.x}
+                                                    </div>
+                                                    <div className="text-[9px] md:text-xs font-bold mt-0.5 text-white/90">
+                                                        {item.change >= 0 ? '+' : ''}{item.change.toFixed(1)}%
+                                                    </div>
+                                                </div>
+
+                                                {/* Tap / Hover Detail Popup */}
+                                                {isActive && (
+                                                    <div className="absolute -top-11 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-black/95 rounded-lg text-[10px] shadow-xl z-20 whitespace-nowrap border border-white/15">
+                                                        <div className="font-bold text-white">{item.x}</div>
+                                                        <div className="text-gray-400">${item.price?.toFixed(2)}</div>
+                                                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-black/95 border-r border-b border-white/15 rotate-45"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Legend - Mobile: wrap, Desktop: single row */}
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 md:gap-4 pt-2 pb-2">
+                {[
+                    { color: 'bg-red-600', label: '<-3%' },
+                    { color: 'bg-red-500/70', label: '-1.5%' },
+                    { color: 'bg-red-800/40', label: '-0.5%' },
+                    { color: 'bg-gray-700/40', label: '0%' },
+                    { color: 'bg-green-800/40', label: '+0.5%' },
+                    { color: 'bg-green-500/70', label: '+1.5%' },
+                    { color: 'bg-emerald-500', label: '>+3%' },
+                ].map(({ color, label }) => (
+                    <div key={label} className="flex items-center gap-1 text-[9px] md:text-xs text-gray-500">
+                        <span className={`w-2.5 h-2.5 md:w-3.5 md:h-3.5 rounded-sm ${color}`}></span>
+                        <span>{label}</span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Tap instruction for mobile */}
+            <div className="md:hidden text-center text-[10px] text-gray-600 pb-4">
+                <i className="fas fa-hand-pointer mr-1"></i>
+                종목을 탭하면 가격을 확인할 수 있습니다
+            </div>
         </div>
+    );
+}
 
-        {/* Selectors Row - horizontal scroll on mobile */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
-          {/* Data Source Selector */}
-          <div className="flex gap-0.5 sm:gap-1 bg-[#1c1c1e] rounded-lg sm:rounded-xl p-0.5 sm:p-1 border border-white/10 shrink-0">
-            {DATA_SOURCES.map((s) => (
-              <button
-                key={s.param}
-                onClick={() => setActiveSource(s.param)}
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
-                  activeSource === s.param
-                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/25'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className="sm:hidden">{s.label}</span>
-                <span className="hidden sm:inline">{s.fullLabel}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Divider */}
-          <div className="w-px h-5 bg-white/10 shrink-0 hidden xs:block" />
-
-          {/* Block Size Selector */}
-          <div className="flex gap-0.5 sm:gap-1 bg-[#1c1c1e] rounded-lg sm:rounded-xl p-0.5 sm:p-1 border border-white/10 shrink-0">
-            {BLOCK_SIZES.map((b) => (
-              <button
-                key={b.param}
-                onClick={() => setBlockSize(b.param)}
-                className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all whitespace-nowrap ${
-                  blockSize === b.param
-                    ? 'bg-white/20 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                <span className="sm:hidden">{b.label}</span>
-                <span className="hidden sm:inline">{b.fullLabel}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* TradingView Heatmap Widget - responsive height */}
-      <div className="rounded-xl sm:rounded-2xl overflow-hidden border border-white/10 bg-[#1c1c1e]"
-           style={{ height: 'calc(100vh - 220px)', minHeight: '300px' }}>
-        <div className="tradingview-widget-container" style={{ width: '100%', height: '100%' }}>
-          <div ref={containerRef} className="tradingview-widget-container__widget" style={{ width: '100%', height: '100%' }} />
-        </div>
-      </div>
-
-      {/* Footer - minimal on mobile */}
-      <div className="mt-2 sm:mt-3">
-        <p className="text-[10px] sm:text-xs text-gray-600">
-          Powered by TradingView
-        </p>
-      </div>
-    </div>
-  );
+export default function SectorHeatmapPage() {
+    return <HeatmapView />;
 }
