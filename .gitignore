@@ -47,6 +47,26 @@ logs/
 *_backup.py
 *_backup_*.py
 
+# Archives & binaries
+*.zip
+*.tar.gz
+*.rar
+__MACOSX/
+backups/
+
+# Extracted / duplicate source folders
+closing-bet-api/
+korean market/
+us-market-pro/
+
+# Output data (generated)
+us_market_preview/output/
+us_market/data/
+us_market/history/
+
 # Misc
 .claude/
 *.bak
+*.pid
+nul
+*.db
