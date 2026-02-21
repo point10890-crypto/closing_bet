@@ -80,95 +80,87 @@ def get_kr_market_status():
         return jsonify({'error': str(e)}), 500
 
 
+def _load_ticker_maps():
+    """ticker_to_yahoo_map.csv에서 name/market/yahoo 매핑 로드"""
+    name_map = {}
+    market_map = {}
+    yahoo_map = {}
+    candidates = [
+        os.path.join(_BASE_DIR, 'ticker_to_yahoo_map.csv'),
+        os.path.join(DATA_DIR, 'ticker_to_yahoo_map.csv'),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            try:
+                df = pd.read_csv(p, dtype={'ticker': str})
+                df['ticker'] = df['ticker'].str.zfill(6)
+                name_map = dict(zip(df['ticker'], df['name']))
+                market_map = dict(zip(df['ticker'], df['market']))
+                if 'yahoo_ticker' in df.columns:
+                    yahoo_map = dict(zip(df['ticker'], df['yahoo_ticker']))
+            except Exception as e:
+                print(f"[WARN] ticker map load error: {e}")
+            break
+    return name_map, market_map, yahoo_map
+
+
 @kr_bp.route('/signals')
 def get_kr_signals():
     """오늘의 VCP + 외인매집 시그널"""
     try:
-        # Load ticker name mapping
-        name_map = {}
-        # Flexible path resolution
-        candidates = [
-            os.path.join(_BASE_DIR, 'ticker_to_yahoo_map.csv'),
-            os.path.join(DATA_DIR, 'ticker_to_yahoo_map.csv'),
-        ]
-        ticker_map_path = 'ticker_to_yahoo_map.csv'
-        for p in candidates:
-            if os.path.exists(p):
-                ticker_map_path = p
-                break
-        if os.path.exists(ticker_map_path):
-            try:
-                map_df = pd.read_csv(ticker_map_path, dtype={'ticker': str})
-                name_map = dict(zip(map_df['ticker'].str.zfill(6), map_df['name']))
-            except:
-                pass
-        
+        name_map, market_map, yahoo_map = _load_ticker_maps()
+
         json_path = os.path.join(DATA_DIR, 'kr_ai_analysis.json')
-        
+
         if os.path.exists(json_path):
             try:
                 with open(json_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                
-                signals = data.get('signals', [])
-                
-                # Fill missing names from ticker map
-                yahoo_map = {}
-                try:
-                    if os.path.exists(ticker_map_path):
-                        map_df = pd.read_csv(ticker_map_path, dtype={'ticker': str})
-                        yahoo_map = dict(zip(map_df['ticker'].str.zfill(6), map_df['yahoo_ticker']))
-                except:
-                    pass
 
+                signals = data.get('signals', [])
+
+                # ── 종목명 + 마켓 보완 (ticker_to_yahoo_map 기반) ──
                 for signal in signals:
                     ticker = str(signal.get('ticker', '')).zfill(6)
-                    if not signal.get('name'):
+                    if not signal.get('name') or signal.get('name') == ticker:
                         signal['name'] = name_map.get(ticker, ticker)
-                
-                # -----------------------------------------------------------
-                # Inject Real-time Prices using yfinance
-                # -----------------------------------------------------------
+                    if not signal.get('market'):
+                        signal['market'] = market_map.get(ticker, '')
+
+                # ── 실시간 가격 주입 (yfinance) ──
                 try:
                     import yfinance as yf
                     yf_tickers = []
                     signal_by_yf = {}
-                    
+
                     for s in signals:
                         t = str(s.get('ticker', '')).zfill(6)
-                        if not t: continue
+                        if not t:
+                            continue
                         yf_t = yahoo_map.get(t, f"{t}.KS")
                         yf_tickers.append(yf_t)
-                        # Map yahoo ticker back to signal reference
-                        # (If distinct signals have same ticker, last one wins, but usually unique)
                         signal_by_yf[yf_t] = s
 
                     if yf_tickers:
-                        # Fetch 1-minute data for today
                         price_data = yf.download(yf_tickers, period='1d', interval='1m', progress=False, threads=True)
-                        
+
                         if not price_data.empty:
                             closes = price_data['Close']
-                            
-                            # Single ticker case handling
+
                             if len(yf_tickers) == 1:
                                 val = float(closes.iloc[-1])
                                 s = signal_by_yf[yf_tickers[0]]
                                 s['current_price'] = val
-                                # Calculate return from entry
                                 entry = float(s.get('entry_price', 0))
                                 if entry > 0:
                                     s['return_pct'] = round((val - entry) / entry * 100, 2)
                             else:
-                                # Multi ticker case
                                 for yf_t, s in signal_by_yf.items():
                                     try:
                                         if yf_t in closes.columns:
-                                            # Check if last value is valid (not NaN)
                                             val = closes[yf_t].iloc[-1]
                                             if pd.notna(val) and float(val) > 0:
                                                 s['current_price'] = float(val)
-                                                
                                                 entry = float(s.get('entry_price', 0))
                                                 if entry > 0:
                                                     s['return_pct'] = round((float(val) - entry) / entry * 100, 2)
@@ -176,11 +168,10 @@ def get_kr_signals():
                                         pass
                 except Exception as e:
                     print(f"Error fetching realtime signal prices: {e}")
-                # -----------------------------------------------------------
-                
+
                 signals.sort(key=lambda x: x.get('score', 0), reverse=True)
 
-                # 중복 제거: 같은 ticker는 최고 스코어만 유지
+                # 중복 제거
                 seen = set()
                 unique_signals = []
                 for s in signals:
@@ -199,27 +190,28 @@ def get_kr_signals():
             except Exception as e:
                 print(f"Error reading JSON: {e}")
                 pass
-            
+
         # Fallback to CSV
         signals_path = os.path.join(DATA_DIR, 'signals_log.csv')
-        
+
         if not os.path.exists(signals_path):
             return jsonify({
                 'signals': [],
                 'count': 0,
                 'message': '시그널 로그가 없습니다.'
             })
-        
+
         df = pd.read_csv(signals_path, encoding='utf-8-sig')
         if 'status' in df.columns:
             df = df[df['status'] == 'OPEN']
-        
+
         signals = []
         for _, row in df.iterrows():
+            ticker = str(row['ticker']).zfill(6)
             signals.append({
-                'ticker': str(row['ticker']).zfill(6),
-                'name': row.get('name', '') or name_map.get(str(row['ticker']).zfill(6), ''),
-                'market': row.get('market', ''),
+                'ticker': ticker,
+                'name': row.get('name', '') or name_map.get(ticker, ticker),
+                'market': row.get('market', '') or market_map.get(ticker, ''),
                 'signal_date': row['signal_date'],
                 'foreign_5d': int(row.get('foreign_5d', 0)),
                 'inst_5d': int(row.get('inst_5d', 0)),
@@ -230,7 +222,7 @@ def get_kr_signals():
                 'return_pct': 0,
                 'status': row.get('status', 'OPEN')
             })
-            
+
         return jsonify({
             'signals': signals[:20],
             'count': len(signals),
@@ -238,6 +230,123 @@ def get_kr_signals():
         })
 
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@kr_bp.route('/vcp-history')
+def get_vcp_history():
+    """VCP 시그널 히스토리 (signals_log.csv 기반)"""
+    try:
+        name_map, market_map, _ = _load_ticker_maps()
+        days = request.args.get('days', 30, type=int)
+
+        signals_path = os.path.join(DATA_DIR, 'signals_log.csv')
+        if not os.path.exists(signals_path):
+            return jsonify({'signals': [], 'count': 0})
+
+        df = pd.read_csv(signals_path, encoding='utf-8-sig', dtype={'ticker': str})
+        df['ticker'] = df['ticker'].str.zfill(6)
+
+        # 날짜 필터
+        if 'signal_date' in df.columns:
+            df['signal_date'] = pd.to_datetime(df['signal_date'], errors='coerce')
+            cutoff = pd.Timestamp.now() - pd.Timedelta(days=days)
+            df = df[df['signal_date'] >= cutoff]
+            df = df.sort_values('signal_date', ascending=False)
+
+        signals = []
+        for idx, row in df.iterrows():
+            ticker = str(row.get('ticker', '')).zfill(6)
+            entry_price = float(row.get('entry_price', 0))
+            exit_price = float(row.get('exit_price', 0)) if pd.notna(row.get('exit_price')) else None
+            return_pct = float(row.get('return_pct', 0)) if pd.notna(row.get('return_pct')) else None
+            hold_days = int(row.get('hold_days', 0)) if pd.notna(row.get('hold_days')) else None
+            status = str(row.get('status', 'OPEN'))
+
+            signals.append({
+                'id': int(idx),
+                'ticker': ticker,
+                'name': row.get('name', '') if pd.notna(row.get('name', '')) else name_map.get(ticker, ticker),
+                'market': row.get('market', '') if pd.notna(row.get('market', '')) else market_map.get(ticker, ''),
+                'signalDate': row['signal_date'].strftime('%m월 %d일') if hasattr(row['signal_date'], 'strftime') else str(row['signal_date']),
+                'foreign5d': int(row.get('foreign_5d', 0)) if pd.notna(row.get('foreign_5d')) else 0,
+                'inst5d': int(row.get('inst_5d', 0)) if pd.notna(row.get('inst_5d')) else 0,
+                'score': float(row.get('score', 0)) if pd.notna(row.get('score')) else 0,
+                'contractionRatio': float(row.get('contraction_ratio', 0)) if pd.notna(row.get('contraction_ratio')) else 0,
+                'entryPrice': entry_price,
+                'status': status,
+                'exitPrice': exit_price,
+                'exitDate': str(row.get('exit_date', '')) if pd.notna(row.get('exit_date')) else None,
+                'returnPct': return_pct,
+                'holdDays': hold_days,
+            })
+
+        return jsonify({
+            'signals': signals,
+            'count': len(signals),
+            'days': days,
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@kr_bp.route('/vcp-stats')
+def get_vcp_stats():
+    """VCP 전략 성과 통계"""
+    try:
+        signals_path = os.path.join(DATA_DIR, 'signals_log.csv')
+        if not os.path.exists(signals_path):
+            return jsonify({'error': 'No signal data'}), 404
+
+        df = pd.read_csv(signals_path, encoding='utf-8-sig')
+
+        total = len(df)
+        if total == 0:
+            return jsonify({'error': 'Empty signal data'}), 404
+
+        has_status = 'status' in df.columns
+        closed = df[df['status'] == 'CLOSED'] if has_status else pd.DataFrame()
+        open_count = len(df[df['status'] == 'OPEN']) if has_status else total
+
+        closed_count = len(closed)
+        winners = 0
+        losers = 0
+        returns = []
+
+        if closed_count > 0 and 'return_pct' in closed.columns:
+            closed_valid = closed[closed['return_pct'].notna()]
+            returns = closed_valid['return_pct'].tolist()
+            winners = int((closed_valid['return_pct'] > 0).sum())
+            losers = int((closed_valid['return_pct'] <= 0).sum())
+
+        win_rate = round(winners / max(winners + losers, 1) * 100, 1)
+        avg_return = round(sum(returns) / max(len(returns), 1), 2) if returns else 0
+        max_return = round(max(returns), 2) if returns else 0
+        min_return = round(min(returns), 2) if returns else 0
+
+        avg_hold = 0
+        if closed_count > 0 and 'hold_days' in closed.columns:
+            hold_valid = closed[closed['hold_days'].notna()]
+            if len(hold_valid) > 0:
+                avg_hold = round(hold_valid['hold_days'].mean(), 1)
+
+        return jsonify({
+            'total_signals': total,
+            'closed_signals': closed_count,
+            'open_signals': open_count,
+            'win_rate': win_rate,
+            'avg_return_pct': avg_return,
+            'max_return_pct': max_return,
+            'min_return_pct': min_return,
+            'avg_hold_days': avg_hold,
+            'total_winners': winners,
+            'total_losers': losers,
+        })
+
+    except Exception as e:
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
