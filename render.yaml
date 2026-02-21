@@ -3,7 +3,7 @@ services:
     name: closing-bet-api
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn flask_app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    startCommand: gunicorn flask_app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 300
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
@@ -11,3 +11,14 @@ services:
         value: utf-8
       - key: AUTH_DISABLED
         value: "true"
+      # Render 환경 자동 감지 (Render가 자동 설정)
+      # RENDER=true 이면 클라우드 스케줄러 자동 시작
+      # ── 아래 API 키들은 Render Dashboard > Environment에서 직접 설정 ──
+      # GEMINI_API_KEY
+      # OPENAI_API_KEY
+      # PERPLEXITY_API_KEY
+      # TELEGRAM_BOT_TOKEN
+      # TELEGRAM_CHAT_ID
+      # TELEGRAM_CHANNEL_BOT_TOKEN
+      # TELEGRAM_CHANNEL_CHAT_ID
+      # DART_API_KEY

@@ -1,21 +1,676 @@
 # app/utils/scheduler.py
-"""백그라운드 스케줄러 - V2 엔진 연동
+"""통합 백그라운드 스케줄러 — Render 클라우드 + 로컬 겸용
 
-경로: 절대 경로 기반 (고정)
-데이터: data/jongga_v2_latest.json (V2 엔진 결과)
+구조:
+1. start_cloud_scheduler()  → Render 배포 시 gunicorn 내부에서 스케줄러 실행
+2. start_kr_price_scheduler() → KR 종가베팅 가격 실시간 업데이트 (5분 간격)
+
+특징:
+- schedule 라이브러리 기반 (무료, 유료 플랜 불필요)
+- gunicorn 멀티워커에서 한 워커만 스케줄러 실행 (파일 락)
+- subprocess 대신 in-process 함수 호출 (Render 호환)
+- KST 시간대 기반 스케줄링
+- 텔레그램 알림 지원
 """
 
 import os
+import sys
 import json
 import time
+import logging
 import threading
+import traceback
+from datetime import datetime, date, timedelta
+from pathlib import Path
+
+# .env 로드 보장 (standalone import 시에도 환경변수 사용 가능)
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+except ImportError:
+    pass
 
 # ── 고정 경로 ──────────────────────────────────────────────
 _APP_DIR = os.path.dirname(os.path.abspath(__file__))       # app/utils/
 _APP_ROOT = os.path.dirname(_APP_DIR)                        # app/
-BASE_DIR = os.path.dirname(_APP_ROOT)                        # /c/closing_bet
+BASE_DIR = os.path.dirname(_APP_ROOT)                        # project root
 DATA_DIR = os.path.join(BASE_DIR, 'data')
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
+logger = logging.getLogger('cloud_scheduler')
+
+
+# ============================================================
+# KST 시간 유틸리티
+# ============================================================
+
+def _get_kst_now():
+    """현재 KST 시간 반환"""
+    try:
+        from zoneinfo import ZoneInfo
+        from datetime import timezone
+        return datetime.now(ZoneInfo('Asia/Seoul'))
+    except ImportError:
+        # Python 3.8 이하 fallback
+        try:
+            import pytz
+            kst = pytz.timezone('Asia/Seoul')
+            return datetime.now(kst)
+        except ImportError:
+            # UTC+9 직접 계산
+            from datetime import timezone, timedelta as td
+            kst = timezone(td(hours=9))
+            return datetime.now(kst)
+
+
+def _is_weekday_kst():
+    """KST 기준 평일인지 확인 (0=월 ~ 4=금)"""
+    now = _get_kst_now()
+    return now.weekday() < 5
+
+
+def _is_saturday_kst():
+    """KST 기준 토요일인지 확인"""
+    return _get_kst_now().weekday() == 5
+
+
+# ============================================================
+# 텔레그램 유틸리티
+# ============================================================
+
+def _send_telegram(message: str) -> bool:
+    """텔레그램 메시지 전송 (개인 + 채널 동시)"""
+    import requests
+    success = False
+
+    # 1) 개인 봇
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if token and chat_id and "your_bot_token" not in token:
+        try:
+            r = requests.post(
+                f"https://api.telegram.org/bot{token}/sendMessage",
+                json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"},
+                timeout=10
+            )
+            if r.status_code == 200:
+                success = True
+            else:
+                logger.error(f"텔레그램(개인) 응답: {r.status_code} {r.text[:200]}")
+        except Exception as e:
+            logger.error(f"텔레그램(개인) 전송 실패: {e}")
+
+    # 2) 채널 봇
+    ch_token = os.getenv("TELEGRAM_CHANNEL_BOT_TOKEN")
+    ch_chat_id = os.getenv("TELEGRAM_CHANNEL_CHAT_ID")
+    if ch_token and ch_chat_id:
+        try:
+            r = requests.post(
+                f"https://api.telegram.org/bot{ch_token}/sendMessage",
+                json={"chat_id": ch_chat_id, "text": message, "parse_mode": "HTML"},
+                timeout=10
+            )
+            if r.status_code == 200:
+                success = True
+        except Exception as e:
+            logger.error(f"텔레그램(채널) 전송 실패: {e}")
+
+    return success
+
+
+def _send_telegram_long(message: str) -> bool:
+    """긴 텔레그램 메시지를 4000자 단위로 분할 전송"""
+    MAX_LEN = 4000
+    if len(message) <= MAX_LEN:
+        return _send_telegram(message)
+
+    chunks = []
+    current = ""
+    for paragraph in message.split("\n\n"):
+        if len(current) + len(paragraph) + 2 > MAX_LEN:
+            if current:
+                chunks.append(current.strip())
+            current = paragraph
+        else:
+            current = current + "\n\n" + paragraph if current else paragraph
+    if current.strip():
+        chunks.append(current.strip())
+
+    ok = True
+    for chunk in chunks:
+        if not _send_telegram(chunk):
+            ok = False
+        time.sleep(0.5)
+    return ok
+
+
+# ============================================================
+# 작업 함수들 (In-Process 실행)
+# ============================================================
+
+def _run_jongga_v2():
+    """종가베팅 V2 — in-process 실행"""
+    logger.info("🎯 종가베팅 V2 분석 시작...")
+    try:
+        import asyncio
+        # 프로젝트 루트를 sys.path에 추가
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+
+        from engine.generator import run_screener
+
+        # 분석 기준일 계산
+        now = datetime.now()
+        target_date = date.today()
+        if now.hour < 9:
+            target_date = target_date - timedelta(days=1)
+        if target_date.weekday() == 6:  # 일요일
+            target_date = target_date - timedelta(days=2)
+        elif target_date.weekday() == 5:  # 토요일
+            target_date = target_date - timedelta(days=1)
+
+        logger.info(f"   분석 기준일: {target_date}")
+
+        # 새 이벤트 루프에서 실행
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(
+                run_screener(capital=50_000_000, markets=['KOSPI', 'KOSDAQ'], target_date=target_date)
+            )
+        finally:
+            loop.close()
+
+        logger.info("✅ 종가베팅 V2 분석 완료")
+
+        # S/A급 텔레그램 전송
+        _send_jongga_v2_telegram()
+        return True
+
+    except Exception as e:
+        logger.error(f"❌ 종가베팅 V2 실패: {e}")
+        traceback.print_exc()
+        _send_telegram(f"❌ 종가베팅 V2 실패: {str(e)[:200]}")
+        return False
+
+
+def _send_jongga_v2_telegram():
+    """종가베팅 V2 결과 텔레그램 전송 (S/A급만)"""
+    try:
+        json_path = os.path.join(DATA_DIR, "jongga_v2_latest.json")
+        if not os.path.exists(json_path):
+            return
+
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        date_str = data.get("date", "")
+        all_signals = data.get("signals", [])
+        total_count = len(all_signals)
+
+        sa_signals = [s for s in all_signals if s.get("grade") in ["S", "A"]]
+        s_count = len([s for s in all_signals if s.get("grade") == "S"])
+        a_count = len([s for s in all_signals if s.get("grade") == "A"])
+        b_count = len([s for s in all_signals if s.get("grade") == "B"])
+
+        header = f"<b>🎯 종가베팅 V2 ({date_str})</b>\n\n"
+        header += f"총 {total_count}개 시그널 (S:{s_count} A:{a_count} B:{b_count})\n"
+        header += "────────────────────"
+
+        if not sa_signals:
+            _send_telegram(header + "\n\n⚠️ S/A급 시그널 없음 (B급 제외됨)")
+        else:
+            seen_codes = set()
+            items = []
+            for s in sa_signals:
+                code = s.get("stock_code", "")
+                if code in seen_codes:
+                    continue
+                seen_codes.add(code)
+
+                grade = s.get("grade", "B")
+                icon = "🥇" if grade == "S" else "🥈"
+                change_pct = s.get("change_pct", 0)
+
+                item = f"\n{icon} <b>{s.get('stock_name')}</b> ({code}) {s.get('market', '')}\n"
+                item += f"   등급: {grade} | 점수: {s.get('score', {}).get('total', 0)} | 등락: {change_pct:+.1f}%\n"
+                item += f"   진입: {s.get('entry_price', 0):,}원 | 목표: {s.get('target_price', 0):,}원\n"
+                if s.get("themes"):
+                    item += f"   테마: {', '.join(s.get('themes')[:3])}\n"
+                llm_reason = s.get('score', {}).get('llm_reason', '')
+                if llm_reason:
+                    item += f"   💡 {llm_reason[:60]}...\n"
+                items.append(item)
+
+            chunks = []
+            current_chunk = header
+            for item in items:
+                if len(current_chunk) + len(item) > 3800:
+                    chunks.append(current_chunk)
+                    current_chunk = item
+                else:
+                    current_chunk += item
+            if current_chunk:
+                chunks.append(current_chunk)
+
+            for i, chunk in enumerate(chunks):
+                if i > 0:
+                    chunk = f"<b>🎯 종가베팅 V2 계속 ({i+1}/{len(chunks)})</b>\n" + chunk
+                _send_telegram(chunk)
+                time.sleep(0.5)
+
+    except Exception as e:
+        logger.error(f"종가베팅 텔레그램 전송 실패: {e}")
+
+
+def _run_institutional_data():
+    """수급 데이터 업데이트 — in-process"""
+    logger.info("📊 수급 데이터 업데이트 시작...")
+    try:
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+
+        # all_institutional_trend_data.py 를 직접 import
+        os.environ['DATA_DIR'] = DATA_DIR
+        from all_institutional_trend_data import main as inst_main
+        inst_main()
+        logger.info("✅ 수급 데이터 업데이트 완료")
+        return True
+    except ImportError:
+        logger.warning("⚠️ all_institutional_trend_data 모듈 없음 — 스킵")
+        return False
+    except Exception as e:
+        logger.error(f"❌ 수급 데이터 실패: {e}")
+        traceback.print_exc()
+        return False
+
+
+def _run_vcp_signal_scan():
+    """VCP 시그널 스캔 — in-process"""
+    logger.info("📈 VCP 시그널 스캔 시작...")
+    try:
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+
+        from signal_tracker import main as signal_main
+        signal_main()
+        logger.info("✅ VCP 시그널 스캔 완료")
+        return True
+    except ImportError:
+        logger.warning("⚠️ signal_tracker 모듈 없음 — 스킵")
+        return False
+    except Exception as e:
+        logger.error(f"❌ VCP 시그널 실패: {e}")
+        traceback.print_exc()
+        return False
+
+
+def _run_us_market_update():
+    """US Market 데이터 업데이트 — in-process"""
+    logger.info("🇺🇸 US Market 업데이트 시작...")
+    try:
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+
+        from update_us import main as us_main
+        us_main(send_telegram=False)
+        logger.info("✅ US Market 업데이트 완료")
+
+        # Smart Money Top 5 텔레그램
+        _send_us_smart_money_telegram()
+        return True
+    except ImportError:
+        logger.warning("⚠️ update_us 모듈 없음 — 스킵")
+        return False
+    except Exception as e:
+        logger.error(f"❌ US Market 업데이트 실패: {e}")
+        traceback.print_exc()
+        return False
+
+
+def _send_us_smart_money_telegram():
+    """US Smart Money Top 5 텔레그램"""
+    try:
+        picks_path = os.path.join(BASE_DIR, 'us_market_preview', 'output', 'top_picks.json')
+        if not os.path.exists(picks_path):
+            return
+
+        with open(picks_path, 'r', encoding='utf-8') as f:
+            picks_data = json.load(f)
+
+        top_picks = picks_data.get('top_picks', [])[:5]
+        if not top_picks:
+            return
+
+        today = _get_kst_now().strftime('%m/%d')
+        msg = f"<b>🇺🇸 US Smart Money Top 5 ({today})</b>\n"
+        msg += "────────────────────\n"
+
+        for p in top_picks:
+            rank = p.get('rank', 0)
+            ticker = p.get('ticker', '')
+            name = p.get('name', ticker)[:20]
+            score = p.get('composite_score', 0)
+            grade = p.get('grade', '-')
+            price = p.get('price', 0)
+            msg += f"\n{rank}. <b>{ticker}</b> ({name})\n"
+            msg += f"   점수: {score}점 [{grade}] | ${price:,.2f}\n"
+
+        _send_telegram(msg)
+    except Exception as e:
+        logger.error(f"US 텔레그램 전송 실패: {e}")
+
+
+def _run_crypto_pipeline():
+    """Crypto 전체 파이프라인 — in-process (가능한 것만)"""
+    logger.info("🪙 Crypto 파이프라인 시작...")
+    try:
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+
+        crypto_dir = os.path.join(BASE_DIR, 'crypto-analytics', 'crypto_market')
+        if not os.path.isdir(crypto_dir):
+            logger.warning("⚠️ crypto-analytics 디렉토리 없음 — 스킵")
+            return False
+
+        if crypto_dir not in sys.path:
+            sys.path.insert(0, crypto_dir)
+
+        results = []
+
+        # Gate Check
+        try:
+            from market_gate import run_market_gate_sync
+            gate_result = run_market_gate_sync()
+            crypto_output = os.path.join(crypto_dir, 'output')
+            os.makedirs(crypto_output, exist_ok=True)
+
+            gate_json = {
+                'gate': gate_result.gate,
+                'score': gate_result.score,
+                'status': 'RISK_ON' if gate_result.gate == 'GREEN' else ('RISK_OFF' if gate_result.gate == 'RED' else 'NEUTRAL'),
+                'reasons': gate_result.reasons,
+                'metrics': gate_result.metrics,
+                'generated_at': datetime.now().isoformat()
+            }
+            with open(os.path.join(crypto_output, 'market_gate.json'), 'w', encoding='utf-8') as f:
+                json.dump(gate_json, f, ensure_ascii=False, indent=2)
+
+            results.append(('Gate', True))
+            logger.info(f"🚦 Crypto Gate: {gate_result.gate} ({gate_result.score})")
+        except Exception as e:
+            logger.error(f"Crypto Gate 실패: {e}")
+            results.append(('Gate', False))
+
+        # VCP Scan
+        try:
+            from run_scan import run_scan_sync
+            scan_result = run_scan_sync()
+            results.append(('VCP', True))
+        except Exception as e:
+            logger.error(f"Crypto VCP 실패: {e}")
+            results.append(('VCP', False))
+
+        # Briefing, Prediction, Risk — subprocess fallback
+        for script_name, label in [
+            ('crypto_briefing.py', 'Briefing'),
+            ('crypto_prediction.py', 'Prediction'),
+            ('crypto_risk.py', 'Risk'),
+        ]:
+            script_path = os.path.join(crypto_dir, script_name)
+            if os.path.exists(script_path):
+                try:
+                    import subprocess
+                    result = subprocess.run(
+                        [sys.executable, script_path],
+                        cwd=os.path.join(BASE_DIR, 'crypto-analytics'),
+                        capture_output=True, text=True, timeout=600,
+                        env={**os.environ, 'PYTHONPATH': BASE_DIR, 'PYTHONIOENCODING': 'utf-8'}
+                    )
+                    results.append((label, result.returncode == 0))
+                except Exception as e:
+                    logger.error(f"Crypto {label} 실패: {e}")
+                    results.append((label, False))
+            else:
+                logger.warning(f"⚠️ {script_name} 없음")
+                results.append((label, False))
+
+        success = sum(1 for _, ok in results if ok)
+        logger.info(f"🪙 Crypto 파이프라인 완료: {success}/{len(results)}")
+        return success > 0
+
+    except Exception as e:
+        logger.error(f"❌ Crypto 파이프라인 실패: {e}")
+        traceback.print_exc()
+        return False
+
+
+# ============================================================
+# KR Round 1 & 2
+# ============================================================
+
+def _run_round1():
+    """1차 업데이트 (15:10 KST) — 종가베팅 V2"""
+    if not _is_weekday_kst():
+        logger.info("⏭️ 주말 — Round 1 스킵")
+        return True
+
+    logger.info("=" * 50)
+    logger.info("🇰🇷 [1차] 종가베팅 V2 시작")
+    logger.info("=" * 50)
+    return _run_jongga_v2()
+
+
+def _run_round2():
+    """2차 업데이트 (16:00 KST) — 수급/VCP/리포트"""
+    if not _is_weekday_kst():
+        logger.info("⏭️ 주말 — Round 2 스킵")
+        return True
+
+    logger.info("=" * 50)
+    logger.info("🇰🇷 [2차] 데이터 갱신 + VCP 시작")
+    logger.info("=" * 50)
+
+    results = []
+    results.append(('institutional', _run_institutional_data()))
+    results.append(('vcp_signals', _run_vcp_signal_scan()))
+
+    success_count = sum(1 for _, s in results if s)
+    total_count = len(results)
+
+    summary_lines = []
+    for name, ok in results:
+        status = "✅" if ok else "❌"
+        summary_lines.append(f"{status} {name}")
+
+    now_str = _get_kst_now().strftime('%Y-%m-%d %H:%M')
+    msg = (
+        f"<b>📊 16시 데이터 업데이트 완료</b>\n"
+        f"⏰ {now_str}\n"
+        f"결과: {success_count}/{total_count}\n"
+        + "\n".join(summary_lines)
+    )
+    _send_telegram(msg)
+    return True
+
+
+def _run_us_update():
+    """US 업데이트 (04:00 KST)"""
+    if not _is_weekday_kst():
+        logger.info("⏭️ 주말 — US 업데이트 스킵")
+        return True
+
+    logger.info("=" * 50)
+    logger.info("🇺🇸 US Market 전체 갱신 시작")
+    logger.info("=" * 50)
+    return _run_us_market_update()
+
+
+# ============================================================
+# 클라우드 스케줄러 (Flask 백그라운드 스레드)
+# ============================================================
+
+_scheduler_started = False
+_scheduler_lock = threading.Lock()
+
+
+def start_cloud_scheduler():
+    """Render 클라우드용 통합 스케줄러 시작
+
+    - gunicorn 내에서 백그라운드 스레드로 실행
+    - 멀티워커 환경에서 한 번만 실행 (파일 락)
+    - schedule 라이브러리로 KST 기준 스케줄링
+    """
+    global _scheduler_started
+
+    with _scheduler_lock:
+        if _scheduler_started:
+            return
+        _scheduler_started = True
+
+    # 파일 락으로 멀티워커 중복 방지
+    lock_path = os.path.join(DATA_DIR, '.scheduler.lock')
+    try:
+        from filelock import FileLock, Timeout
+        lock = FileLock(lock_path, timeout=1)
+        lock.acquire(timeout=1)
+    except Exception:
+        logger.info("[CloudScheduler] 다른 워커가 이미 실행 중 — 스킵")
+        return
+
+    thread = threading.Thread(target=_cloud_scheduler_loop, daemon=True, name='CloudScheduler')
+    thread.start()
+    logger.info("[CloudScheduler] 백그라운드 스케줄러 시작됨")
+
+
+def _cloud_scheduler_loop():
+    """스케줄러 메인 루프"""
+    import schedule as sched
+
+    # 로깅 설정
+    os.makedirs(LOG_DIR, exist_ok=True)
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter('%(asctime)s [CloudSched] %(message)s'))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+    # ── 스케줄 등록 ──
+    # schedule 라이브러리는 시스템 로컬 시간 기반
+    # Render는 UTC → KST 오프셋(-9h) 적용 필요
+
+    # KST를 UTC로 변환하는 헬퍼
+    def kst_to_utc(kst_time_str: str) -> str:
+        """'15:10' (KST) → '06:10' (UTC) 변환"""
+        h, m = map(int, kst_time_str.split(':'))
+        utc_h = (h - 9) % 24
+        return f"{utc_h:02d}:{m:02d}"
+
+    # Render에서는 UTC, 로컬에서는 KST
+    is_render = bool(os.getenv('RENDER'))
+
+    def sched_time(kst_time: str) -> str:
+        if is_render:
+            return kst_to_utc(kst_time)
+        return kst_time
+
+    weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+
+    for day in weekdays:
+        # 04:00 KST — US Market 전체 갱신
+        getattr(sched.every(), day).at(sched_time('04:00')).do(
+            _safe_run, _run_us_update, 'US Market Update'
+        )
+        # 15:10 KST — KR 종가베팅 V2
+        getattr(sched.every(), day).at(sched_time('15:10')).do(
+            _safe_run, _run_round1, 'KR Round 1 (종가베팅)'
+        )
+        # 16:00 KST — KR 수급/VCP/리포트
+        getattr(sched.every(), day).at(sched_time('16:00')).do(
+            _safe_run, _run_round2, 'KR Round 2 (수급/VCP)'
+        )
+
+    # Crypto — 매 4시간 (24/7)
+    crypto_times = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00']
+    for ct in crypto_times:
+        sched.every().day.at(sched_time(ct)).do(
+            _safe_run, _run_crypto_pipeline, 'Crypto Pipeline'
+        )
+
+    logger.info("📅 클라우드 스케줄 등록 완료:")
+    logger.info(f"   환경: {'Render (UTC)' if is_render else 'Local (KST)'}")
+    logger.info(f"   🇺🇸 평일 04:00 KST → US Market")
+    logger.info(f"   🇰🇷 평일 15:10 KST → 종가베팅 V2")
+    logger.info(f"   🇰🇷 평일 16:00 KST → 수급/VCP")
+    logger.info(f"   🪙 매일 4시간마다 → Crypto")
+
+    # 시작 알림
+    _send_telegram(
+        "<b>⏰ CloudScheduler 시작</b>\n\n"
+        f"🇺🇸 US: 04:00 KST (평일)\n"
+        f"🇰🇷 KR: 15:10, 16:00 KST (평일)\n"
+        f"🪙 Crypto: 4시간마다 (24/7)\n"
+        f"📍 {'Render' if is_render else 'Local'}"
+    )
+
+    # ── 메인 루프 ──
+    while True:
+        try:
+            sched.run_pending()
+        except Exception as e:
+            logger.error(f"스케줄 실행 에러: {e}")
+            traceback.print_exc()
+        time.sleep(30)
+
+
+def _safe_run(func, name: str):
+    """작업을 안전하게 실행 (예외 캐치 + 로깅)"""
+    try:
+        logger.info(f"🚀 시작: {name}")
+        start = time.time()
+        result = func()
+        elapsed = time.time() - start
+        status = "✅" if result else "⚠️"
+        logger.info(f"{status} 완료: {name} ({elapsed:.1f}초)")
+    except Exception as e:
+        logger.error(f"❌ 실패: {name} — {e}")
+        traceback.print_exc()
+        try:
+            _send_telegram(f"❌ 스케줄 작업 실패: {name}\n{str(e)[:300]}")
+        except Exception:
+            pass
+
+
+# ============================================================
+# API 엔드포인트용: 스케줄러 상태 & 수동 트리거
+# ============================================================
+
+def get_scheduler_status() -> dict:
+    """스케줄러 상태 반환"""
+    try:
+        import schedule as sched
+        jobs = []
+        for job in sched.get_jobs():
+            jobs.append({
+                'next_run': str(job.next_run) if job.next_run else None,
+                'interval': str(job.interval),
+                'unit': str(job.unit),
+            })
+        return {
+            'running': _scheduler_started,
+            'environment': 'render' if os.getenv('RENDER') else 'local',
+            'jobs_count': len(jobs),
+            'jobs': jobs[:20],
+            'kst_now': _get_kst_now().strftime('%Y-%m-%d %H:%M:%S KST'),
+        }
+    except Exception as e:
+        return {'running': _scheduler_started, 'error': str(e)}
+
+
+# ============================================================
+# KR 가격 실시간 업데이터 (기존 기능 유지)
+# ============================================================
 
 def start_kr_price_scheduler():
     """KR 종가베팅 V2 가격 업데이트 스케줄러 (5분 간격)
@@ -52,7 +707,6 @@ def start_kr_price_scheduler():
 
                     try:
                         from pykrx import stock as pykrx_stock
-                        from datetime import date
                         today = date.today().strftime("%Y%m%d")
                         df = pykrx_stock.get_market_ohlcv(today, today, code)
                         if not df.empty:

@@ -67,6 +67,36 @@ def create_app(config=None):
         from flask import jsonify as _jsonify
         return _jsonify({'status': 'ok', 'service': 'MarketFlow API'})
 
+    # ── 스케줄러 상태 API ──
+    @app.route('/api/scheduler/status')
+    def scheduler_status():
+        from flask import jsonify as _jsonify
+        from app.utils.scheduler import get_scheduler_status
+        return _jsonify(get_scheduler_status())
+
+    # ── 스케줄러 수동 트리거 API ──
+    @app.route('/api/scheduler/trigger/<task>', methods=['POST'])
+    def scheduler_trigger(task):
+        from flask import jsonify as _jsonify
+        import threading
+        from app.utils.scheduler import (
+            _run_jongga_v2, _run_round2, _run_us_update, _run_crypto_pipeline
+        )
+
+        tasks_map = {
+            'jongga-v2': _run_jongga_v2,
+            'round2': _run_round2,
+            'us-update': _run_us_update,
+            'crypto': _run_crypto_pipeline,
+        }
+        func = tasks_map.get(task)
+        if not func:
+            return _jsonify({'error': f'Unknown task: {task}', 'available': list(tasks_map.keys())}), 400
+
+        # 백그라운드 스레드에서 실행
+        threading.Thread(target=func, daemon=True, name=f'trigger-{task}').start()
+        return _jsonify({'status': 'triggered', 'task': task})
+
     # ── 라우트 등록 검증: 핵심 라우트 누락 시 즉시 중단 ──
     registered = {r.rule for r in app.url_map.iter_rules()}
     for critical in ['/api/health', '/api/data-version']:
@@ -75,5 +105,14 @@ def create_app(config=None):
                 f"[FATAL] Critical route not registered: {critical}\n"
                 f"  Registered ({len(registered)}): {sorted(list(registered))[:15]}..."
             )
+
+    # ── 클라우드 스케줄러 자동 시작 (Render 또는 SCHEDULER_ENABLED) ──
+    if os.getenv('RENDER') or os.getenv('SCHEDULER_ENABLED', '').lower() in ('true', '1'):
+        try:
+            from app.utils.scheduler import start_cloud_scheduler
+            start_cloud_scheduler()
+            print("[OK] Cloud scheduler started in background thread")
+        except Exception as e:
+            print(f"[WARN] Cloud scheduler failed to start: {e}")
 
     return app
