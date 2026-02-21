@@ -185,13 +185,13 @@ export function RotationView() {
                                                 {isActive && <i className="fas fa-arrow-right mr-1"></i>}
                                                 {phase}
                                             </div>
-                                            <div className="text-xs text-gray-500 mb-2">Score: {info.score.toFixed(1)}</div>
+                                            <div className="text-xs text-gray-500 mb-2">Score: {(info.score ?? 0).toFixed(1)}</div>
                                             <div className="space-y-1">
-                                                {info.sectors.map((s: any) => (
+                                                {(info.sectors ?? []).map((s: any) => (
                                                     <div key={s.ticker} className="flex justify-between text-xs">
                                                         <span className="text-gray-400">{s.ticker}</span>
-                                                        <span className={getChangeColor(s.return_1m)}>
-                                                            {s.return_1m >= 0 ? '+' : ''}{s.return_1m.toFixed(1)}%
+                                                        <span className={getChangeColor(s.return_1m ?? 0)}>
+                                                            {(s.return_1m ?? 0) >= 0 ? '+' : ''}{(s.return_1m ?? 0).toFixed(1)}%
                                                         </span>
                                                     </div>
                                                 ))}
@@ -261,7 +261,7 @@ export function RotationView() {
                                                 <span className="text-white font-bold text-sm">{item.ticker}</span>
                                                 <span className="text-gray-500 text-xs ml-2">{item.name}</span>
                                             </div>
-                                            <span className="text-green-400 text-sm font-mono">+{item.rs_change.toFixed(2)}</span>
+                                            <span className="text-green-400 text-sm font-mono">+{(item.rs_change ?? 0).toFixed(2)}</span>
                                         </div>
                                     ))}
                                     {moneyFlow.inflows.length === 0 && (
@@ -280,7 +280,7 @@ export function RotationView() {
                                                 <span className="text-white font-bold text-sm">{item.ticker}</span>
                                                 <span className="text-gray-500 text-xs ml-2">{item.name}</span>
                                             </div>
-                                            <span className="text-red-400 text-sm font-mono">{item.rs_change.toFixed(2)}</span>
+                                            <span className="text-red-400 text-sm font-mono">{(item.rs_change ?? 0).toFixed(2)}</span>
                                         </div>
                                     ))}
                                     {moneyFlow.outflows.length === 0 && (

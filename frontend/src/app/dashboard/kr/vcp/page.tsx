@@ -98,10 +98,10 @@ export default function VCPSignalsPage() {
         setLoading(true);
         try {
             const [signalsRes, aiRes] = await Promise.all([
-                krAPI.getSignals(),
-                krAPI.getAIAnalysis(),
+                krAPI.getSignals().catch(() => ({ signals: [] })),
+                krAPI.getAIAnalysis().catch(() => null),
             ]);
-            setSignals(signalsRes.signals || []);
+            setSignals(signalsRes?.signals || []);
             setAiData(aiRes);
             const genAt = (signalsRes as any).generated_at;
             if (genAt) {
@@ -120,10 +120,10 @@ export default function VCPSignalsPage() {
     const silentRefresh = useCallback(async () => {
         try {
             const [signalsRes, aiRes] = await Promise.all([
-                krAPI.getSignals(),
-                krAPI.getAIAnalysis(),
+                krAPI.getSignals().catch(() => ({ signals: [] })),
+                krAPI.getAIAnalysis().catch(() => null),
             ]);
-            setSignals(signalsRes.signals || []);
+            setSignals(signalsRes?.signals || []);
             setAiData(aiRes);
             const genAt = (signalsRes as any).generated_at;
             if (genAt) {
@@ -149,8 +149,11 @@ export default function VCPSignalsPage() {
     const loadStats = async () => {
         try {
             const res = await fetch('/api/kr/vcp-stats');
-            if (res.ok) setStats(await res.json());
-        } catch { /* silent */ }
+            if (res.ok) {
+                const data = await res.json();
+                if (data && !data.error) setStats(data);
+            }
+        } catch { /* vcp-stats endpoint may not exist */ }
     };
 
     const loadHistory = async () => {
@@ -159,9 +162,9 @@ export default function VCPSignalsPage() {
             const res = await fetch(`/api/kr/vcp-history?days=${historyDays}`);
             if (res.ok) {
                 const data = await res.json();
-                setHistorySignals(data.signals || []);
+                if (data && !data.error) setHistorySignals(data.signals || []);
             }
-        } catch { /* silent */ }
+        } catch { /* vcp-history endpoint may not exist */ }
         finally { setHistoryLoading(false); }
     };
 

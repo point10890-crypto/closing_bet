@@ -35,16 +35,18 @@ export default function KRMarketOverview() {
         setIsRefreshing(true);
         try {
             const [gate, signals] = await Promise.all([
-                krAPI.getMarketGate(),
-                krAPI.getSignals(),
+                krAPI.getMarketGate().catch(() => null),
+                krAPI.getSignals().catch(() => null),
             ]);
-            setGateData(gate);
-            setSignalsData(signals);
+            if (gate) setGateData(gate);
+            if (signals) setSignalsData(signals);
 
-            const btRes = await fetch('/api/kr/backtest-summary');
-            if (btRes.ok) {
-                setBacktestData(await btRes.json());
-            }
+            try {
+                const btRes = await fetch('/api/kr/backtest-summary');
+                if (btRes.ok) {
+                    setBacktestData(await btRes.json());
+                }
+            } catch { /* backtest-summary endpoint may not exist */ }
 
             setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
         } catch (error) {
@@ -59,13 +61,15 @@ export default function KRMarketOverview() {
     const silentRefresh = useCallback(async () => {
         try {
             const [gate, signals] = await Promise.all([
-                krAPI.getMarketGate(),
-                krAPI.getSignals(),
+                krAPI.getMarketGate().catch(() => null),
+                krAPI.getSignals().catch(() => null),
             ]);
-            setGateData(gate);
-            setSignalsData(signals);
-            const btRes = await fetch('/api/kr/backtest-summary');
-            if (btRes.ok) setBacktestData(await btRes.json());
+            if (gate) setGateData(gate);
+            if (signals) setSignalsData(signals);
+            try {
+                const btRes = await fetch('/api/kr/backtest-summary');
+                if (btRes.ok) setBacktestData(await btRes.json());
+            } catch { /* silent */ }
             setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
         } catch { /* silent */ }
     }, []);

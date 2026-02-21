@@ -197,11 +197,11 @@ export default function USMarketDashboard() {
                         {/* Component Pills */}
                         <div className="flex-1 flex flex-wrap gap-2">
                             {[
-                                { label: 'Gate', value: `${decisionSignal.components.market_gate.score}`, contrib: decisionSignal.components.market_gate.contribution },
-                                { label: 'Regime', value: decisionSignal.components.regime.regime.replace('_', ' '), contrib: decisionSignal.components.regime.contribution },
-                                { label: 'ML Pred', value: `${decisionSignal.components.prediction.spy_bullish.toFixed(0)}%`, contrib: decisionSignal.components.prediction.contribution },
-                                { label: 'Risk', value: decisionSignal.components.risk.level, contrib: decisionSignal.components.risk.contribution },
-                                { label: 'Sector', value: decisionSignal.components.sector_phase.phase, contrib: decisionSignal.components.sector_phase.contribution },
+                                { label: 'Gate', value: `${decisionSignal.components?.market_gate?.score ?? '--'}`, contrib: decisionSignal.components?.market_gate?.contribution ?? 0 },
+                                { label: 'Regime', value: (decisionSignal.components?.regime?.regime ?? 'N/A').replace('_', ' '), contrib: decisionSignal.components?.regime?.contribution ?? 0 },
+                                { label: 'ML Pred', value: `${decisionSignal.components?.prediction?.spy_bullish?.toFixed(0) ?? '--'}%`, contrib: decisionSignal.components?.prediction?.contribution ?? 0 },
+                                { label: 'Risk', value: decisionSignal.components?.risk?.level ?? 'N/A', contrib: decisionSignal.components?.risk?.contribution ?? 0 },
+                                { label: 'Sector', value: decisionSignal.components?.sector_phase?.phase ?? 'N/A', contrib: decisionSignal.components?.sector_phase?.contribution ?? 0 },
                             ].map(comp => (
                                 <div key={comp.label} className="px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
                                     <div className="text-[10px] text-gray-500">{comp.label}</div>
@@ -223,9 +223,9 @@ export default function USMarketDashboard() {
                     </div>
 
                     {/* Warnings */}
-                    {decisionSignal.warnings.length > 0 && (
+                    {(decisionSignal.warnings?.length ?? 0) > 0 && (
                         <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap gap-2">
-                            {decisionSignal.warnings.map((w, i) => (
+                            {(decisionSignal.warnings ?? []).map((w, i) => (
                                 <span key={i} className="text-xs text-yellow-400/80 bg-yellow-500/10 px-2 py-0.5 rounded">
                                     <i className="fas fa-exclamation-triangle mr-1"></i>{w}
                                 </span>
@@ -497,11 +497,11 @@ export default function USMarketDashboard() {
                             </span>
                         </div>
                         <div className="flex items-center gap-6 flex-wrap text-sm">
-                            <span className="text-emerald-400 font-black">+{backtestData.returns.total_return.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">return</span></span>
-                            <span className="text-blue-400 font-black">+{backtestData.benchmarks.SPY?.alpha.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">alpha vs SPY</span></span>
-                            <span className="text-purple-400 font-black">{backtestData.returns.sharpe_ratio.toFixed(1)} <span className="text-gray-500 font-normal text-xs">sharpe</span></span>
-                            <span className="text-yellow-400 font-black">{backtestData.returns.win_rate.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">win rate</span></span>
-                            <span className="text-red-400 font-bold">{backtestData.returns.max_drawdown.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">max DD</span></span>
+                            <span className="text-emerald-400 font-black">+{backtestData.returns?.total_return?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">return</span></span>
+                            <span className="text-blue-400 font-black">+{backtestData.benchmarks?.SPY?.alpha?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">alpha vs SPY</span></span>
+                            <span className="text-purple-400 font-black">{backtestData.returns?.sharpe_ratio?.toFixed(1) ?? '--'} <span className="text-gray-500 font-normal text-xs">sharpe</span></span>
+                            <span className="text-yellow-400 font-black">{backtestData.returns?.win_rate?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">win rate</span></span>
+                            <span className="text-red-400 font-bold">{backtestData.returns?.max_drawdown?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">max DD</span></span>
                         </div>
                     </div>
                 </Link>

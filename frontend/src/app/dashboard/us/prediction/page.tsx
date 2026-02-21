@@ -133,27 +133,27 @@ export default function IndexPredictionPage() {
                                 <div>
                                     <div className="flex justify-between text-xs text-gray-500 mb-2">
                                         <span className="relative group cursor-help">
-                                            Bearish {pred.bearish_probability}%
+                                            Bearish {pred.bearish_probability ?? '--'}%
                                             <Tip text="Probability the index closes lower in 5 trading days, based on gradient-boosted ensemble model." />
                                         </span>
                                         <span className="relative group cursor-help">
-                                            Bullish {pred.bullish_probability}%
+                                            Bullish {pred.bullish_probability ?? '--'}%
                                             <Tip text="Probability the index closes higher in 5 trading days, based on gradient-boosted ensemble model." />
                                         </span>
                                     </div>
                                     <div className="h-6 bg-white/5 rounded-full overflow-hidden flex">
                                         <div
                                             className={`h-full ${getProbabilityBarColor(pred.bearish_probability, false)} transition-all`}
-                                            style={{ width: `${pred.bearish_probability}%` }}
+                                            style={{ width: `${pred.bearish_probability ?? 0}%` }}
                                         ></div>
                                         <div
-                                            className={`h-full ${getProbabilityBarColor(pred.bullish_probability, true)} transition-all`}
-                                            style={{ width: `${pred.bullish_probability}%` }}
+                                            className={`h-full ${getProbabilityBarColor(pred.bullish_probability ?? 0, true)} transition-all`}
+                                            style={{ width: `${pred.bullish_probability ?? 0}%` }}
                                         ></div>
                                     </div>
                                     <div className="text-center mt-2">
-                                        <span className={`text-lg font-black ${pred.bullish_probability >= 50 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {pred.predicted_return_pct >= 0 ? '+' : ''}{pred.predicted_return_pct}%
+                                        <span className={`text-lg font-black ${(pred.bullish_probability ?? 0) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                                            {(pred.predicted_return_pct ?? 0) >= 0 ? '+' : ''}{pred.predicted_return_pct ?? '--'}%
                                         </span>
                                         <span className="text-gray-500 text-xs ml-2">predicted return (5d)</span>
                                     </div>
@@ -171,13 +171,13 @@ export default function IndexPredictionPage() {
                                         ></div>
                                         <div className="absolute inset-y-0 w-0.5 bg-white/50"
                                             style={{
-                                                left: `${((pred.current_price - pred.target_range.low) / (pred.target_range.high - pred.target_range.low)) * (100 - 2 * TARGET_PADDING_PCT) + TARGET_PADDING_PCT}%`
+                                                left: pred.target_range ? `${((pred.current_price - pred.target_range.low) / ((pred.target_range.high - pred.target_range.low) || 1)) * (100 - 2 * TARGET_PADDING_PCT) + TARGET_PADDING_PCT}%` : '50%'
                                             }}
                                         ></div>
                                         <div className="absolute inset-0 flex justify-between items-center px-3">
-                                            <span className="text-xs text-red-400 font-mono">${pred.target_range.low?.toLocaleString() ?? '--'}</span>
-                                            <span className="text-xs text-blue-400 font-mono">${pred.target_range.mid?.toLocaleString() ?? '--'}</span>
-                                            <span className="text-xs text-green-400 font-mono">${pred.target_range.high?.toLocaleString() ?? '--'}</span>
+                                            <span className="text-xs text-red-400 font-mono">${pred.target_range?.low?.toLocaleString() ?? '--'}</span>
+                                            <span className="text-xs text-blue-400 font-mono">${pred.target_range?.mid?.toLocaleString() ?? '--'}</span>
+                                            <span className="text-xs text-green-400 font-mono">${pred.target_range?.high?.toLocaleString() ?? '--'}</span>
                                         </div>
                                     </div>
                                 </div>
