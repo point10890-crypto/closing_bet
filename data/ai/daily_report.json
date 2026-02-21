@@ -1,0 +1,12 @@
+{
+  "date": "2026-01-14",
+  "open_signals": 67,
+  "closed_signals": 253,
+  "today_new_signals": 40,
+  "total_signals": 320,
+  "generated_at": "2026-01-14T10:11:44.567445",
+  "env": {
+    "base_dir": "/Users/seoheun/Documents/국내주식",
+    "python": "/Users/seoheun/Documents/국내주식/.venv/bin/python"
+  }
+}

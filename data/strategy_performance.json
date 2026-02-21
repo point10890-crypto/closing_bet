@@ -1,0 +1,22 @@
+{
+  "period": "2026-02-05 ~ 2026-02-19",
+  "total_signals": 1097,
+  "closed_signals": 669,
+  "open_signals": 428,
+  "wins": 240,
+  "losses": 429,
+  "win_rate": 35.9,
+  "avg_return": 1.85,
+  "total_return": 1234.77,
+  "best_trade": 417.24,
+  "worst_trade": -24.67,
+  "avg_hold_days": 4.9,
+  "strategy_params": {
+    "foreign_min": 50000,
+    "consecutive_min": 3,
+    "contraction_max": 0.8,
+    "near_high_pct": 0.92,
+    "hold_days": 5,
+    "stop_loss_pct": 7.0
+  }
+}

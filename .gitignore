@@ -16,10 +16,8 @@ frontend/node_modules/
 frontend/.next/
 frontend/out/
 
-# Data (large files)
-data/
+# Data (large files - keep essential JSON for deployment)
 *.csv
-*.json
 !package.json
 !package-lock.json
 !tsconfig.json
@@ -27,6 +25,15 @@ data/
 !tailwind.config.*
 !postcss.config.*
 !components.json
+!render.yaml
+
+# Data directory: exclude heavy/generated files, keep essential
+data/*.csv
+data/*.db
+data/history/
+data/backtest/
+data/ai/
+data/institutional/
 
 # IDE
 .vscode/

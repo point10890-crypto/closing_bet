@@ -1,0 +1,166 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [
+      {
+        "source": "/api/auth/:path*",
+        "destination": "/api/auth/:path*",
+        "regex": "^/api/auth(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
+      },
+      {
+        "source": "/api/:path*",
+        "destination": "http://localhost:5001/api/:path*",
+        "regex": "^/api(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))?(?:/)?$"
+      }
+    ],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/auth/[...nextauth]",
+      "regex": "^/api/auth/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPnextauth": "nxtPnextauth"
+      },
+      "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/dashboard/crypto",
+      "regex": "^/dashboard/crypto(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/crypto(?:/)?$"
+    },
+    {
+      "page": "/dashboard/crypto/briefing",
+      "regex": "^/dashboard/crypto/briefing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/crypto/briefing(?:/)?$"
+    },
+    {
+      "page": "/dashboard/crypto/prediction",
+      "regex": "^/dashboard/crypto/prediction(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/crypto/prediction(?:/)?$"
+    },
+    {
+      "page": "/dashboard/crypto/risk",
+      "regex": "^/dashboard/crypto/risk(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/crypto/risk(?:/)?$"
+    },
+    {
+      "page": "/dashboard/crypto/signals",
+      "regex": "^/dashboard/crypto/signals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/crypto/signals(?:/)?$"
+    },
+    {
+      "page": "/dashboard/data-status",
+      "regex": "^/dashboard/data\\-status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/data\\-status(?:/)?$"
+    },
+    {
+      "page": "/disclaimer",
+      "regex": "^/disclaimer(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/disclaimer(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/pricing",
+      "regex": "^/pricing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pricing(?:/)?$"
+    },
+    {
+      "page": "/privacy",
+      "regex": "^/privacy(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/privacy(?:/)?$"
+    },
+    {
+      "page": "/signup",
+      "regex": "^/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/signup(?:/)?$"
+    },
+    {
+      "page": "/terms",
+      "regex": "^/terms(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/terms(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

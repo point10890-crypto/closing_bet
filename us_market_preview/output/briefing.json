@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-02-19T09:00:53.410155",
+  "content": "# 미국 주식 시장 분석\n\n제공하신 SPY 데이터는 2월 17일 장 마감 시점의 정보로 보입니다. 당시 미국 증시는 **기술주와 금융주의 반등에 힘입어 소폭 상승**으로 마감했습니다.[2][3]\n\n## 주요 시장 동향\n\n**장중 변동성 이후 반등**: S&P 500은 장 초반 최대 1.5%까지 하락했으나 손실폭을 만회하며 0.1% 상승한 6,843.22로 마감했습니다.[2][3] 다우지수는 0.07%, 나스닥은 0.14% 상승했습니다.[2]\n\n**기술주 주도 회복**: 엔비디아와 애플 같은 대형 기술주들의 급등이 마이크로소프트와 오라클의 하락세를 상쇄했으며, 기술주 전체가 0.5% 상승으로 마감했습니다.[3]\n\n**금융주 지지**: 골드만삭스와 JP모건 체이스 등 주요 은행들의 성장이 다우지수의 초반 0.7% 하락세를 반전시키는 데 기여했습니다.[3]\n\n## 시장 배경\n\n지난주(2월 2주차)에는 **순환매 현상**이 두드러졌는데, 투자자들이 기술주 비중을 줄이고 경기 민감주와 가치주로 눈을 돌렸습니다.[1] ISM 제조업 구매관리자지수(PMI)가 57.1로 반등하며 2022년 2월 이후 최고치를 기록했고, 이는 경제가 순환적 확장 국면에 진입하고 있음을 시사합니다.[1]\n\n## 향후 주목 포인트\n\n투자자들은 연준이 선호하는 인플레이션 지표인 **개인소비지출(PCE) 보고서**에 주목하고 있으며, 이는 해당주 후반에 발표될 예정입니다.[3] 지난주 예상보다 낮은 인플레이션 수치가 발표되면서 연준의 2026년 6월 금리 인하 확률이 63%까지 높아졌습니다.[3]\n\n**VIX 19.62**는 시장 변동성이 중간 수준으로 안정화되고 있음을 나타냅니다.",
+  "citations": [
+    "https://www.funetf.co.kr/investInfo/investLibrary/premium/27560",
+    "https://contents.premium.naver.com/onedollardive/corporation/contents/260218163653467if",
+    "https://www.vietnam.vn/ko/chung-khoan-my-tang-nhe-nho-su-phuc-hoi-cua-co-phieu-cong-nghe-va-tai-chinh",
+    "https://www.youtube.com/watch?v=UF-5LeBpejE",
+    "https://www.chosun.com/economy/startup_story/2026/02/05/UZB5ECC6U5GQJP46DF6RWBJGDU/",
+    "https://www.youtube.com/watch?v=9Q4SaP_7IY4",
+    "https://www.choicestock.co.kr/stock/research_view/7238?bu=%2Fstock%2Fnote",
+    "https://kr.investing.com/news/stock-market-news/article-1830269",
+    "https://contents.premium.naver.com/assetx2/assetsx2/contents/260218233512191xv"
+  ]
+}

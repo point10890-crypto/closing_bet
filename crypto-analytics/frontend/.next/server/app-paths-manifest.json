@@ -1,0 +1,20 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/dashboard/crypto/briefing/page": "app/dashboard/crypto/briefing/page.js",
+  "/dashboard/crypto/page": "app/dashboard/crypto/page.js",
+  "/dashboard/crypto/prediction/page": "app/dashboard/crypto/prediction/page.js",
+  "/dashboard/crypto/risk/page": "app/dashboard/crypto/risk/page.js",
+  "/dashboard/crypto/signals/page": "app/dashboard/crypto/signals/page.js",
+  "/dashboard/data-status/page": "app/dashboard/data-status/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/disclaimer/page": "app/disclaimer/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/pricing/page": "app/pricing/page.js",
+  "/privacy/page": "app/privacy/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/terms/page": "app/terms/page.js"
+}

@@ -1,0 +1,364 @@
+{
+  "market_indices": {
+    "kospi": {
+      "value": 5332.91,
+      "change_pct": 0.66
+    },
+    "kosdaq": {
+      "value": 1118.5,
+      "change_pct": -0.8
+    }
+  },
+  "signals": [
+    {
+      "ticker": "047050",
+      "name": "",
+      "score": 88.06000000000003,
+      "contraction_ratio": 0.62,
+      "foreign_5d": 318687,
+      "inst_5d": 433078,
+      "entry_price": 64100.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 63900,
+      "return_pct": -0.31,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 78,
+        "reason": "VCP Score 88 및 수축비율 0.62로 기술적 여건이 우수하고, 외국인·기관 5일 동반 순매수로 수급도 뒷받침되며(뉴스 모멘텀 부재는 중립), 진입가 대비 -0.31%로 리스크가 제한적이라 매수 관점 유지",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 88.06000000000003, 외국인 순매수 318,687주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "056080",
+      "name": "",
+      "score": 88.06000000000003,
+      "contraction_ratio": 0.391,
+      "foreign_5d": 311674,
+      "inst_5d": 112548,
+      "entry_price": 38250.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 45800,
+      "return_pct": 19.74,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 72,
+        "reason": "VCP 점수(88)와 수축비율(0.391)로 기술적 추세는 우수하고 외국인·기관 순매수도 긍정적이나, 현재가가 진입가 대비 +19.7%로 단기 과열/조정 리스크가 있어 뉴스 모멘텀 부재 구간에서는 추가매수보다 보유·분할익절 관망이 유리",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 88.06000000000003, 외국인 순매수 311,674주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "047050",
+      "name": "",
+      "score": 87.63000000000001,
+      "contraction_ratio": 0.575,
+      "foreign_5d": 329691,
+      "inst_5d": 586636,
+      "entry_price": 64000.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 63900,
+      "return_pct": -0.16,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 72,
+        "reason": "VCP Score 87.6과 수축비율 0.575로 기술적 셋업은 우수하고 외국인·기관 동반 순매수도 긍정적이나, 검증된 뉴스 모멘텀이 부재해 50:50 기준에서 확신 매수보단 관망이 합리적입니다.",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 87.63000000000001, 외국인 순매수 329,691주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "047050",
+      "name": "",
+      "score": 87.63000000000001,
+      "contraction_ratio": 0.62,
+      "foreign_5d": 329691,
+      "inst_5d": 586636,
+      "entry_price": 64100.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 63900,
+      "return_pct": -0.31,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 67,
+        "reason": "VCP Score 87.6과 수축비율 0.62로 기술적 여건은 우수하고 외국인·기관 동반 순매수도 긍정적이나, 검증된 뉴스 모멘텀이 부재해 50:50 기준에서 확신 매수보다는 관망이 합리적입니다.",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 87.63000000000001, 외국인 순매수 329,691주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "222080",
+      "name": "",
+      "score": 85.0,
+      "contraction_ratio": 0.715,
+      "foreign_5d": 317256,
+      "inst_5d": 65301,
+      "entry_price": 13040.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 13730,
+      "return_pct": 5.29,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 66,
+        "reason": "VCP Score 85와 수축비율 0.715로 기술적 흐름은 우수하고 외국인·기관 순매수도 긍정적이나, 검증된 최신 뉴스 모멘텀이 부재한 가운데 이미 +5.29% 상승해 추가 매수보다는 추세 유지 확인 후 대응이 합리적",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 85.0, 외국인 순매수 317,256주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "222080",
+      "name": "",
+      "score": 84.6,
+      "contraction_ratio": 0.715,
+      "foreign_5d": 80513,
+      "inst_5d": -304045,
+      "entry_price": 13040.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 13730,
+      "return_pct": 5.29,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 62,
+        "reason": "VCP Score 84.6과 수축비율 0.715로 기술적 흐름은 양호하나, 검증된 뉴스 모멘텀이 없고 기관 5일 순매도(-304,045주)가 부담이라 +5% 수익 구간에서는 추격매수보다 관망이 유리",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 84.6, 외국인 순매수 80,513주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "060280",
+      "name": "",
+      "score": 84.1,
+      "contraction_ratio": 0.613,
+      "foreign_5d": 110059,
+      "inst_5d": 217448,
+      "entry_price": 19570.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 19060,
+      "return_pct": -2.61,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 62,
+        "reason": "VCP 점수(84.1)와 수축비율(0.613)로 기술적 흐름은 양호하고 외국인·기관 순매수도 긍정적이나, 검증된 최신 뉴스 모멘텀이 부재한 가운데 진입가 대비 -2.61%로 아직 추세 확인이 필요해 관망이 적절합니다.",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 84.1, 외국인 순매수 110,059주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "083650",
+      "name": "",
+      "score": 82.7,
+      "contraction_ratio": 0.755,
+      "foreign_5d": 111329,
+      "inst_5d": -6564,
+      "entry_price": 76700.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 74000,
+      "return_pct": -3.52,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 62,
+        "reason": "VCP Score 82.7로 기술적 기반은 양호하나(수축비율 0.755), 최근 뉴스 모멘텀이 없고 현재가가 진입가 대비 -3.52%로 약세 구간이며 기관 수급도 미미해 추가 확인 후 대응이 유리합니다.",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 82.7, 외국인 순매수 111,329주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "009520",
+      "name": "",
+      "score": 80.9,
+      "contraction_ratio": 0.701,
+      "foreign_5d": 92315,
+      "inst_5d": -38197,
+      "entry_price": 20025.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 19830,
+      "return_pct": -0.97,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 62,
+        "reason": "VCP Score 80.9로 기술적 여건은 양호하나(수축비율 0.701), 최근 검증된 뉴스 모멘텀이 없고 현재가가 진입가 대비 -0.97%로 추세 확인이 필요해 관망이 합리적입니다.",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 80.9, 외국인 순매수 92,315주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    },
+    {
+      "ticker": "009520",
+      "name": "",
+      "score": 80.8,
+      "contraction_ratio": 0.701,
+      "foreign_5d": 62152,
+      "inst_5d": 25559,
+      "entry_price": 20025.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 19830,
+      "return_pct": -0.97,
+      "news": [],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 62,
+        "reason": "VCP Score 80.8과 수축비율 0.701로 기술적 여건은 양호하고 외국인·기관 순매수도 플러스지만, 검증된 뉴스 모멘텀이 없어 50:50 기준에서 매수 확신이 부족해 진입가 부근 관망이 합리적입니다.",
+        "source": "openai"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 60,
+        "reason": "VCP Score 80.8, 외국인 순매수 62,152주 - 기술적 관점 긍정",
+        "source": "fallback"
+      },
+      "analysis_source": "openai"
+    }
+  ],
+  "api_status": {
+    "gemini": "active",
+    "openai": "active",
+    "errors": {
+      "gemini": 10,
+      "openai": 0
+    }
+  },
+  "generated_at": "2026-02-10T15:15:14.870604",
+  "signal_date": "2026-02-10"
+}

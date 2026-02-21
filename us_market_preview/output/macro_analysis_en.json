@@ -1,0 +1,507 @@
+{
+  "timestamp": "2026-02-19T15:32:12.472837",
+  "lang": "en",
+  "model": "gemini",
+  "macro_indicators": {
+    "VIX": {
+      "value": 19.62,
+      "change_1d": -3.3,
+      "high_52w": 60.13,
+      "low_52w": 13.38,
+      "pct_from_high": -67.37,
+      "pct_from_low": 46.64,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:04.430273"
+    },
+    "SKEW": {
+      "value": 139.17,
+      "change_1d": -0.79,
+      "high_52w": 178.57,
+      "low_52w": 125.77,
+      "pct_from_high": -22.06,
+      "pct_from_low": 10.65,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:04.558450"
+    },
+    "DXY": {
+      "value": 97.7,
+      "change_1d": -0.0,
+      "high_52w": 107.66,
+      "low_52w": 95.55,
+      "pct_from_high": -9.25,
+      "pct_from_low": 2.25,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:04.687370"
+    },
+    "EUR/USD": {
+      "value": 1.18,
+      "change_1d": -0.42,
+      "high_52w": 1.2,
+      "low_52w": 1.04,
+      "pct_from_high": -1.84,
+      "pct_from_low": 13.68,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:04.819446"
+    },
+    "USD/JPY": {
+      "value": 155.09,
+      "change_1d": 1.27,
+      "high_52w": 159.44,
+      "low_52w": 139.89,
+      "pct_from_high": -2.72,
+      "pct_from_low": 10.87,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:04.950070"
+    },
+    "2Y_Yield": {
+      "value": 3.6,
+      "change_1d": 0.28,
+      "high_52w": 4.3,
+      "low_52w": 3.51,
+      "pct_from_high": -16.31,
+      "pct_from_low": 2.74,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.081727"
+    },
+    "10Y_Yield": {
+      "value": 4.08,
+      "change_1d": 0.67,
+      "high_52w": 4.63,
+      "low_52w": 3.89,
+      "pct_from_high": -11.88,
+      "pct_from_low": 4.97,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.209866"
+    },
+    "30Y_Yield": {
+      "value": 4.71,
+      "change_1d": 0.49,
+      "high_52w": 5.15,
+      "low_52w": 4.34,
+      "pct_from_high": -8.67,
+      "pct_from_low": 8.41,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.339605"
+    },
+    "HY_Credit": {
+      "value": 80.91,
+      "change_1d": 0.12,
+      "high_52w": 81.01,
+      "low_52w": 71.53,
+      "pct_from_high": -0.12,
+      "pct_from_low": 13.11,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.508054"
+    },
+    "IG_Credit": {
+      "value": 111.59,
+      "change_1d": -0.1,
+      "high_52w": 111.74,
+      "low_52w": 99.64,
+      "pct_from_high": -0.13,
+      "pct_from_low": 12.0,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.671103"
+    },
+    "GOLD": {
+      "value": 5017.3,
+      "change_1d": 0.62,
+      "high_52w": 5586.2,
+      "low_52w": 2834.1,
+      "pct_from_high": -10.18,
+      "pct_from_low": 77.03,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.802213"
+    },
+    "SILVER": {
+      "value": 77.99,
+      "change_1d": 0.62,
+      "high_52w": 121.3,
+      "low_52w": 28.31,
+      "pct_from_high": -35.7,
+      "pct_from_low": 175.49,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:05.931121"
+    },
+    "OIL": {
+      "value": 65.26,
+      "change_1d": 0.11,
+      "high_52w": 78.4,
+      "low_52w": 54.98,
+      "pct_from_high": -16.76,
+      "pct_from_low": 18.7,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:06.061016"
+    },
+    "COPPER": {
+      "value": 5.78,
+      "change_1d": -0.15,
+      "high_52w": 6.51,
+      "low_52w": 4.1,
+      "pct_from_high": -11.11,
+      "pct_from_low": 41.15,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:06.188727"
+    },
+    "NAT_GAS": {
+      "value": 3.01,
+      "change_1d": -0.03,
+      "high_52w": 7.83,
+      "low_52w": 2.62,
+      "pct_from_high": -61.54,
+      "pct_from_low": 14.8,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:06.318881"
+    },
+    "SPY": {
+      "value": 686.29,
+      "change_1d": 0.5,
+      "high_52w": 697.84,
+      "low_52w": 477.64,
+      "pct_from_high": -1.66,
+      "pct_from_low": 43.68,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:06.479900"
+    },
+    "QQQ": {
+      "value": 605.79,
+      "change_1d": 0.75,
+      "high_52w": 636.6,
+      "low_52w": 400.96,
+      "pct_from_high": -4.84,
+      "pct_from_low": 51.09,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:06.748113"
+    },
+    "IWM": {
+      "value": 263.99,
+      "change_1d": 0.36,
+      "high_52w": 271.6,
+      "low_52w": 170.2,
+      "pct_from_high": -2.8,
+      "pct_from_low": 55.1,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:06.912282"
+    },
+    "DIA": {
+      "value": 497.0,
+      "change_1d": 0.23,
+      "high_52w": 505.3,
+      "low_52w": 361.92,
+      "pct_from_high": -1.64,
+      "pct_from_low": 37.32,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.100634"
+    },
+    "BTC": {
+      "value": 67155.81,
+      "change_1d": 1.1,
+      "high_52w": 126198.07,
+      "low_52w": 60074.2,
+      "pct_from_high": -46.79,
+      "pct_from_low": 11.79,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.282915"
+    },
+    "ETH": {
+      "value": 1980.51,
+      "change_1d": 1.36,
+      "high_52w": 4953.73,
+      "low_52w": 1386.8,
+      "pct_from_high": -60.02,
+      "pct_from_low": 42.81,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.410864"
+    },
+    "CSI300": {
+      "value": 4660.41,
+      "change_1d": -1.25,
+      "high_52w": 4836.96,
+      "low_52w": 3514.12,
+      "pct_from_high": -3.65,
+      "pct_from_low": 32.62,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.540145"
+    },
+    "NIKKEI": {
+      "value": 57473.26,
+      "change_1d": 0.58,
+      "high_52w": 58015.08,
+      "low_52w": 30792.74,
+      "pct_from_high": -0.93,
+      "pct_from_low": 86.65,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.667643"
+    },
+    "DAX": {
+      "value": 25278.21,
+      "change_1d": 1.12,
+      "high_52w": 25507.79,
+      "low_52w": 18489.91,
+      "pct_from_high": -0.9,
+      "pct_from_low": 36.71,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.795559"
+    },
+    "FTSE": {
+      "value": 10686.2,
+      "change_1d": 1.23,
+      "high_52w": 10715.8,
+      "low_52w": 7544.8,
+      "pct_from_high": -0.28,
+      "pct_from_low": 41.64,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:07.925065"
+    },
+    "KOSPI": {
+      "value": 5669.78,
+      "change_1d": 2.96,
+      "high_52w": 5681.65,
+      "low_52w": 2284.72,
+      "pct_from_high": -0.21,
+      "pct_from_low": 148.16,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:08.054014"
+    },
+    "RSP": {
+      "value": 203.57,
+      "change_1d": 0.52,
+      "high_52w": 205.24,
+      "low_52w": 148.5,
+      "pct_from_high": -0.81,
+      "pct_from_low": 37.08,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:08.212238"
+    },
+    "IEF": {
+      "value": 97.0,
+      "change_1d": -0.21,
+      "high_52w": 97.31,
+      "low_52w": 89.31,
+      "pct_from_high": -0.32,
+      "pct_from_low": 8.61,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:08.373259"
+    },
+    "XLF": {
+      "value": 52.59,
+      "change_1d": 0.75,
+      "high_52w": 56.52,
+      "low_52w": 41.78,
+      "pct_from_high": -6.95,
+      "pct_from_low": 25.87,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:08.537731"
+    },
+    "XLE": {
+      "value": 54.78,
+      "change_1d": 1.92,
+      "high_52w": 55.24,
+      "low_52w": 36.32,
+      "pct_from_high": -0.83,
+      "pct_from_low": 50.82,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:08.704401"
+    },
+    "XLK": {
+      "value": 140.91,
+      "change_1d": 1.03,
+      "high_52w": 152.76,
+      "low_52w": 85.84,
+      "pct_from_high": -7.76,
+      "pct_from_low": 64.15,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:08.863071"
+    },
+    "XLU": {
+      "value": 45.61,
+      "change_1d": -1.66,
+      "high_52w": 47.08,
+      "low_52w": 34.77,
+      "pct_from_high": -3.12,
+      "pct_from_low": 31.18,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:09.024405"
+    },
+    "XHB": {
+      "value": 119.59,
+      "change_1d": -0.46,
+      "high_52w": 123.13,
+      "low_52w": 84.08,
+      "pct_from_high": -2.88,
+      "pct_from_low": 42.23,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:09.180757"
+    },
+    "VNQ": {
+      "value": 94.37,
+      "change_1d": -1.17,
+      "high_52w": 95.56,
+      "low_52w": 74.77,
+      "pct_from_high": -1.25,
+      "pct_from_low": 26.22,
+      "data_quality": "actual",
+      "last_updated": "2026-02-19T15:32:09.334750"
+    },
+    "YieldSpread": {
+      "value": 0.48,
+      "change_1d": 0,
+      "pct_from_high": 0,
+      "signal": "Normal",
+      "desc": "10Y - 2Y Yield"
+    },
+    "Breadth": {
+      "value": 0.2966,
+      "change_1d": 0,
+      "pct_from_high": 0,
+      "signal": "Check Trend",
+      "desc": "RSP/SPY Ratio (Rising = Healthy)"
+    },
+    "CreditRisk": {
+      "value": 0.8341,
+      "change_1d": 0,
+      "pct_from_high": 0,
+      "signal": "Check Trend",
+      "desc": "HYG/IEF Ratio (Falling = Stress)"
+    },
+    "FearGreed": {
+      "value": 50,
+      "change_1d": 0,
+      "signal": "Neutral (unavailable)",
+      "pct_from_high": 0,
+      "pct_from_low": 0,
+      "data_quality": "simulated",
+      "note": "CNN API unavailable - using neutral placeholder"
+    }
+  },
+  "news": [
+    {
+      "title": "Fed officials split on where interest rates should go, minutes say - CNBC",
+      "source": "CNBC",
+      "date": "Wed, 18 Feb 2026 19:00:37 GMT",
+      "category": "Federal"
+    },
+    {
+      "title": "Federal Reserve officials discussed interest rate hike scenarios at their last meeting - NBC News",
+      "source": "NBC News",
+      "date": "Wed, 18 Feb 2026 22:15:13 GMT",
+      "category": "Federal"
+    },
+    {
+      "title": "Fed's Goolsbee: 'Several' rate cuts possible this year if inflation gets on track to 2% - Reuters",
+      "source": "Reuters",
+      "date": "Tue, 17 Feb 2026 15:54:44 GMT",
+      "category": "Federal"
+    },
+    {
+      "title": "How does the Fed actually change interest rates? - marketplace.org",
+      "source": "marketplace.org",
+      "date": "Mon, 16 Feb 2026 21:00:00 GMT",
+      "category": "Fed"
+    },
+    {
+      "title": "Think you could run the Fed better than Jerome Powell? Now you can try in Federal Reserve Simulator - Courthouse News",
+      "source": "Courthouse News",
+      "date": "Tue, 17 Feb 2026 23:35:56 GMT",
+      "category": "Fed"
+    },
+    {
+      "title": "Statement from Federal Reserve Chair Jerome H. Powell - Federal Reserve Board (.gov)",
+      "source": "Federal Reserve Board (.gov)",
+      "date": "Sun, 11 Jan 2026 08:00:00 GMT",
+      "category": "Fed"
+    },
+    {
+      "title": "2026 Manufacturing Outlook: Technology Gains in a Divided Economy - Quality Magazine",
+      "source": "Quality Magazine",
+      "date": "Thu, 19 Feb 2026 05:00:00 GMT",
+      "category": "US"
+    },
+    {
+      "title": "2026 U.S. Economic Outlook - The Wall Street Journal",
+      "source": "The Wall Street Journal",
+      "date": "Tue, 27 Jan 2026 08:00:00 GMT",
+      "category": "US"
+    },
+    {
+      "title": "The Budget and Economic Outlook: 2026 to 2036 | Congressional Budget Office - Congressional Budget Office (.gov)",
+      "source": "Congressional Budget Office (.gov)",
+      "date": "Wed, 11 Feb 2026 12:00:00 GMT",
+      "category": "US"
+    }
+  ],
+  "historical_patterns": [
+    {
+      "event": "Fed Rate Cut Cycle Start (2019)",
+      "date": "2019-07-31",
+      "conditions": {
+        "VIX": "Low (15-18)",
+        "SPY_trend": "Uptrend",
+        "Treasury_yield": "Declining"
+      },
+      "outcome": {
+        "SPY_6m": "+12%",
+        "QQQ_6m": "+18%",
+        "sectors_best": [
+          "Technology",
+          "Consumer Discretionary"
+        ],
+        "sectors_worst": [
+          "Financials",
+          "Energy"
+        ]
+      }
+    },
+    {
+      "event": "QE3 Start (2012)",
+      "date": "2012-09-13",
+      "conditions": {
+        "VIX": "Moderate (15-20)",
+        "SPY_trend": "Recovery",
+        "Treasury_yield": "Low"
+      },
+      "outcome": {
+        "SPY_6m": "+10%",
+        "QQQ_6m": "+8%",
+        "sectors_best": [
+          "Financials",
+          "Housing"
+        ],
+        "sectors_worst": [
+          "Utilities",
+          "Consumer Staples"
+        ]
+      }
+    },
+    {
+      "event": "Fed Pivot Signal (2023)",
+      "date": "2023-11-01",
+      "conditions": {
+        "VIX": "Elevated then declining",
+        "SPY_trend": "Recovery from October low",
+        "Treasury_yield": "Peak and declining"
+      },
+      "outcome": {
+        "SPY_3m": "+15%",
+        "QQQ_3m": "+20%",
+        "sectors_best": [
+          "Technology",
+          "Communications"
+        ],
+        "sectors_worst": [
+          "Energy",
+          "Utilities"
+        ]
+      }
+    }
+  ],
+  "corporate_sentiment": {
+    "earnings_tone": "Analyzed 15 companies",
+    "guidance_trend": "Stable",
+    "filing_activity": "Recent filings: 20 companies",
+    "details": [
+      "Earnings data for 15 tickers"
+    ]
+  },
+  "ai_analysis": "AI 분석 생성 실패"
+}

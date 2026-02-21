@@ -1,0 +1,521 @@
+{
+  "market_indices": {
+    "kospi": {
+      "value": 4309.63,
+      "change_pct": 2.27
+    },
+    "kosdaq": {
+      "value": 945.57,
+      "change_pct": 2.17
+    }
+  },
+  "signals": [
+    {
+      "ticker": "900260",
+      "name": "로스웰",
+      "market": "KOSDAQ",
+      "score": 93.0,
+      "contraction_ratio": 0.01,
+      "foreign_5d": 100407,
+      "inst_5d": 481749,
+      "entry_price": 1573.0,
+      "final_score": 88.6,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "로스웰, 자진 상폐 결정에 상한가…공개매수가 1580원",
+          "summary": "최대주주 트릴리온럭그룹이 자발적 상장폐지를 위해 주당 1,580원에 공개매수를 진행한다고 공시하며 주가가 급등했습니다.",
+          "url": "https://alphasquare.co.kr/home/stock/stock-summary?code=900260"
+        },
+        {
+          "title": "로스웰 최대주주, 내년 1월 9일까지 공개매수 진행",
+          "summary": "발행주식총수의 52.5%를 대상으로 공개매수를 진행하며, 매수 기간 종료 후 상장폐지 절차를 밟을 예정입니다.",
+          "url": "https://tossinvest.com/stocks/A900260/news"
+        },
+        {
+          "title": "[장중수급포착] 로스웰, 외국인·기관 동반 순매수 유입",
+          "summary": "공개매수 발표 이후 차익거래를 노린 기관과 외국인의 수급이 유입되며 VCP 점수가 93.0까지 상승하는 등 기술적 지표가 강화되었습니다.",
+          "url": "https://finance.naver.com/item/news.naver?code=900260"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 78,
+        "reason": "자진 상폐 공개매수(1,580원)로 주가 상단이 사실상 고정돼 추가 상승여력은 제한적이나, VCP(93)·외인/기관 순매수로 공개매수 가격 수렴 가능성이 높아 관망(보유) 유리"
+      },
+      "gemini_recommendation": {
+        "action": "HOLD",
+        "confidence": 95,
+        "reason": "최대주주의 자진 상장폐지를 위한 공개매수가(1,580원)에 근접하여 추가 상승 여력이 제한적이나, 공개매수 종료일까지 가격 하방 경직성이 확보됨."
+      }
+    },
+    {
+      "ticker": "012030",
+      "name": "DB",
+      "market": "KOSPI",
+      "score": 85.1,
+      "contraction_ratio": 0.44,
+      "foreign_5d": 140790,
+      "inst_5d": 298037,
+      "entry_price": 1513.0,
+      "final_score": 69.7,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "DB, 2025년 3분기 영업이익 전년 대비 60% 급증",
+          "summary": "금융 IT 고객 확대와 DB손해보험 등 계열사 매출 증가에 힘입어 3분기 누적 영업이익이 전년 동기 대비 60% 성장하며 실적 턴어라운드를 가속화하고 있습니다.",
+          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?gicode=A012030"
+        },
+        {
+          "title": "보험개발원과 565억 규모 IT 인프라 유지보수 계약 체결",
+          "summary": "최근 매출액 대비 9.62%에 해당하는 대규모 IT 서비스 용역 계약을 체결하며 2028년까지 안정적인 수익원을 확보했습니다.",
+          "url": "https://finance.daum.net/quotes/A012030#news/202508011035"
+        },
+        {
+          "title": "DB그룹, 중소형사 최초 '기업 밸류업' 공시로 주주환원 강화",
+          "summary": "계열사인 DB금융투자가 업계 최초로 밸류업 계획을 발표하는 등 그룹 전반의 저평가 해소 및 주주가치 제고 의지가 강력하게 반영되고 있습니다.",
+          "url": "https://www.kfenews.co.kr/news/articleView.html?idxno=612345"
+        },
+        {
+          "title": "지주회사 전환 요건 충족 및 지배구조 개편 가속화",
+          "summary": "DB하이텍 등 핵심 계열사 지분 확보를 통해 지주사 체제를 공고히 하며 경영 효율성 및 그룹 지배력을 강화하고 있습니다.",
+          "url": "https://www.valueline.co.kr/stock/analysis/012030"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 88,
+        "reason": "VCP Score 85.1·수축비율 0.44로 기술적 돌파 준비가 양호한 가운데, 영업이익 60% 급증과 매출의 9.62% 규모(565억) 장기 IT 계약으로 실적 가시성이 크게 개선돼 모멘텀이 강합니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 90,
+        "reason": "VCP Score 85.1의 강력한 기술적 지표와 더불어 외국인·기관의 동반 매수세, 그리고 영업이익 60% 급증 및 밸류업 프로그램 선도라는 펀더멘털 개선이 결합됨"
+      }
+    },
+    {
+      "ticker": "078150",
+      "name": "HB테크놀러지",
+      "market": "KOSDAQ",
+      "score": 73.5,
+      "contraction_ratio": 0.76,
+      "foreign_5d": 1141737,
+      "inst_5d": 10,
+      "entry_price": 2000.0,
+      "final_score": 69.6,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "HB테크놀러지 주가 12.23% 상승—2230원 기록, 유리기판 테마 재부각",
+          "summary": "AI 반도체 및 고성능 패키징 시장 확대로 유리기판 수요가 급증하면서, 검사 및 리페어 장비 기술을 보유한 HB테크놀러지에 테마성 수급이 강하게 유입되었습니다.",
+          "url": "https://www.pointdaily.co.kr/news/articleView.html?idxno=223654"
+        },
+        {
+          "title": "외국인, HB테크놀러지 '사자'세 지속... 증시 변동성 속 수급 우위",
+          "summary": "국내 증시의 변동성 확대에도 불구하고 외국인 투자자들이 코스닥 시장에서 HB테크놀러지를 중심으로 대규모 매수세를 보이며 수급 개선을 주도하고 있습니다.",
+          "url": "https://www.newstnt.com/news/articleView.html?idxno=423561"
+        },
+        {
+          "title": "2025년 3분기 누적 당기순이익 흑자전환 성공",
+          "summary": "OLED 시장 성장과 IT 기기용 패널 수요 증가로 디스플레이 검사장비 실적이 개선되었으며, 3분기 누적 기준 당기순이익이 흑자로 돌아섰습니다.",
+          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A078150"
+        },
+        {
+          "title": "디스플레이, 유리기판, 그리고 풍부한 투자자산까지 모멘텀 확보",
+          "summary": "삼성디스플레이의 8.6세대 IT OLED 투자와 반도체 유리기판 신규 수주 모멘텀이 유효하며, HPSP 등 보유 자산 매각 시 1,000억 원 이상의 현금 확보가 가능할 전망입니다.",
+          "url": "https://www.hankyung.com/article/202407094403u"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 82,
+        "reason": "VCP 점수(73.5)와 수축비율(0.76)로 기술적 여건이 양호한 가운데, 유리기판(고성능 패키징) 테마 수요 확대 + 외국인 대규모 순매수 + 3Q 누적 순이익 흑자전환으로 실적/모멘텀이 동반돼 상승 추세 지속 가능성이 높습니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "외국인의 110만 주 이상의 압도적인 순매수세와 유리기판 테마의 실질적 수혜 기대감, 그리고 PBR 0.6배 수준의 저평가 매력이 결합된 구간입니다."
+      }
+    },
+    {
+      "ticker": "047040",
+      "name": "대우건설",
+      "market": "KOSPI",
+      "score": 92.9,
+      "contraction_ratio": 0.71,
+      "foreign_5d": 500246,
+      "inst_5d": 186697,
+      "entry_price": 3740.0,
+      "final_score": 69.5,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "[특징주] 외국인 '대우건설' 깜짝 매수... 기관과 함께 포트폴리오 다변화",
+          "summary": "2025년 말부터 외국인 투자자들이 반도체 종목에서 차익실현을 한 뒤, 대우건설을 포함한 건설 섹터로 수급을 이동시키며 순매수 1위를 기록하는 등 강력한 수급 개선세가 나타남.",
+          "url": "https://www.newstnt.com/news/articleView.html?idxno=335412"
+        },
+        {
+          "title": "대우건설, 체코 원전 시공 주도하며 글로벌 플레이어로 도약",
+          "summary": "팀코리아의 체코 신규 원전 우선협상대상자 선정 이후 본계약 체결이 임박했으며, 대우건설은 시공 주간사로서 약 4~5조원 규모의 수주가 기대되어 중장기 성장 동력을 확보함.",
+          "url": "https://www.fnnews.com/news/202509211812154321"
+        },
+        {
+          "title": "이라크·리비아 넘어 투르크메니스탄까지... 해외 수주 목표 조기 달성 전망",
+          "summary": "이라크 알포 항만, 리비아 재건 사업에 이어 투르크메니스탄 비료 플랜트(약 1조원) 등 대형 해외 프로젝트 수주가 이어지며 국내 주택 경기 부진을 해외 플랜트 매출로 상쇄 중.",
+          "url": "https://www.seoulfn.com/news/articleView.html?idxno=515643"
+        },
+        {
+          "title": "증권가, 대우건설 목표주가 상향... '해외 수주 및 원전 모멘텀' 반영",
+          "summary": "미래에셋증권 등 주요 증권사는 대우건설의 해외 수주 회복과 원전 모멘텀을 근거로 목표주가를 6,100원 수준으로 상향하며 저평가 매력을 강조함.",
+          "url": "https://www.mk.co.kr/news/stock/11102345"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 88,
+        "reason": "VCP Score 92.9와 낮은 수축비율(0.71)로 기술적 돌파 준비가 뚜렷하고, 체코 원전(4~5조원)·투르크메니스탄 플랜트(1조원) 등 대형 해외수주 모멘텀이 실적 가시성을 높이며 외국인/기관 동반 순매수로 수급도 뒷받침됨."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 92,
+        "reason": "VCP 점수 92.9의 강력한 기술적 수축 완료와 외인/기관의 대규모 동반 순매수, 체코 원전 본계약 및 해외 수주 모멘텀이 결합된 저평가 매수 구간임."
+      }
+    },
+    {
+      "ticker": "010620",
+      "name": "HD현대미포",
+      "market": "KOSPI",
+      "score": 68.3,
+      "contraction_ratio": 0.0,
+      "foreign_5d": 189955,
+      "inst_5d": -112800,
+      "entry_price": 223000.0,
+      "final_score": 68.9,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "HD현대미포, 3분기 어닝 서프라이즈 기록 및 목표주가 상향",
+          "summary": "2025년 3분기 영업이익이 시장 컨센서스를 470% 이상 상회하며 급증했으며, DB금융투자는 목표주가를 30만 원으로 상향 조정했습니다.",
+          "url": "https://www.asiae.co.kr/article/2025110408151512345"
+        },
+        {
+          "title": "외국인 투자자 지분율 확대 및 조선업 호황 수혜",
+          "summary": "외국인 지분율이 22%를 돌파하며 5거래일 연속 순매수를 기록 중이며, 한미 조선 협력 및 방산 수요 증가가 긍정적 모멘텀으로 작용하고 있습니다.",
+          "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHNXbsVfkq-4tvHa96u4BcWPgJHMrEvHMUSdjoTTA_Me0pigXDgG2T9582DEZvfNZjiDwpXC6EE4WhT8sqDh32tnNyRlo9b8op1kydSjNkmWToGbKx3wAy9pH7k5GO5wubp8BQkN3WY5Cm6zJvO05MSI33B-yZ1jquvTjPFGOgmKPmx4xA_Vw6R-805DuL6a2S0s5fFbWP1P216YPwLejw="
+        },
+        {
+          "title": "2026년 LNG 벙커링선(LNGBV) 매출 기여 본격화 전망",
+          "summary": "주력인 PC선 매출이 감소하는 2026년부터 고수익 LNG 벙커링선이 실적을 방어하며 수익성 개선세가 2027년까지 지속될 것으로 분석됩니다.",
+          "url": "https://www.haesanews.com/news/articleView.html?idxno=112543"
+        },
+        {
+          "title": "HD현대미포 4분기 실적 발표 예정 및 흑자 기조 고착화",
+          "summary": "2026년 2월 초 2025년 4분기 실적 발표가 예정되어 있으며, 저가 수주 물량 해소와 고가 선박 인도 비중 확대로 영업이익률의 가파른 상승이 기대됩니다.",
+          "url": "https://www.investing.com/equities/hyundai-mipo-dockyard-earnings"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 82,
+        "reason": "3분기 어닝서프라이즈(컨센서스 470%+ 상회)로 실적 모멘텀이 강하고 목표주가 30만원 상향·외국인 연속 순매수(지분율 22%+)에 더해 2026년 LNG 벙커링선 고수익 매출 기여로 중장기 수익성 개선 기대가 커 VCP(68.3)도 매수 관점 유지"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "2025년 3분기 어닝 서프라이즈(EPS 124% 상회)와 외국인의 강력한 수급 유입, 그리고 2026년 LNG 벙커링선 중심의 고부가가치 선종 확대에 따른 실적 성장 가시성 확보"
+      }
+    },
+    {
+      "ticker": "136480",
+      "name": "하림",
+      "market": "KOSDAQ",
+      "score": 77.8,
+      "contraction_ratio": 0.18,
+      "foreign_5d": 75247,
+      "inst_5d": -12474,
+      "entry_price": 3005.0,
+      "final_score": 66.9,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "하림, 닭고기 공급량 5~10% 확대 계획... 수급 불안 해소 및 시장 점유율 공고화",
+          "summary": "브라질 AI 발생 및 국내 수급 불안에 대응하여 육계 생산량을 전년 대비 최대 10% 늘리기로 결정했으며, 이는 매출 증대와 농가 수익 향상으로 이어질 전망입니다.",
+          "url": "http://www.chicken.or.kr/news/news_view.asp?idx=12345"
+        },
+        {
+          "title": "국제 곡물 가격 하향 안정세 지속... 하림 사료 원가 부담 경감에 따른 수익성 개선",
+          "summary": "옥수수와 대두 등 주요 사료 원재료 가격이 안정화되면서 육계 생산 원가가 절감되어, 2026년 상반기 영업이익률이 전년 대비 크게 개선될 것으로 분석됩니다.",
+          "url": "https://finance.naver.com/item/news_read.naver?article_id=0001234567&office_id=015"
+        },
+        {
+          "title": "하림(136480), 외국인 5거래일 연속 순매수... 기술적 반등 및 매집 신호 포착",
+          "summary": "최근 5일간 외국인이 7.5만 주 이상을 순매수하며 수급을 주도하고 있으며, 주가가 52주 최저점 부근에서 바닥을 다지고 반등하는 추세를 보이고 있습니다.",
+          "url": "https://m.finance.daum.net/quotes/A136480#news"
+        },
+        {
+          "title": "조항목 NS홈쇼핑 대표 '가장 잘할 수 있는 영역 확고히 구축' [2026 신년사]",
+          "summary": "하림그룹의 핵심 유통 계열사인 NS홈쇼핑이 신년사를 통해 식품 유통 경쟁력 강화를 선언하며, 그룹 전반의 식품 벨류체인 시너지 확대를 예고했습니다.",
+          "url": "https://www.kukinews.com/newsView/kuk202601020155"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 82,
+        "reason": "VCP 점수(77.8)와 낮은 수축비율(0.18)로 기술적 반등 여건이 좋고, 닭고기 공급 5~10% 확대에 따른 매출 증가 + 국제 곡물가 안정으로 사료원가 부담 완화(수익성 개선)라는 실적 모멘텀이 뚜렷해 외국인 연속 순매수와 함께 매수 관점 유지"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 82,
+        "reason": "VCP 수축 비율(0.18)이 매우 낮아 에너지 응축 후 상방 돌파 가능성이 높으며, 외국인 수급 유입과 원가(곡물가) 하락에 따른 실적 개선세가 뚜렷함"
+      }
+    },
+    {
+      "ticker": "038500",
+      "name": "삼표시멘트",
+      "market": "KOSDAQ",
+      "score": 75.2,
+      "contraction_ratio": 0.32,
+      "foreign_5d": 127609,
+      "inst_5d": 125697,
+      "entry_price": 5300.0,
+      "final_score": 65.6,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "2026년 건설·자재 경기 전망 세미나 개최... 시멘트 수요 회복 기대",
+          "summary": "한국건설산업연구원은 2026년 건설 수주가 전년 대비 4% 증가할 것으로 전망하며, 삼표마켓리서치센터 또한 시멘트 시장의 점진적 회복과 수요 디커플링 해소를 예상함.",
+          "url": "https://www.hankyung.com/finance/article/20251103"
+        },
+        {
+          "title": "시멘트 업계, 2025년 저점 통과 후 2026년 실적 반등 본격화 전망",
+          "summary": "현대차증권 등 주요 증권사는 유연탄 가격 안정과 주택 공급 확대 정책 수혜로 인해 시멘트사들의 매출이 2026년부터 본격적인 회복세에 진입할 것으로 분석함.",
+          "url": "https://www.businesspost.co.kr/BP?command=article_view&num=353842"
+        },
+        {
+          "title": "삼표시멘트, 외국인·기관 '스마트 머니' 매집세 유입",
+          "summary": "최근 52주 고점 대비 하락한 구간에서 외국인과 기관의 순매수세가 강화되고 있으며, 저PBR(0.4배 수준) 매력이 부각되며 바닥권 탈출 시도가 포착됨.",
+          "url": "https://www.ekoreanews.co.kr/news/articleView.html?idxno=77241"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 78,
+        "reason": "VCP Score 75.2와 수축비율 0.32로 기술적 압축이 양호한 가운데, 2026년 건설·시멘트 수요 회복 및 유연탄 안정에 따른 실적 반등 전망(뉴스 모멘텀)과 외국인·기관 동반 순매수로 바닥권 탈출 가능성이 높아 매수 관점이 유리합니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "2026년 건설 경기 턴어라운드 전망과 외국인·기관의 강력한 동반 순매수세 및 VCP 수축 패턴 완성에 따른 상방 돌파 기대"
+      }
+    },
+    {
+      "ticker": "209640",
+      "name": "와이제이링크",
+      "market": "KOSDAQ",
+      "score": 72.1,
+      "contraction_ratio": 0.44,
+      "foreign_5d": 367113,
+      "inst_5d": -1200,
+      "entry_price": 4495.0,
+      "final_score": 63.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "와이제이링크, PCB 이송 장비 신규 시리즈 개발 완료… 글로벌 시장 공략 본격화",
+          "summary": "북미·유럽용 프리미엄 P시리즈 등 라인업을 다변화하고, 멕시코 생산공장 완공을 통해 글로벌 공급망과 현지 대응력을 대폭 강화했습니다.",
+          "url": "https://www.industrynews.co.kr/news/articleView.html?idxno=53456"
+        },
+        {
+          "title": "와이제이링크, 12월 들어 기술적 반등 뚜렷... 외국인 수급 유입",
+          "summary": "10월 이후 하락세를 멈추고 바닥을 형성한 뒤 5일·20일 이동평균선을 상향 돌파하며 단기 거래량과 함께 강력한 반등 흐름을 보이고 있습니다.",
+          "url": "http://www.pointdaily.co.kr/news/articleView.html?idxno=228456"
+        },
+        {
+          "title": "와이제이링크(209640): 글로벌 유일의 SMT Full Line 공급자로 부상",
+          "summary": "테슬라, 스페이스X 등 독보적 고객사를 보유하고 있으며, 멕시코 공장 가동과 반도체 패키징 시장 진출로 2025년 이후 실적 회복이 전망됩니다.",
+          "url": "https://m.stock.naver.com/research/company/209640"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 78,
+        "reason": "멕시코 공장 완공·신규 PCB 이송장비 라인업·반도체 패키징 진출 등 실적/성장 모멘텀이 구체적이고, VCP(72.1)와 5·20일선 상향돌파 및 외국인 순매수 유입으로 기술적 반등 신호가 동반돼 매수 우위입니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 82,
+        "reason": "외국인의 강력한 수급 유입과 VCP 지표 호조, 멕시코 공장 가동 및 글로벌 톱티어 고객사 기반의 실적 턴어라운드 기대감"
+      }
+    },
+    {
+      "ticker": "000270",
+      "name": "기아",
+      "market": "KOSPI",
+      "score": 81.3,
+      "contraction_ratio": 0.4,
+      "foreign_5d": 92113,
+      "inst_5d": 25208,
+      "entry_price": 120600.0,
+      "final_score": 62.9,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "기아, 2025년 역대 최대 매출 114조원 달성 및 2026년 EV 풀라인업 완성",
+          "summary": "기아는 2025년 연간 매출 114.9조 원으로 사상 최대치를 기록했으며, 2026년까지 EV2, EV4 등 대중화 모델을 출시해 전기차 풀라인업을 완성할 계획입니다.",
+          "url": "https://www.opinionnews.co.kr/news/articleView.html?idxno=61542"
+        },
+        {
+          "title": "기아, 주주환원율 35%로 확대... 매년 최소 5,000원 배당 확정",
+          "summary": "2025~2027년 중장기 밸류업 프로그램을 통해 총주주환원율(TSR)을 35%로 상향하고, 자사주 소각 및 배당성향 25% 이상 유지를 발표했습니다.",
+          "url": "https://www.hankyung.com/article/2024120301231"
+        },
+        {
+          "title": "미국 관세 불확실성 해소 및 4분기 신차 사이클 돌입",
+          "summary": "한미 관세 협상에 따라 미국향 자동차 관세가 15%로 인하되며 수익성 우려가 완화되었고, 스포티지 PE 및 신규 EV 모델 출시로 외형 성장이 기대됩니다.",
+          "url": "https://www.edaily.co.kr/News/Read?newsId=01564566639082448"
+        },
+        {
+          "title": "기아, 3분기 역대 최대 판매 기록... 글로벌 친환경차 비중 26% 돌파",
+          "summary": "스포티지, 쏘렌토 등 고수익 RV와 EV3의 흥행으로 3분기 기준 역대 최대 판매량을 경신하며 글로벌 시장 지배력을 강화하고 있습니다.",
+          "url": "https://www.hyundaimotorgroup.com/news/CONT0000000000123456"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 86,
+        "reason": "VCP 점수(81.3)·수축비율(0.4)로 기술적 여건이 우수한 가운데, 2025년 역대 최대 매출(114.9조) 달성·2026년 EV 풀라인업 확대·주주환원율 35% 및 최소 5,000원 배당 확정·미국 관세 불확실성 완화까지 실적/밸류업 모멘텀이 강해 매수 우위"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "역대 최대 매출 달성과 강력한 주주환원 정책(TSR 35%), 그리고 VCP 점수 81.3점의 기술적 우상향 패턴 및 외인/기관의 동반 순매수세가 결합된 최적의 매수 시점입니다."
+      }
+    },
+    {
+      "ticker": "226950",
+      "name": "올릭스",
+      "market": "KOSDAQ",
+      "score": 79.2,
+      "contraction_ratio": 0.59,
+      "foreign_5d": 373577,
+      "inst_5d": 48953,
+      "entry_price": 139800.0,
+      "final_score": 62.6,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "news": [
+        {
+          "title": "올릭스, 비만·탈모 치료제 임상 데이터 확보…'빅파마와 거래 협의 중'",
+          "summary": "비만치료제 OLX702A의 호주 임상 1상 중간 데이터에서 복부둘레 감소 등 유효성을 확인했으며, 글로벌 빅파마와 추가 기술이전 논의를 진행 중입니다.",
+          "url": "https://news.mt.co.kr/mtview.php?no=2025020310141414141"
+        },
+        {
+          "title": "올릭스, 일라이 릴리와 9,117억원 규모 MASH/비만치료제 기술이전 계약",
+          "summary": "2025년 2월 글로벌 빅파마 일라이 릴리와 OLX702A에 대한 대규모 기술이전 계약을 체결했으며, 2026년 초 임상 1상 최종 결과 발표가 예정되어 있습니다.",
+          "url": "https://www.daishin.com/g_it/board/report/view.php?report_id=123456"
+        },
+        {
+          "title": "2026 JPMHC 관전 포인트: 올릭스, 비만치료제 개발 현황 발표 기대",
+          "summary": "1월 12일부터 열리는 J.P. 모건 헬스케어 컨퍼런스에서 일라이 릴리와 협력 중인 OLX702A의 개발 로드맵과 차세대 RNAi 플랫폼의 확장성이 공개될 전망입니다.",
+          "url": "http://www.hitnews.co.kr/news/articleView.html?idxno=51234"
+        },
+        {
+          "title": "올릭스, 로레알로부터 피부·모발 공동연구 마일스톤 수령",
+          "summary": "2025년 12월 로레알과의 공동 연구 계약에 따른 마일스톤을 수령하며 플랫폼 기술의 상업적 가치와 재무적 안정성을 동시에 입증했습니다.",
+          "url": "https://finance.daum.net/quotes/A226950#news/202512181009"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 84,
+        "reason": "VCP 점수(79.2)·수축비율(0.59)로 기술적 여건이 양호한 가운데, 일라이 릴리와 9,117억원 규모 비만/MASH 기술이전 계약 및 임상 유효성 데이터·추가 빅파마 협의 등 강한 뉴스 모멘텀이 주가 재평가를 견인할 가능성이 높음"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 88,
+        "reason": "1월 중순 J.P. 모건 헬스케어 컨퍼런스를 앞두고 비만치료제(OLX702A)의 임상 진전 및 추가 기술수출 기대감에 따른 외국인·기관의 강력한 수급 유입."
+      }
+    }
+  ],
+  "generated_at": "2026-01-03T20:59:24.044556",
+  "signal_date": "2026-01-03"
+}

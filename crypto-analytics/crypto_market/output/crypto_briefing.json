@@ -1,0 +1,551 @@
+{
+  "timestamp": "2026-02-20T00:26:04.064582",
+  "version": "1.0",
+  "market_summary": {
+    "total_market_cap": 2345440441840.0,
+    "total_volume_24h": 93537589392.0,
+    "btc_dominance": 56.32,
+    "btc_dominance_change_24h": 0,
+    "total_market_cap_change_24h": -2.47,
+    "active_cryptocurrencies": 18878
+  },
+  "major_coins": {
+    "BTC": {
+      "price": 66122,
+      "change_24h": -1.86,
+      "change_7d": 0,
+      "volume_24h": 37134565961,
+      "market_cap": 1321976860872
+    },
+    "ETH": {
+      "price": 1920.89,
+      "change_24h": -3.08,
+      "change_7d": 0,
+      "volume_24h": 22522632499,
+      "market_cap": 231516449941
+    },
+    "XRP": {
+      "price": 1.39,
+      "change_24h": -5.17,
+      "change_7d": 0,
+      "volume_24h": 2484106745,
+      "market_cap": 84853048715
+    },
+    "BNB": {
+      "price": 599.27,
+      "change_24h": -2.43,
+      "change_7d": 0,
+      "volume_24h": 967586992,
+      "market_cap": 81605086315
+    },
+    "SOL": {
+      "price": 80.25,
+      "change_24h": -3.17,
+      "change_7d": 0,
+      "volume_24h": 3193522209,
+      "market_cap": 45643374943
+    }
+  },
+  "top_movers": {
+    "gainers": [
+      {
+        "symbol": "NIGHT",
+        "name": "Midnight",
+        "price": 0.061588,
+        "change_24h": 4.24
+      },
+      {
+        "symbol": "LEO",
+        "name": "LEO Token",
+        "price": 8.69,
+        "change_24h": 2.35
+      },
+      {
+        "symbol": "STABLE",
+        "name": "​​Stable",
+        "price": 0.02961225,
+        "change_24h": 1.72
+      },
+      {
+        "symbol": "BDX",
+        "name": "Beldex",
+        "price": 0.080423,
+        "change_24h": 0.16
+      },
+      {
+        "symbol": "PAXG",
+        "name": "PAX Gold",
+        "price": 5007.88,
+        "change_24h": 0.06
+      }
+    ],
+    "losers": [
+      {
+        "symbol": "M",
+        "name": "MemeCore",
+        "price": 1.35,
+        "change_24h": -10.94
+      },
+      {
+        "symbol": "ARB",
+        "name": "Arbitrum",
+        "price": 0.099575,
+        "change_24h": -10.9
+      },
+      {
+        "symbol": "PIPPIN",
+        "name": "pippin",
+        "price": 0.498917,
+        "change_24h": -10.22
+      },
+      {
+        "symbol": "HASH",
+        "name": "Provenance Blockchain",
+        "price": 0.01790685,
+        "change_24h": -10.08
+      },
+      {
+        "symbol": "ZEC",
+        "name": "Zcash",
+        "price": 259.04,
+        "change_24h": -8.77
+      }
+    ]
+  },
+  "fear_greed": {
+    "score": 9,
+    "current_score": 9,
+    "current_label": "Extreme Fear",
+    "level": "Extreme Fear",
+    "timestamp": "1771459200",
+    "previous": 8,
+    "previous_score": 8,
+    "previous_label": "Extreme Fear",
+    "change": 1
+  },
+  "funding_rates": {
+    "BTC": {
+      "symbol": "BTCUSDT",
+      "rate": -2.9e-05,
+      "rate_pct": -0.0029,
+      "annualized_pct": -3.15,
+      "sentiment": "neutral"
+    },
+    "ETH": {
+      "symbol": "ETHUSDT",
+      "rate": -6.3e-05,
+      "rate_pct": -0.0063,
+      "annualized_pct": -6.86,
+      "sentiment": "neutral"
+    }
+  },
+  "macro_correlations": {
+    "btc_pairs": {
+      "BTC_SPY": 0.5694,
+      "BTC_GLD": 0.2039,
+      "BTC_DXY": -0.1405
+    }
+  },
+  "market_gate": {
+    "gate": "RED",
+    "score": 15,
+    "reasons": [
+      "BTC가 EMA50 아래 (하락 추세)",
+      "EMA200 하락 중 (장기 약세)",
+      "변동성 급증 (시장 불안정)",
+      "거래량 부족 (관심 저조)",
+      "알트 breadth 붕괴 (0% > EMA50)"
+    ],
+    "metrics": {
+      "btc_price": 65990.6875,
+      "btc_ema50": 79061.9020696806,
+      "btc_ema200": 93064.83047058263,
+      "btc_ema200_slope_pct_20": -5.19535009903314,
+      "btc_volume_z_50": -0.6014381897408596,
+      "btc_atrp_14_pct": 5.324605629555144,
+      "alt_breadth_above_ema50": 0.0,
+      "funding_rate": -2.875e-05,
+      "open_interest_delta_z": null,
+      "gate_score_components": {
+        "trend": 0.0,
+        "volatility": 2.0,
+        "participation": 2.0,
+        "breadth": 2.0,
+        "leverage": 9.0
+      },
+      "fear_greed_index": 9,
+      "fear_greed_class": "Extreme Fear"
+    },
+    "generated_at": "2026-02-20T00:25:49.334582"
+  },
+  "btc_price_history": [
+    {
+      "date": "2025-11-22",
+      "price": 84648.359375
+    },
+    {
+      "date": "2025-11-23",
+      "price": 86805.0078125
+    },
+    {
+      "date": "2025-11-24",
+      "price": 88270.5625
+    },
+    {
+      "date": "2025-11-25",
+      "price": 87341.890625
+    },
+    {
+      "date": "2025-11-26",
+      "price": 90518.3671875
+    },
+    {
+      "date": "2025-11-27",
+      "price": 91285.375
+    },
+    {
+      "date": "2025-11-28",
+      "price": 90919.265625
+    },
+    {
+      "date": "2025-11-29",
+      "price": 90851.7578125
+    },
+    {
+      "date": "2025-11-30",
+      "price": 90394.3125
+    },
+    {
+      "date": "2025-12-01",
+      "price": 86321.5703125
+    },
+    {
+      "date": "2025-12-02",
+      "price": 91350.203125
+    },
+    {
+      "date": "2025-12-03",
+      "price": 93527.8046875
+    },
+    {
+      "date": "2025-12-04",
+      "price": 92141.625
+    },
+    {
+      "date": "2025-12-05",
+      "price": 89387.7578125
+    },
+    {
+      "date": "2025-12-06",
+      "price": 89272.375
+    },
+    {
+      "date": "2025-12-07",
+      "price": 90405.640625
+    },
+    {
+      "date": "2025-12-08",
+      "price": 90640.203125
+    },
+    {
+      "date": "2025-12-09",
+      "price": 92691.7109375
+    },
+    {
+      "date": "2025-12-10",
+      "price": 92020.9453125
+    },
+    {
+      "date": "2025-12-11",
+      "price": 92511.3359375
+    },
+    {
+      "date": "2025-12-12",
+      "price": 90270.4140625
+    },
+    {
+      "date": "2025-12-13",
+      "price": 90298.7109375
+    },
+    {
+      "date": "2025-12-14",
+      "price": 88175.1796875
+    },
+    {
+      "date": "2025-12-15",
+      "price": 86419.78125
+    },
+    {
+      "date": "2025-12-16",
+      "price": 87843.984375
+    },
+    {
+      "date": "2025-12-17",
+      "price": 86143.7578125
+    },
+    {
+      "date": "2025-12-18",
+      "price": 85462.5078125
+    },
+    {
+      "date": "2025-12-19",
+      "price": 88103.3828125
+    },
+    {
+      "date": "2025-12-20",
+      "price": 88344.0
+    },
+    {
+      "date": "2025-12-21",
+      "price": 88621.75
+    },
+    {
+      "date": "2025-12-22",
+      "price": 88490.015625
+    },
+    {
+      "date": "2025-12-23",
+      "price": 87414.0
+    },
+    {
+      "date": "2025-12-24",
+      "price": 87611.9609375
+    },
+    {
+      "date": "2025-12-25",
+      "price": 87234.7421875
+    },
+    {
+      "date": "2025-12-26",
+      "price": 87301.4296875
+    },
+    {
+      "date": "2025-12-27",
+      "price": 87802.15625
+    },
+    {
+      "date": "2025-12-28",
+      "price": 87835.8359375
+    },
+    {
+      "date": "2025-12-29",
+      "price": 87138.140625
+    },
+    {
+      "date": "2025-12-30",
+      "price": 88430.1328125
+    },
+    {
+      "date": "2025-12-31",
+      "price": 87508.828125
+    },
+    {
+      "date": "2026-01-01",
+      "price": 88731.984375
+    },
+    {
+      "date": "2026-01-02",
+      "price": 89944.6953125
+    },
+    {
+      "date": "2026-01-03",
+      "price": 90603.1875
+    },
+    {
+      "date": "2026-01-04",
+      "price": 91413.4921875
+    },
+    {
+      "date": "2026-01-05",
+      "price": 93882.5546875
+    },
+    {
+      "date": "2026-01-06",
+      "price": 93729.03125
+    },
+    {
+      "date": "2026-01-07",
+      "price": 91308.0546875
+    },
+    {
+      "date": "2026-01-08",
+      "price": 91027.125
+    },
+    {
+      "date": "2026-01-09",
+      "price": 90513.1015625
+    },
+    {
+      "date": "2026-01-10",
+      "price": 90386.6484375
+    },
+    {
+      "date": "2026-01-11",
+      "price": 90827.4609375
+    },
+    {
+      "date": "2026-01-12",
+      "price": 91192.9921875
+    },
+    {
+      "date": "2026-01-13",
+      "price": 95321.78125
+    },
+    {
+      "date": "2026-01-14",
+      "price": 96929.328125
+    },
+    {
+      "date": "2026-01-15",
+      "price": 95551.1875
+    },
+    {
+      "date": "2026-01-16",
+      "price": 95525.1171875
+    },
+    {
+      "date": "2026-01-17",
+      "price": 95099.921875
+    },
+    {
+      "date": "2026-01-18",
+      "price": 93634.4296875
+    },
+    {
+      "date": "2026-01-19",
+      "price": 92553.59375
+    },
+    {
+      "date": "2026-01-20",
+      "price": 88310.90625
+    },
+    {
+      "date": "2026-01-21",
+      "price": 89376.9609375
+    },
+    {
+      "date": "2026-01-22",
+      "price": 89462.453125
+    },
+    {
+      "date": "2026-01-23",
+      "price": 89503.875
+    },
+    {
+      "date": "2026-01-24",
+      "price": 89110.734375
+    },
+    {
+      "date": "2026-01-25",
+      "price": 86572.21875
+    },
+    {
+      "date": "2026-01-26",
+      "price": 88267.140625
+    },
+    {
+      "date": "2026-01-27",
+      "price": 89102.5703125
+    },
+    {
+      "date": "2026-01-28",
+      "price": 89184.5703125
+    },
+    {
+      "date": "2026-01-29",
+      "price": 84561.5859375
+    },
+    {
+      "date": "2026-01-30",
+      "price": 84128.65625
+    },
+    {
+      "date": "2026-01-31",
+      "price": 78621.1171875
+    },
+    {
+      "date": "2026-02-01",
+      "price": 76974.4453125
+    },
+    {
+      "date": "2026-02-02",
+      "price": 78688.765625
+    },
+    {
+      "date": "2026-02-03",
+      "price": 75633.546875
+    },
+    {
+      "date": "2026-02-04",
+      "price": 73019.703125
+    },
+    {
+      "date": "2026-02-05",
+      "price": 62702.09765625
+    },
+    {
+      "date": "2026-02-06",
+      "price": 70555.390625
+    },
+    {
+      "date": "2026-02-07",
+      "price": 69281.96875
+    },
+    {
+      "date": "2026-02-08",
+      "price": 70264.7265625
+    },
+    {
+      "date": "2026-02-09",
+      "price": 70120.78125
+    },
+    {
+      "date": "2026-02-10",
+      "price": 68793.9609375
+    },
+    {
+      "date": "2026-02-11",
+      "price": 66991.96875
+    },
+    {
+      "date": "2026-02-12",
+      "price": 66221.84375
+    },
+    {
+      "date": "2026-02-13",
+      "price": 68857.84375
+    },
+    {
+      "date": "2026-02-14",
+      "price": 69767.625
+    },
+    {
+      "date": "2026-02-15",
+      "price": 68788.1875
+    },
+    {
+      "date": "2026-02-16",
+      "price": 68843.15625
+    },
+    {
+      "date": "2026-02-17",
+      "price": 67494.21875
+    },
+    {
+      "date": "2026-02-18",
+      "price": 66425.3203125
+    },
+    {
+      "date": "2026-02-19",
+      "price": 65990.6875
+    }
+  ],
+  "sentiment_summary": {
+    "overall": "Neutral",
+    "factors": [
+      "fear_greed: extreme_fear (bullish)",
+      "funding: neutral (neutral)",
+      "dominance: btc_high (neutral)"
+    ]
+  }
+}

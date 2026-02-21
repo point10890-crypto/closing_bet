@@ -1,0 +1,449 @@
+{
+  "timestamp": "2026-02-19T15:32:03.539682",
+  "version": "2.0",
+  "market_data": {
+    "timestamp": "2026-02-19T15:32:03.539688",
+    "indices": {
+      "SPY": {
+        "name": "S&P 500",
+        "price": 686.29,
+        "change": 0.5,
+        "prev_close": 682.85,
+        "high_52w": 697.84,
+        "low_52w": 477.64,
+        "pct_from_high": -1.66
+      },
+      "QQQ": {
+        "name": "NASDAQ 100",
+        "price": 605.79,
+        "change": 0.75,
+        "prev_close": 601.3,
+        "high_52w": 636.6,
+        "low_52w": 400.96,
+        "pct_from_high": -4.84
+      },
+      "DIA": {
+        "name": "Dow Jones",
+        "price": 497.0,
+        "change": 0.23,
+        "prev_close": 495.85,
+        "high_52w": 505.3,
+        "low_52w": 361.92,
+        "pct_from_high": -1.64
+      },
+      "IWM": {
+        "name": "Russell 2000",
+        "price": 263.99,
+        "change": 0.36,
+        "prev_close": 263.04,
+        "high_52w": 271.6,
+        "low_52w": 170.2,
+        "pct_from_high": -2.8
+      }
+    },
+    "futures": {
+      "ES=F": {
+        "name": "S&P 500 Futures",
+        "price": 6901.25,
+        "change": 0.1,
+        "prev_close": 6894.25,
+        "high_52w": 7043.0,
+        "low_52w": 4832.0,
+        "pct_from_high": -2.01
+      },
+      "NQ=F": {
+        "name": "NASDAQ Futures",
+        "price": 24995.0,
+        "change": 0.16,
+        "prev_close": 24956.0,
+        "high_52w": 26399.0,
+        "low_52w": 16460.0,
+        "pct_from_high": -5.32
+      },
+      "YM=F": {
+        "name": "Dow Futures",
+        "price": 49731.0,
+        "change": 0.02,
+        "prev_close": 49722.0,
+        "high_52w": 50611.0,
+        "low_52w": 36708.0,
+        "pct_from_high": -1.74
+      }
+    },
+    "bonds": {
+      "^TNX": {
+        "name": "10Y Treasury",
+        "price": 4.08,
+        "change": 0.67,
+        "prev_close": 4.05,
+        "high_52w": 4.63,
+        "low_52w": 3.89,
+        "pct_from_high": -11.88
+      },
+      "^FVX": {
+        "name": "5Y Treasury",
+        "price": 3.64,
+        "change": 0.66,
+        "prev_close": 3.62,
+        "high_52w": 4.41,
+        "low_52w": 3.53,
+        "pct_from_high": -17.4
+      },
+      "^IRX": {
+        "name": "3M T-Bill",
+        "price": 3.6,
+        "change": 0.28,
+        "prev_close": 3.59,
+        "high_52w": 4.3,
+        "low_52w": 3.51,
+        "pct_from_high": -16.31
+      }
+    },
+    "currencies": {
+      "DX-Y.NYB": {
+        "name": "Dollar Index",
+        "price": 97.7,
+        "change": -0.0,
+        "prev_close": 97.7,
+        "high_52w": 107.66,
+        "low_52w": 95.55,
+        "pct_from_high": -9.25
+      },
+      "USDKRW=X": {
+        "name": "USD/KRW",
+        "price": 1445.43,
+        "change": 0.38,
+        "prev_close": 1439.97,
+        "high_52w": 1486.9,
+        "low_52w": 1322.42,
+        "pct_from_high": -2.79
+      },
+      "USDJPY=X": {
+        "name": "USD/JPY",
+        "price": 155.08,
+        "change": 1.26,
+        "prev_close": 153.15,
+        "high_52w": 159.44,
+        "low_52w": 139.89,
+        "pct_from_high": -2.73
+      },
+      "EURUSD=X": {
+        "name": "EUR/USD",
+        "price": 1.18,
+        "change": -0.42,
+        "prev_close": 1.19,
+        "high_52w": 1.2,
+        "low_52w": 1.04,
+        "pct_from_high": -1.84
+      }
+    },
+    "commodities": {
+      "GC=F": {
+        "name": "Gold",
+        "price": 5016.9,
+        "change": 0.61,
+        "prev_close": 4986.5,
+        "high_52w": 5586.2,
+        "low_52w": 2834.1,
+        "pct_from_high": -10.19
+      },
+      "CL=F": {
+        "name": "Crude Oil",
+        "price": 65.26,
+        "change": 0.11,
+        "prev_close": 65.19,
+        "high_52w": 78.4,
+        "low_52w": 54.98,
+        "pct_from_high": -16.76
+      },
+      "BTC-USD": {
+        "name": "Bitcoin",
+        "price": 67155.81,
+        "change": 1.1,
+        "prev_close": 66425.32,
+        "high_52w": 126198.07,
+        "low_52w": 60074.2,
+        "pct_from_high": -46.79
+      }
+    },
+    "korean_indices": {
+      "^KS11": {
+        "name": "KOSPI",
+        "price": 5669.78,
+        "change": 2.96,
+        "prev_close": 5507.01,
+        "high_52w": 5681.65,
+        "low_52w": 2284.72,
+        "pct_from_high": -0.21
+      },
+      "^KQ11": {
+        "name": "KOSDAQ",
+        "price": 1161.62,
+        "change": 5.02,
+        "prev_close": 1106.08,
+        "high_52w": 1180.87,
+        "low_52w": 637.55,
+        "pct_from_high": -1.63
+      }
+    },
+    "vix": {
+      "value": 19.62,
+      "change": -3.3,
+      "level": "Neutral",
+      "color": "#FFC107"
+    }
+  },
+  "vix": {
+    "value": 19.62,
+    "change": -3.3,
+    "level": "Neutral",
+    "color": "#FFC107"
+  },
+  "fear_greed": {
+    "score": 65,
+    "level": "Greed",
+    "color": "#4CAF50",
+    "components": {
+      "vix": {
+        "value": 19.62,
+        "score": 68
+      },
+      "momentum": {
+        "pct_from_high": -1.66,
+        "score": 92
+      },
+      "breadth": {
+        "spy_chg": 0.5,
+        "iwm_chg": 0.36,
+        "score": 49
+      },
+      "safe_haven": {
+        "stock_chg": 0.5,
+        "gold_chg": 0.61,
+        "score": 49
+      },
+      "junk_bond": {
+        "yield_change": 0.67,
+        "score": 53
+      }
+    }
+  },
+  "ai_analysis": {
+    "content": "",
+    "citations": []
+  },
+  "quant_signals": {
+    "regime": {
+      "regime": "neutral",
+      "confidence": 100.0
+    },
+    "prediction": {
+      "spy_bullish": 50,
+      "qqq_bullish": 50
+    },
+    "risk": {
+      "risk_level": "Low",
+      "var_95_5d": 1915.17,
+      "cvar_95_5d": 2320.97
+    },
+    "top_picks": [
+      {
+        "ticker": "ALGN",
+        "name": "Align Technology, Inc.",
+        "final_score": 73.9,
+        "quant_score": 69.9,
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "grade": "📈 B급 (매수 고려)",
+        "current_price": 187.22,
+        "target_upside": 6.1,
+        "sd_stage": "Strong Accumulation",
+        "inst_pct": 98.53,
+        "rsi": 62.0,
+        "ai_summary": "```json\n{\n  \"thesis\": \"Align Technology(ALGN)는 98.5%에 달하는 강력한 기관 보유 비중과 스위스 구강 건강 연구를 통한 장기적 해자 구축, 그리고 자사주 매입이라는 주주 환원 정책이 맞물려 구조적 성장 국면에 재진입했습니다. 현재 P/E 33.0배는 역사적 고점 대비 합리적인 수준이며, RSI 61.7과 Bullish MA Signal은 기술적으로도 상승 추세가 유효함을 시사합니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"장기적 경제적 해자(Moat) 강화\",\n      \"evidence\": \"스위스 구강 건강 연구(Swiss Oral Health Study) 데이터를 활용하여 경쟁사 대비 차별화된 임상 데이터 확보 및 장기적 진입 장벽 구축 [2026-02-15 뉴스]\"\n    },\n    {\n      \"point\": \"주주 친화 정책 및 가이던스 상향\",\n      \"evidence\": \"새로운 가이던스 ",
+        "rank": 1
+      },
+      {
+        "ticker": "APTV",
+        "name": "Aptiv PLC",
+        "final_score": 73.4,
+        "quant_score": 69.2,
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "grade": "📈 B급 (매수 고려)",
+        "current_price": 82.77,
+        "target_upside": 22.3,
+        "sd_stage": "Accumulation",
+        "inst_pct": 103.69,
+        "rsi": 53.9,
+        "ai_summary": "```json\n{\n  \"thesis\": \"기관 투자자들의 강력한 매수세와 대규모 자사주 매입 완료에 따른 수급 개선이 기대되나, 113.6배에 달하는 높은 P/E 밸류에이션은 단기 부담 요인입니다. 매크로 환경이 가치주 및 중소형주 순환매 장세로 전환됨에 따라 자동차 부품 섹터 내 성장성을 보유한 동사에 대한 선별적 접근이 유효합니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"기관 투자자들의 지속적인 지분 확대\",\n      \"evidence\": \"Caprock Group LLC가 17,636주를 매수하고, Signature Estate & Investment Advisors LLC가 770만 달러 규모의 신규 포지션을 구축함 [MarketBeat, 2026-02-15; Quiver Quantitative, 2026-02-06]\"\n    },\n    {\n      \"point\": \"주주 환원 정책 및 가이던스 명확화\",\n      \"evidence\":",
+        "rank": 2
+      },
+      {
+        "ticker": "AMGN",
+        "name": "Amgen Inc.",
+        "final_score": 73.0,
+        "quant_score": 68.8,
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "grade": "📈 B급 (매수 고려)",
+        "current_price": 373.36,
+        "target_upside": -7.4,
+        "sd_stage": "Strong Accumulation",
+        "inst_pct": 84.67,
+        "rsi": 65.2,
+        "ai_summary": "```json\n{\n  \"thesis\": \"경기 방어적 성격을 지닌 헬스케어 섹터 내에서 견고한 기관 수급(84.7%)과 희귀질환 치료제(UPLIZNA)의 EU 승인 등 R&D 파이프라인 성과가 주가 상승을 뒷받침하고 있습니다. 시장 변동성(VIX 21.2)이 높은 상황에서 안정적인 현금 흐름과 신약 모멘텀을 겸비한 매력적인 대안입니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"신약 파이프라인 확장 및 규제 승인 모멘텀\",\n      \"evidence\": \"UPLIZNA의 EU 승인으로 희귀질환 포트폴리오가 강화되며 장기 성장 동력 확보 [2026-02-14, GuruFocus/News]\"\n    },\n    {\n      \"point\": \"강력한 기관 수급 및 기술적 강세\",\n      \"evidence\": \"수급 점수 75점(Strong Accumulation) 및 기관 보유 비중 84.7%로 스마트 머니 유입 지속, MA Signal이 Bullis",
+        "rank": 3
+      },
+      {
+        "ticker": "AMAT",
+        "name": "Applied Materials, Inc.",
+        "final_score": 73.0,
+        "quant_score": 68.7,
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "grade": "📈 B급 (매수 고려)",
+        "current_price": 359.13,
+        "target_upside": 12.8,
+        "sd_stage": "Accumulation",
+        "inst_pct": 86.29,
+        "rsi": 65.8,
+        "ai_summary": "```json\n{\n  \"thesis\": \"AI 및 HBM 관련 수요 증가에 힘입어 강력한 1분기 실적과 2분기 가이던스를 제시하며 반도체 장비 업종 내 차별화된 성장세를 보이고 있습니다. 높은 기관 보유율(86.3%)과 기술적 강세(Bullish MA Signal)는 추가 상승 여력을 지지하나, 높은 VIX와 P/E 밸류에이션 부담은 단기 변동성을 유발할 수 있습니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"강력한 실적 및 가이던스 상향\",\n      \"evidence\": \"1분기 어닝 서프라이즈 달성 및 강력한 2분기 전망 제시 후 주가 8% 급등 [TIKR.com, 2026-02-16]\"\n    },\n    {\n      \"point\": \"AI 메모리(HBM) 및 삼성전자 협력 수혜\",\n      \"evidence\": \"삼성전자의 HBM4 생산 확대 계획과 EPIC 센터에서의 역할이 AI 메모리 스토리의 핵심 동력으로 작용 [뉴스 4, 2026-",
+        "rank": 4
+      },
+      {
+        "ticker": "ALL",
+        "name": "The Allstate Corporation",
+        "final_score": 71.1,
+        "quant_score": 72.6,
+        "ai_bonus": 13,
+        "ai_recommendation": "매수",
+        "grade": "🌟 A급 (적극 매수)",
+        "current_price": 212.32,
+        "target_upside": 13.1,
+        "sd_stage": "Strong Accumulation",
+        "inst_pct": 82.95,
+        "rsi": 61.0,
+        "ai_summary": "```json\n{\n  \"thesis\": \"Allstate는 현재 5.45배의 극도로 낮은 P/E와 강력한 비용 절감 프로그램(SAVE)을 통해 수익성 개선이 가시화되고 있으며, 금리 하락기 주택 시장 활성화에 따른 보험 수요 증가 수혜가 예상됩니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"구조적 비용 절감 및 마진 개선\",\n      \"evidence\": \"SAVE 프로그램을 통해 4분기 실적 강세를 장기적 경쟁 우위로 전환하고 있으며, 비용 주도 마진 개선과 배당금 인상이 주주 가치를 제고함 [2026-02-15, Allstate SAVE Program & Dividend News]\"\n    },\n    {\n      \"point\": \"주택 시장 바이어 우위 전환에 따른 보험 갱신/신규 수요\",\n      \"evidence\": \"주택 시장이 현금 구매자 중심에서 바이어 우위 시장(Buyers' market)으로 전환되면서 거래량 회복 및 신규 주택",
+        "rank": 5
+      }
+    ],
+    "backtest": {
+      "total_return": "N/A",
+      "alpha": "N/A",
+      "sharpe": "N/A",
+      "max_dd": "N/A",
+      "win_rate": "N/A"
+    },
+    "track_record": {
+      "total_picks": "N/A",
+      "win_rate": 50.0,
+      "avg_return": 0.04,
+      "alpha": "N/A"
+    },
+    "decision_signal": {
+      "score": 50,
+      "action": "HOLD",
+      "timing": "SELECTIVE",
+      "components": {
+        "market_gate": {
+          "score": 50,
+          "contribution": 0
+        },
+        "regime": {
+          "regime": "neutral",
+          "contribution": 0
+        },
+        "prediction": {
+          "spy_bullish": 50,
+          "contribution": 0
+        },
+        "risk": {
+          "level": "Low",
+          "contribution": 5
+        },
+        "sector_phase": {
+          "phase": "Late Cycle",
+          "contribution": -5
+        }
+      }
+    }
+  },
+  "sector_rotation": {
+    "content": "",
+    "citations": []
+  },
+  "smart_money": {
+    "top_picks": {
+      "timestamp": "2026-02-18T10:07:08.246733",
+      "picks": [
+        {
+          "rank": 1,
+          "ticker": "ALGN",
+          "name": "Align Technology, Inc.",
+          "final_score": 73.9,
+          "ai_recommendation": "매수",
+          "target_upside": 6.1,
+          "sd_stage": "Strong Accumulation"
+        },
+        {
+          "rank": 2,
+          "ticker": "APTV",
+          "name": "Aptiv PLC",
+          "final_score": 73.4,
+          "ai_recommendation": "매수",
+          "target_upside": 22.3,
+          "sd_stage": "Accumulation"
+        },
+        {
+          "rank": 3,
+          "ticker": "AMGN",
+          "name": "Amgen Inc.",
+          "final_score": 73.0,
+          "ai_recommendation": "매수",
+          "target_upside": -7.4,
+          "sd_stage": "Strong Accumulation"
+        },
+        {
+          "rank": 4,
+          "ticker": "AMAT",
+          "name": "Applied Materials, Inc.",
+          "final_score": 73.0,
+          "ai_recommendation": "매수",
+          "target_upside": 12.8,
+          "sd_stage": "Accumulation"
+        },
+        {
+          "rank": 5,
+          "ticker": "ALL",
+          "name": "The Allstate Corporation",
+          "final_score": 71.1,
+          "ai_recommendation": "매수",
+          "target_upside": 13.1,
+          "sd_stage": "Strong Accumulation"
+        }
+      ]
+    },
+    "performance": {
+      "recent_dates": [
+        {
+          "date": "2026-02-19",
+          "avg_return": 0.27,
+          "win_rate": 50.0
+        },
+        {
+          "date": "2026-02-18",
+          "avg_return": 0.27,
+          "win_rate": 50.0
+        },
+        {
+          "date": "2026-02-17",
+          "avg_return": -0.42,
+          "win_rate": 50.0
+        }
+      ],
+      "overall_avg": 0.04,
+      "overall_win_rate": 50.0
+    }
+  }
+}

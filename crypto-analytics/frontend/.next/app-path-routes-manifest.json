@@ -1,0 +1,20 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/[...nextauth]/route": "/api/auth/[...nextauth]",
+  "/dashboard/crypto/briefing/page": "/dashboard/crypto/briefing",
+  "/dashboard/crypto/page": "/dashboard/crypto",
+  "/dashboard/crypto/prediction/page": "/dashboard/crypto/prediction",
+  "/dashboard/crypto/risk/page": "/dashboard/crypto/risk",
+  "/dashboard/crypto/signals/page": "/dashboard/crypto/signals",
+  "/dashboard/data-status/page": "/dashboard/data-status",
+  "/dashboard/page": "/dashboard",
+  "/disclaimer/page": "/disclaimer",
+  "/favicon.ico/route": "/favicon.ico",
+  "/login/page": "/login",
+  "/page": "/",
+  "/pricing/page": "/pricing",
+  "/privacy/page": "/privacy",
+  "/signup/page": "/signup",
+  "/terms/page": "/terms"
+}

@@ -1,0 +1,22 @@
+{
+  "period": "2025-12-29 ~ 2026-01-11",
+  "total_signals": 320,
+  "closed_signals": 253,
+  "open_signals": 67,
+  "wins": 89,
+  "losses": 164,
+  "win_rate": 35.2,
+  "avg_return": -0.93,
+  "total_return": -234.2,
+  "best_trade": 38.71,
+  "worst_trade": -15.17,
+  "avg_hold_days": 6.1,
+  "strategy_params": {
+    "foreign_min": 50000,
+    "consecutive_min": 3,
+    "contraction_max": 0.8,
+    "near_high_pct": 0.92,
+    "hold_days": 5,
+    "stop_loss_pct": 7.0
+  }
+}

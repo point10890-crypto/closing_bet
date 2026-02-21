@@ -1,7 +1,7 @@
 // API utility functions
 
-// Use Next.js rewrites proxy (works for both local and external access)
-const API_BASE = '';
+// Use NEXT_PUBLIC_API_URL for deployed environments, empty for local (rewrites proxy)
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 export async function fetchAPI<T>(endpoint: string): Promise<T> {
     const response = await fetch(`${API_BASE}${endpoint}`);

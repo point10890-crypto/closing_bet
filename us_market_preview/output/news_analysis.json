@@ -1,0 +1,57 @@
+[
+  {
+    "ticker": "AES",
+    "news_score": 0,
+    "sentiment": "neutral",
+    "reason": "뉴스 없음",
+    "action": "HOLD",
+    "catalysts": [],
+    "risk": "",
+    "citations": [],
+    "analyzed_at": "2026-02-19T15:32:03.545257"
+  },
+  {
+    "ticker": "ALL",
+    "news_score": 0,
+    "sentiment": "neutral",
+    "reason": "뉴스 없음",
+    "action": "HOLD",
+    "catalysts": [],
+    "risk": "",
+    "citations": [],
+    "analyzed_at": "2026-02-19T15:32:04.558859"
+  },
+  {
+    "ticker": "T",
+    "news_score": 0,
+    "sentiment": "neutral",
+    "reason": "뉴스 없음",
+    "action": "HOLD",
+    "catalysts": [],
+    "risk": "",
+    "citations": [],
+    "analyzed_at": "2026-02-19T15:32:05.578004"
+  },
+  {
+    "ticker": "AKAM",
+    "news_score": 0,
+    "sentiment": "neutral",
+    "reason": "뉴스 없음",
+    "action": "HOLD",
+    "catalysts": [],
+    "risk": "",
+    "citations": [],
+    "analyzed_at": "2026-02-19T15:32:06.604413"
+  },
+  {
+    "ticker": "ALGN",
+    "news_score": 0,
+    "sentiment": "neutral",
+    "reason": "뉴스 없음",
+    "action": "HOLD",
+    "catalysts": [],
+    "risk": "",
+    "citations": [],
+    "analyzed_at": "2026-02-19T15:32:07.621456"
+  }
+]

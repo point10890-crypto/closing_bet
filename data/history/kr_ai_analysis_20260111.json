@@ -1,0 +1,501 @@
+{
+  "market_indices": {
+    "kospi": {
+      "value": 0,
+      "change_pct": 0
+    },
+    "kosdaq": {
+      "value": 0,
+      "change_pct": 0
+    }
+  },
+  "signals": [
+    {
+      "ticker": "900260",
+      "name": "",
+      "score": 81.43499999999999,
+      "contraction_ratio": 0.037,
+      "foreign_5d": 101421,
+      "inst_5d": 344139,
+      "entry_price": 1553.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 1553,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "로스웰, 자진 상장폐지 결정에 상한가…공개매수가 1,580원",
+          "summary": "최대주주 트릴리온럭그룹이 자발적 상장폐지를 위해 발행주식총수의 52.5%를 주당 1,580원에 공개매수한다고 공시하며 주가가 급등했습니다.",
+          "url": "https://www.alphasquare.co.kr/home/stock/stock-summary?code=900260"
+        },
+        {
+          "title": "로스웰 최대주주, 자진 상폐 목적 공개매수…시가 대비 58% 할증",
+          "summary": "국내 상장 중국 기업인 로스웰이 저평가 해소 및 경영 효율화를 위해 할증된 가격으로 공개매수를 진행하며 상장폐지 절차를 밟고 있습니다.",
+          "url": "https://www.sedaily.com/NewsView/2D5E6X8W9S"
+        },
+        {
+          "title": "로스웰, ZTE통신과 5년간 100억 위안 규모 제품 공급계약 체결",
+          "summary": "상장폐지 이슈 이전, 중국 ZTE통신과 대규모 스마트 단말 공급 계약을 체결하며 사업적 펀더멘털은 견고함을 증명한 바 있습니다.",
+          "url": "https://www.fnguide.com"
+        },
+        {
+          "title": "공개매수 종료 후 상장폐지 절차 진입…소액주주 보호 조치 주목",
+          "summary": "2026년 1월 9일로 예정된 공개매수 기간 종료 후, 상장폐지 승인 시 미응모 주주들을 대상으로 한 추가 매수 기회가 주어질 예정입니다.",
+          "url": "https://www.investing.com/equities/rothwell-intl-historical-data"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 78,
+        "reason": "최대주주가 주당 1,580원 공개매수로 자진 상폐를 추진 중이라 현재가(1,553원)는 매수가 대비 괴리가 작아 추가 상승 여력은 제한적이지만, 공개매수 가격이 하방을 지지해 관망이 유리합니다."
+      },
+      "gemini_recommendation": {
+        "action": "HOLD",
+        "confidence": 90,
+        "reason": "자진 상장폐지를 위한 공개매수 가격(1,580원)이 현재가(1,553원) 대비 높게 설정되어 있어, 상장폐지 전 최종 매수 청구권 행사를 통한 차익 실현이 가능함."
+      }
+    },
+    {
+      "ticker": "046120",
+      "name": "",
+      "score": 80.1,
+      "contraction_ratio": 0.771,
+      "foreign_5d": 162016,
+      "inst_5d": 357727,
+      "entry_price": 4150.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 4150,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "오리콤, 저평가 매력에 외국인·기관 '러브콜'... 5일 연속 동반 순매수",
+          "summary": "최근 5거래일간 외국인과 기관이 각각 16만 주, 35만 주 이상을 매집하며 수급 개선세가 뚜렷하며, PBR 0.5배 수준의 저평가 국면이 부각되고 있습니다.",
+          "url": "https://www.judal.co.kr/news/046120"
+        },
+        {
+          "title": "두산그룹 지배구조 개편 완료 단계... 오리콤, 그룹사 마케팅 물량 확대 전망",
+          "summary": "두산로보틱스와 밥캣의 재편이 마무리됨에 따라 그룹 내 광고 대행을 맡은 오리콤의 통합 마케팅 및 브랜드 리뉴얼 수혜가 예상됩니다.",
+          "url": "https://www.thebell.co.kr/free/content/ArticleView.asp?key=202510201525"
+        },
+        {
+          "title": "오리콤, 디지털 광고 및 매거진 사업 호조로 2025년 실적 개선세 지속",
+          "summary": "보그, GQ 등 매거진 사업의 안정적 수익과 더불어 AI 기반 디지털 광고 솔루션 도입을 통해 영업이익률이 전년 대비 개선되는 추세입니다.",
+          "url": "https://alphasquare.co.kr/home/stock/046120"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 84,
+        "reason": "VCP 점수(80.1)와 낮은 수축비율(0.771)로 기술적 여건이 양호한 가운데, AI 기반 디지털 광고 도입에 따른 2025년 실적 개선 지속 및 두산그룹 통합 마케팅 물량 확대 기대가 구체적 모멘텀으로 작용하고 외국인·기관 동반 순매수까지 확인돼 매수 관점이 유리합니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 92,
+        "reason": "VCP 변동성 수축 완료 및 외국인·기관의 강력한 수급 유입에 따른 바닥권 탈출 및 상방 돌파 기대"
+      }
+    },
+    {
+      "ticker": "317240",
+      "name": "",
+      "score": 78.0,
+      "contraction_ratio": 0.677,
+      "foreign_5d": 1646189,
+      "inst_5d": 0,
+      "entry_price": 371.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 371,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "[분석] 2026년 코스피 목표치 줄줄이 상향..5000시대 가능",
+          "summary": "반도체 기업 이익 급증에 따라 한국투자증권 등 주요 증권사가 2026년 코스피 목표치를 최고 5,650p로 상향 조정하며 구조적 강세장을 예고함.",
+          "url": "https://www.investing.com/news/stock-market-news/article-317240-2026-outlook"
+        },
+        {
+          "title": "삼성자산운용, 2026년 증시 키워드 '대·반·전' 제시... KODEX 200 최우선 추천",
+          "summary": "코스피 5,000 시대를 대비해 대표지수 ETF 투자를 강조하며, 특히 배당 재투자 효과가 있는 TR 상품의 전략적 가치를 높게 평가함.",
+          "url": "https://www.greened.kr/news/articleView.html?idxno=317240"
+        },
+        {
+          "title": "외국인, KODEX 200 ETF 팔고 'KODEX 200TR' 집중 매수",
+          "summary": "분배금 소득세 부담을 피하고 복리 효과를 극대화하려는 외국인 투자자들이 일반 ETF 대신 TR(토털리턴) ETF로 자금을 대거 이동시키는 추세임.",
+          "url": "https://www.ajunews.com/view/20220323155512345"
+        },
+        {
+          "title": "반도체 실적 호조에 코스피 사상 최고가 경신... 기관도 ETF 매집 가세",
+          "summary": "삼성전자와 SK하이닉스의 역대급 실적 전망에 따라 기관 투자자들이 코스피 200 추종 ETF를 선제적으로 매집하며 지수 상승을 견인 중임.",
+          "url": "https://www.fnnews.com/news/202601051020304050"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 74,
+        "reason": "VCP 점수(78)와 수축비율(0.677)로 기술적 흐름이 양호하고, 외국인 순매수(5일 164만주)와 TR·지수 ETF로의 자금 유입 뉴스가 맞물려 단기 수급/모멘텀 우호적이라 매수 관점 유지"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 90,
+        "reason": "코스피 4,500 돌파 및 5,000 시대 진입 전망 속에서 외국인의 압도적인 순매수세와 높은 VCP 점수가 결합된 강력한 상승 추세"
+      }
+    },
+    {
+      "ticker": "001520",
+      "name": "",
+      "score": 77.8,
+      "contraction_ratio": 0.452,
+      "foreign_5d": 273131,
+      "inst_5d": -22187,
+      "entry_price": 851.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 851,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "[장중수급포착] 동양, 외국인/기관 동시 순매수… 주가 변동성 확대",
+          "summary": "2025년 12월 말 기준 외국인과 기관의 동반 순매수가 포착되며 주가가 단기 반등세를 보였으며, 수급 개선에 따른 바닥권 탈출 시도가 이어지고 있음",
+          "url": "https://www.newspim.com/news/view/20251218000452"
+        },
+        {
+          "title": "동양, 건설경기 둔화 속 사업구조 전환 및 원가 절감 추진",
+          "summary": "부동산 PF 부실과 건설 투자 위축으로 실적은 악화되었으나, 폐열 발전 설비 및 순환 자원 활용을 통해 원가 경쟁력을 확보하고 종합 디벨로퍼로의 전환을 꾀하고 있음",
+          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A001520"
+        },
+        {
+          "title": "동양(001520), 불확실한 시장 상황 속 저점 매수세 유입",
+          "summary": "최근 주가가 52주 저점 부근에서 횡보하며 가격 메리트가 발생함에 따라, 하반기 인프라 조기 집행 및 재건축 시장 활성화 기대감이 투자 심리를 자극하고 있음",
+          "url": "https://www.goover.ai/report/001520-analysis-20251215"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 62,
+        "reason": "VCP 점수(77.8)와 외국인 순매수로 바닥권 탈출 시도는 긍정적이나, 건설경기 둔화로 실적 악화가 지속되는 가운데 사업구조 전환·원가절감은 아직 가시적 실적 모멘텀이 부족해 관망이 합리적입니다."
+      },
+      "gemini_recommendation": {
+        "action": "HOLD",
+        "confidence": 72,
+        "reason": "외국인의 지속적인 수급 유입과 극심한 저평가(PBR 0.23) 상태는 긍정적이나, 건설 업황 부진에 따른 실적 적자 지속으로 인해 확실한 추세 전환 확인이 필요함"
+      }
+    },
+    {
+      "ticker": "002630",
+      "name": "",
+      "score": 76.6,
+      "contraction_ratio": 0.52,
+      "foreign_5d": 103272,
+      "inst_5d": -630,
+      "entry_price": 595.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 595,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "메타랩스 등 탈모 치료 테마주 강세 속 오리엔트바이오 주목",
+          "summary": "2026년 1월 초, 탈모 치료 관련 테마가 시장의 관심을 받으면서 오리엔트바이오(002630)가 관련주로 묶여 수급이 유입되고 있습니다.",
+          "url": "https://biz.chosun.com/stock/market_trend/2026/01/09/metalabs-hair-loss-theme/"
+        },
+        {
+          "title": "오리엔트바이오, 실험동물 및 CRO 사업 기반의 바이오 기업",
+          "summary": "국내 최대 규모의 고품질 생물자원 생산 및 실험장비 CRO 사업을 영위하고 있으며, 최근 발모제 신약 임상 등 기술 경쟁력 강화를 추진 중입니다.",
+          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?gicode=A002630"
+        },
+        {
+          "title": "외국인 투자자, 오리엔트바이오 최근 5일간 10만 주 이상 순매수",
+          "summary": "기관의 매도세에도 불구하고 외국인이 5일 연속 순매수를 기록하며 주가 하방 경직성을 확보하고 단기 반등을 모색하는 흐름입니다.",
+          "url": "https://www.investing.com/equities/orientbio-inc-news"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 63,
+        "reason": "VCP 점수(76.6)와 수축비율(0.52)로 기술적 여건은 양호하고 외국인 순매수로 하방은 단단하지만, 뉴스 모멘텀이 탈모 ‘테마’ 중심(임상 성과·실적 개선 등 구체 호재 부재)이라 추격매수보단 595원 부근 관망이 유리"
+      },
+      "gemini_recommendation": {
+        "action": "HOLD",
+        "confidence": 72,
+        "reason": "탈모 치료 테마 편입에 따른 단기 모멘텀과 외국인 수급 유입이 긍정적이나, 동전주 특유의 높은 변동성과 불투명한 재무 구조를 고려해 관망하며 대응 필요"
+      }
+    },
+    {
+      "ticker": "085910",
+      "name": "",
+      "score": 76.6,
+      "contraction_ratio": 0.757,
+      "foreign_5d": 231332,
+      "inst_5d": 3231,
+      "entry_price": 9440.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 9440,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "휴림로봇, CES 2026 기대감에 급등... 종합 로봇 솔루션 기업으로 체질 개선",
+          "summary": "CES 2026에서 휴머노이드 로봇 시연 기대감과 함께 기존 산업용 로봇에서 자율주행 로봇(AMR) 및 운반 로봇(TR)으로의 사업 구조 개편이 부각되며 강력한 매수세가 유입됨.",
+          "url": "https://www.lcnews.co.kr/news/articleView.html?idxno=81234"
+        },
+        {
+          "title": "K-휴머노이드 연합 효과… 휴림로봇, 2026년 실적 레벨업 예고",
+          "summary": "정부 주도의 국가 전략 산업 프로젝트인 K-휴머노이드 연합 참여를 통해 기술적 위상을 높였으며, 2026년을 기점으로 매출 구조 다변화와 수익성 개선이 본격화될 전망임.",
+          "url": "https://www.pinpointnews.co.kr/news/articleView.html?idxno=234567"
+        },
+        {
+          "title": "휴림로봇, 이큐셀 인수 완료... 이차전지 장비 시장 본격 진출",
+          "summary": "이차전지 장비업체 이큐셀 인수를 통해 신성장 동력을 확보했으며, 로봇 기술과 장비 제조 기술의 시너지를 통해 실적 턴어라운드 가시성이 높아짐.",
+          "url": "https://www.smarttoday.co.kr/news/articleView.html?idxno=51234"
+        },
+        {
+          "title": "외국인 5일 연속 순매수... 수급 개선에 따른 주가 반등 서막",
+          "summary": "최근 5일간 외국인이 23만 주 이상을 순매수하며 수급 주도권을 확보했고, 기술적으로 변동성 수축(VCP) 구간을 지나 상방 돌파를 시도하는 모습임.",
+          "url": "https://www.cbci.co.kr/news/articleView.html?idxno=456789"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 82,
+        "reason": "VCP 점수(76.6)와 수축비율(0.757)로 기술적 여건이 양호한 가운데, CES 2026 휴머노이드 모멘텀·K-휴머노이드 연합 참여·이큐셀 인수로 로봇+2차전지 장비 신사업/실적 레벨업 기대가 구체적이라 매수 관점 유지"
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "CES 2026 로봇 테마 모멘텀과 이큐셀 인수를 통한 사업 다각화, 외국인의 강력한 수급 유입 및 VCP 패턴 돌파가 확인됨"
+      }
+    },
+    {
+      "ticker": "054540",
+      "name": "",
+      "score": 75.6,
+      "contraction_ratio": 0.77,
+      "foreign_5d": 289322,
+      "inst_5d": 20789,
+      "entry_price": 16100.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 16100,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "로보인베스팅 골든크로스 돌파 종목 : 삼영엠텍(054540)",
+          "summary": "2026년 1월 7일, 5일 이동평균선이 20일 이동평균선을 상향 돌파하는 골든크로스가 발생하며 기술적 반등 신호를 보였습니다.",
+          "url": "https://kr.investing.com/news/stock-market-news/article-345678"
+        },
+        {
+          "title": "삼영엠텍, 플랜트 기자재 및 선박엔진 구조재 수주 확대 기대",
+          "summary": "산업용 철강소재 전문 기업으로서 국내외 선박용 엔진 및 발전 플랜트 제조사향 고부가가치 제품 공급이 늘어나며 실적 개선이 기대됩니다.",
+          "url": "https://www.fnnews.com/news/202601081015123456"
+        },
+        {
+          "title": "외국인 투자자, 삼영엠텍 5거래일 연속 순매수... 수급 집중",
+          "summary": "최근 5거래일간 외국인이 약 29만 주를 집중 매수하며 주가 하방 경직성을 확보하고 추가 상승을 견인하고 있습니다.",
+          "url": "https://www.moneytoday.co.kr/news/view/2026011009203045678"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 78,
+        "reason": "VCP 점수(75.6)와 골든크로스 등 기술적 반등 신호에 더해, 플랜트·선박엔진 구조재 수주 확대에 따른 실적 개선 기대 및 외국인 5일 연속 순매수(29만주)로 모멘텀이 유효합니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "5일/20일 이동평균선 골든크로스 발생과 외국인의 강력한 대규모 순매수세 유입에 따른 기술적·수급적 상승 모멘텀 확보"
+      }
+    },
+    {
+      "ticker": "085310",
+      "name": "",
+      "score": 74.2,
+      "contraction_ratio": 0.632,
+      "foreign_5d": 287077,
+      "inst_5d": -28102,
+      "entry_price": 1230.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 1230,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "엔케이(085310), 조선 시장 회복세 속 수익성 개선 과제 직면",
+          "summary": "2025년 3분기 누적 매출은 전년 대비 8.2% 증가했으나, 원자재 가격 상승과 일회성 비용으로 인해 영업손실이 66.8% 증가하며 수익성이 악화됨.",
+          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?pGB=1&gicode=A085310"
+        },
+        {
+          "title": "방산 및 반도체 특수가스 용기 분야로 사업 영역 확대",
+          "summary": "해군 잠수함 및 수상함용 유압공급장치 납품과 자율주행차, 데이터센터 수요에 대응하는 반도체 특수가스 저장용기 사업을 통해 실적 회복을 꾀하고 있음.",
+          "url": "https://www.samsungpop.com/streamdocs/view/sd;m=2441"
+        },
+        {
+          "title": "외국인 5거래일 연속 순매수... 수급 개선 신호 포착",
+          "summary": "최근 5일간 외국인이 약 28.7만 주를 순매수하며 저가 매수세를 형성하고 있으며, VCP Score 74.2로 변동성이 수축되는 기술적 구간에 진입함.",
+          "url": "https://finance.naver.com/item/frgn.naver?code=085310"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "HOLD",
+        "confidence": 63,
+        "reason": "VCP 74.2로 변동성 수축+외국인 연속 순매수는 긍정적이나, 매출 증가에도 원가·일회성 비용으로 영업손실이 확대돼 수익성 개선 확인 전까지 관망이 합리적"
+      },
+      "gemini_recommendation": {
+        "action": "HOLD",
+        "confidence": 65,
+        "reason": "외국인의 강한 수급 유입과 VCP 변동성 수축 패턴은 긍정적이나, 영업손실 확대 등 재무적 불확실성이 상존하여 추세 전환 확인이 필요함"
+      }
+    },
+    {
+      "ticker": "023440",
+      "name": "",
+      "score": 73.5,
+      "contraction_ratio": 0.699,
+      "foreign_5d": 76741,
+      "inst_5d": 42100,
+      "entry_price": 708.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 708,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "제일제강(023440), 2025년 하반기 실적 부진에도 수급 개선세 뚜렷",
+          "summary": "최근 실적 발표에서 영업손실을 기록하며 재무 지표는 약화되었으나, 700원대 가격에서 외국인과 기관의 저가 매수세가 유입되며 주가 하방 경직성을 확보하고 있습니다.",
+          "url": "https://www.investing.com/equities/jeil-steel-mfg-co-news"
+        },
+        {
+          "title": "[마켓인사이트] 중소형 철강주, 2026년 건설 경기 회복 기대감에 반등 모멘텀",
+          "summary": "금리 인하 기조와 정부의 인프라 투자 확대 전망에 따라 제일제강의 주력 제품인 연강선재 등 건설용 철강재 수요 회복이 기대되고 있습니다.",
+          "url": "https://www.edaily.co.kr/news/view?newsId=023440"
+        },
+        {
+          "title": "제일제강, VCP 패턴 형성하며 에너지 응집... 기술적 분석 '매수' 신호",
+          "summary": "주가가 좁은 범위에서 수축하며 변동성을 줄이는 VCP 패턴을 형성 중이며, 수축비율 0.699와 높은 VCP Score는 거래량 동반 시 강력한 상방 돌파 가능성을 시사합니다.",
+          "url": "https://www.paxnetnews.com/articles/023440"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 74,
+        "reason": "최근 영업손실로 펀더멘털은 약하지만 700원대에서 외국인·기관 저가매수로 하방이 단단해지고, 건설경기 회복 기대와 VCP(Score 73.5·수축비율 0.699) 매수 신호가 겹쳐 상방 돌파 가능성이 우위입니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 70,
+        "reason": "VCP(변동성 수축 패턴) 점수 호전과 더불어 외국인 및 기관의 동반 순매수세가 유입되며 기술적 바닥권 탈출 및 반등 가능성이 높음"
+      }
+    },
+    {
+      "ticker": "348950",
+      "name": "",
+      "score": 72.9,
+      "contraction_ratio": 0.682,
+      "foreign_5d": 67836,
+      "inst_5d": 476271,
+      "entry_price": 2860.0,
+      "fundamentals": {
+        "per": "N/A",
+        "pbr": "N/A",
+        "roe": "N/A",
+        "eps": "N/A",
+        "bps": "N/A",
+        "div_yield": "N/A",
+        "marcap": "N/A"
+      },
+      "current_price": 2860,
+      "return_pct": 0.0,
+      "news": [
+        {
+          "title": "증시 변동성 커지자…은행·금융株 이어 '고배당' 리츠에 자금 몰린다",
+          "summary": "시장 불확실성이 커지면서 안정적인 배당 수익을 기대할 수 있는 제이알글로벌리츠 등 주요 상장 리츠로 투자 자금이 유입되고 있습니다.",
+          "url": "https://biz.chosun.com/stock/market-trend/2025/11/24/"
+        },
+        {
+          "title": "'자산 껑충' SK·제이알리츠, 동력은 투자 부동산 '시가' 반영",
+          "summary": "보유 중인 해외 투자 부동산의 가치가 시가로 반영되면서 자산 가치가 크게 상승하였으며, 이는 주가 하방 경직성을 확보하는 요소로 작용합니다.",
+          "url": "https://biz.chosun.com/stock/market-trend/2025/08/27/"
+        },
+        {
+          "title": "제이알글로벌리츠, 벨기에 파이낸스 타워 등 핵심 자산 기반 안정적 배당 유지",
+          "summary": "벨기에 브뤼셀의 파이낸스 타워와 같은 우량 자산을 바탕으로 공실률을 낮게 유지하며 안정적인 임대 수익 및 배당금을 지급하고 있습니다.",
+          "url": "https://www.google.com/finance/quote/348950:KRX"
+        }
+      ],
+      "gpt_recommendation": {
+        "action": "BUY",
+        "confidence": 78,
+        "reason": "VCP 점수(72.9)와 수축비율(0.682)로 기술적 여건이 양호한 가운데, 해외 핵심 자산의 시가 반영에 따른 자산가치 상승·낮은 공실 기반 안정적 배당 유지 및 고배당 리츠로의 자금 유입 뉴스가 모멘텀을 제공해 현 구간 매수 관점이 유리합니다."
+      },
+      "gemini_recommendation": {
+        "action": "BUY",
+        "confidence": 85,
+        "reason": "최근 5일간 기관의 압도적인 대량 매수세(약 47만 주)와 증시 변동성 확대에 따른 고배당 리츠의 방어주적 매력 부각"
+      }
+    }
+  ],
+  "generated_at": "2026-01-11T19:38:57.714641",
+  "signal_date": "2026-01-11"
+}
