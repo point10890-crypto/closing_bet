@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-// Auth disabled for dev — hardcoded Pro+Admin
+import { useSession, signOut } from 'next-auth/react';
 
 interface NavItem {
     name: string;
@@ -34,7 +34,7 @@ const navigation: NavItem[] = [
         children: [
             { name: 'Overview', href: '/dashboard/kr', color: 'bg-blue-500' },
             { name: 'VCP Signals', href: '/dashboard/kr/vcp', color: 'bg-rose-500' },
-            { name: '종가베팅', href: '/dashboard/kr/closing-bet', color: 'bg-violet-500' },
+            { name: '\uc885\uac00\ubca0\ud305', href: '/dashboard/kr/closing-bet', color: 'bg-violet-500' },
         ],
     },
     {
@@ -116,9 +116,14 @@ const adminNavigation: NavItem[] = [
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const userName = 'Admin';
-    const userTier = 'pro';
-    const userRole = 'admin';
+    const { data: session } = useSession();
+
+    // 세션에서 유저 정보 읽기 (없으면 기본값)
+    const user = session?.user as Record<string, unknown> | undefined;
+    const userName = (user?.name as string) || 'Guest';
+    const userTier = (user?.tier as string) || 'free';
+    const userRole = (user?.role as string) || 'user';
+    const isLoggedIn = !!session?.user;
 
     return (
         <>
@@ -186,6 +191,36 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     );
                 })}
 
+                {/* User Account Section */}
+                {isLoggedIn && (
+                    <>
+                        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            Account
+                        </div>
+                        <Link
+                            href="/account"
+                            onClick={onNavigate}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${pathname === '/account'
+                                ? 'text-white bg-white/5 border border-white/5'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                }`}
+                        >
+                            <i className="fas fa-user-circle w-5 text-center text-blue-400"></i>
+                            <span>My Account</span>
+                        </Link>
+                        {userTier === 'free' && (
+                            <Link
+                                href="/pricing"
+                                onClick={onNavigate}
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-yellow-400 hover:text-white hover:bg-yellow-500/10 border border-transparent transition-all"
+                            >
+                                <i className="fas fa-crown w-5 text-center"></i>
+                                <span>Upgrade to Pro</span>
+                            </Link>
+                        )}
+                    </>
+                )}
+
                 {/* Admin Section */}
                 {userRole === 'admin' && (
                     <>
@@ -215,22 +250,43 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
             {/* Profile */}
             <div className="p-4 border-t border-white/5">
-                <div className="flex items-center gap-3 p-2 rounded-lg">
-                    <div className={`w-8 h-8 rounded-full ring-2 ring-white/10 flex items-center justify-center text-white text-xs font-bold ${userTier === 'pro' ? 'bg-gradient-to-tr from-indigo-500 to-purple-500' : 'bg-gradient-to-tr from-gray-600 to-gray-500'}`}>
-                        {userName.charAt(0).toUpperCase()}
+                {isLoggedIn ? (
+                    <div className="flex items-center gap-3 p-2 rounded-lg">
+                        <div className={`w-8 h-8 rounded-full ring-2 ring-white/10 flex items-center justify-center text-white text-xs font-bold ${userTier === 'pro' || userTier === 'premium' ? 'bg-gradient-to-tr from-indigo-500 to-purple-500' : 'bg-gradient-to-tr from-gray-600 to-gray-500'}`}>
+                            {userName.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                            <span className="text-xs font-bold text-white truncate">{userName}</span>
+                            <span className={`text-[10px] ${userTier === 'pro' || userTier === 'premium' ? 'text-purple-400' : 'text-gray-500'}`}>
+                                {userTier === 'pro' ? 'Pro Plan' : userTier === 'premium' ? 'Premium' : 'Free Plan'}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            {userTier !== 'free' && (
+                                <span className="text-[10px] px-2 py-1 rounded bg-purple-500/10 text-purple-400 font-bold">
+                                    {userTier === 'pro' ? 'Pro' : 'Premium'}
+                                </span>
+                            )}
+                            <button
+                                onClick={() => signOut({ callbackUrl: '/login' })}
+                                className="text-[10px] px-2 py-1 rounded bg-white/5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                title="Sign Out"
+                            >
+                                <i className="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex flex-col flex-1 min-w-0">
-                        <span className="text-xs font-bold text-white truncate">{userName}</span>
-                        <span className={`text-[10px] ${userTier === 'pro' ? 'text-purple-400' : 'text-gray-500'}`}>
-                            {userTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                        <span className="text-[10px] px-2 py-1 rounded bg-purple-500/10 text-purple-400 font-bold">
-                            Pro
-                        </span>
-                    </div>
-                </div>
+                ) : (
+                    <Link
+                        href="/login"
+                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                    >
+                        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                            <i className="fas fa-sign-in-alt text-gray-400 text-xs"></i>
+                        </div>
+                        <span className="text-sm text-gray-400">Sign In</span>
+                    </Link>
+                )}
             </div>
         </>
     );

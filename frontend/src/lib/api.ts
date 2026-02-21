@@ -653,45 +653,99 @@ export interface SubscriptionRequest {
     processed_at: string | null;
 }
 
+// ── Authenticated API helpers (Bearer token 포함) ──
+
+export async function fetchAuthAPI<T>(endpoint: string, apiToken?: string): Promise<T> {
+    const headers: Record<string, string> = {};
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    const response = await fetch(`${API_BASE}${endpoint}`, { headers });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(err.error || `API Error: ${response.status}`);
+    }
+    return response.json();
+}
+
+export async function putAuthAPI<T>(endpoint: string, body?: any, apiToken?: string): Promise<T> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'PUT', headers,
+        body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(err.error || `API Error: ${response.status}`);
+    }
+    return response.json();
+}
+
+export async function postAuthAPI<T>(endpoint: string, body?: any, apiToken?: string): Promise<T> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST', headers,
+        body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(err.error || `API Error: ${response.status}`);
+    }
+    return response.json();
+}
+
+export async function deleteAuthAPI<T>(endpoint: string, apiToken?: string): Promise<T> {
+    const headers: Record<string, string> = {};
+    if (apiToken) headers['Authorization'] = `Bearer ${apiToken}`;
+    const response = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE', headers });
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+        throw new Error(err.error || `API Error: ${response.status}`);
+    }
+    return response.json();
+}
+
 export async function putAPI<T>(endpoint: string, body?: any): Promise<T> {
     const response = await fetch(`${API_BASE}${endpoint}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
     });
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
     return response.json();
 }
 
+// ── Admin API (Bearer token 기반) ──
 export const adminAPI = {
-    getDashboard: () => fetchAPI<AdminDashboard>('/api/admin/dashboard'),
-    getUsers: () => fetchAPI<{ users: AdminUser[] }>('/api/admin/users'),
-    getUser: (id: number) => fetchAPI<AdminUser>(`/api/admin/users/${id}`),
-    setUserRole: (id: number, role: string) => putAPI<AdminUser>(`/api/admin/users/${id}/role`, { role }),
-    setUserTier: (id: number, tier: string) => putAPI<AdminUser>(`/api/admin/users/${id}/tier`, { tier }),
-    getSubscriptions: () => fetchAPI<{ requests: SubscriptionRequest[] }>('/api/admin/subscriptions'),
-    approveSubscription: (id: number) => putAPI<SubscriptionRequest>(`/api/admin/subscriptions/${id}/approve`),
-    rejectSubscription: (id: number, note?: string) => putAPI<SubscriptionRequest>(`/api/admin/subscriptions/${id}/reject`, { note }),
+    getDashboard: (token?: string) => fetchAuthAPI<AdminDashboard>('/api/admin/dashboard', token),
+    getUsers: (token?: string) => fetchAuthAPI<{ users: AdminUser[] }>('/api/admin/users', token),
+    getUser: (id: number, token?: string) => fetchAuthAPI<AdminUser>(`/api/admin/users/${id}`, token),
+    setUserRole: (id: number, role: string, token?: string) => putAuthAPI<{ user: AdminUser }>(`/api/admin/users/${id}/role`, { role }, token),
+    setUserTier: (id: number, tier: string, token?: string) => putAuthAPI<{ user: AdminUser }>(`/api/admin/users/${id}/tier`, { tier }, token),
+    setUserStatus: (id: number, status: string, token?: string) => putAuthAPI<{ user: AdminUser }>(`/api/admin/users/${id}/status`, { status }, token),
+    deleteUser: (id: number, token?: string) => deleteAuthAPI<{ message: string }>(`/api/admin/users/${id}`, token),
+    getSubscriptions: (token?: string) => fetchAuthAPI<{ requests: SubscriptionRequest[] }>('/api/admin/subscriptions', token),
+    approveSubscription: (id: number, token?: string) => putAuthAPI<{ request: SubscriptionRequest }>(`/api/admin/subscriptions/${id}/approve`, undefined, token),
+    rejectSubscription: (id: number, note?: string, token?: string) => putAuthAPI<{ request: SubscriptionRequest }>(`/api/admin/subscriptions/${id}/reject`, { note }, token),
 };
 
-// Stripe API (requires auth token)
+// ── User Subscription API (Bearer token 기반) ──
+export const subscriptionAPI = {
+    requestUpgrade: (toTier: string, token?: string) => postAuthAPI<{ request: SubscriptionRequest }>('/api/auth/subscription/request', { to_tier: toTier }, token),
+    getStatus: (token?: string) => fetchAuthAPI<{ user: AdminUser; requests: SubscriptionRequest[] }>('/api/auth/subscription/status', token),
+    updateProfile: (name: string, token?: string) => putAuthAPI<{ user: AdminUser }>('/api/auth/profile', { name }, token),
+};
+
+// ── Stripe API (requires auth token) ──
 export const stripeAPI = {
     createCheckout: (apiToken: string) =>
         fetch(`${API_BASE}/api/stripe/create-checkout`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${apiToken}`,
-            },
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         }).then(r => r.json()),
     getPortal: (apiToken: string) =>
         fetch(`${API_BASE}/api/stripe/portal`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${apiToken}`,
-            },
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiToken}` },
         }).then(r => r.json()),
 };

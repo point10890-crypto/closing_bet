@@ -1,19 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { adminAPI, AdminDashboard } from '@/lib/api';
 import Link from 'next/link';
 
 export default function AdminDashboardPage() {
+    const { data: session } = useSession();
     const [data, setData] = useState<AdminDashboard | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const apiToken = (session?.user as Record<string, unknown>)?.apiToken as string | undefined;
+
     useEffect(() => {
-        adminAPI.getDashboard()
+        adminAPI.getDashboard(apiToken)
             .then(setData)
             .catch(console.error)
             .finally(() => setLoading(false));
-    }, []);
+    }, [apiToken]);
 
     if (loading) {
         return (

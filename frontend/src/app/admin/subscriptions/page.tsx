@@ -1,18 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { adminAPI, SubscriptionRequest } from '@/lib/api';
 
 export default function AdminSubscriptionsPage() {
+    const { data: session } = useSession();
     const [requests, setRequests] = useState<SubscriptionRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const [actionMsg, setActionMsg] = useState('');
 
-    useEffect(() => { loadRequests(); }, []);
+    const apiToken = (session?.user as Record<string, unknown>)?.apiToken as string | undefined;
+
+    useEffect(() => { loadRequests(); }, [apiToken]);
 
     const loadRequests = async () => {
         setLoading(true);
         try {
-            const res = await adminAPI.getSubscriptions();
+            const res = await adminAPI.getSubscriptions(apiToken);
             setRequests(res.requests || []);
         } catch (err) {
             console.error('Failed to load subscriptions:', err);
@@ -21,22 +26,29 @@ export default function AdminSubscriptionsPage() {
         }
     };
 
+    const showAction = (msg: string) => {
+        setActionMsg(msg);
+        setTimeout(() => setActionMsg(''), 3000);
+    };
+
     const handleApprove = async (id: number) => {
         try {
-            await adminAPI.approveSubscription(id);
+            await adminAPI.approveSubscription(id, apiToken);
             setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'approved' } : r));
-        } catch (err) {
-            console.error('Failed to approve:', err);
+            showAction('Subscription approved successfully');
+        } catch (err: any) {
+            showAction(`Error: ${err.message}`);
         }
     };
 
     const handleReject = async (id: number) => {
         const note = prompt('Rejection reason (optional):');
         try {
-            await adminAPI.rejectSubscription(id, note || undefined);
+            await adminAPI.rejectSubscription(id, note || undefined, apiToken);
             setRequests(prev => prev.map(r => r.id === id ? { ...r, status: 'rejected', admin_note: note } : r));
-        } catch (err) {
-            console.error('Failed to reject:', err);
+            showAction('Subscription request rejected');
+        } catch (err: any) {
+            showAction(`Error: ${err.message}`);
         }
     };
 
@@ -53,7 +65,22 @@ export default function AdminSubscriptionsPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-white">Subscription Management</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-white">Subscription Management</h1>
+                <button
+                    onClick={loadRequests}
+                    className="text-xs text-gray-400 hover:text-white px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 transition-colors"
+                >
+                    <i className="fas fa-sync-alt mr-1"></i> Refresh
+                </button>
+            </div>
+
+            {/* Action message */}
+            {actionMsg && (
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm animate-pulse">
+                    {actionMsg}
+                </div>
+            )}
 
             {/* Pending Requests */}
             <div>
@@ -73,13 +100,20 @@ export default function AdminSubscriptionsPage() {
                                 <div className="flex items-center justify-between flex-wrap gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-yellow-500/10 rounded-full flex items-center justify-center">
-                                            <i className="fas fa-arrow-up text-yellow-400"></i>
+                                            <i className={`fas ${req.request_type === 'upgrade' ? 'fa-arrow-up text-yellow-400' : 'fa-arrow-down text-blue-400'}`}></i>
                                         </div>
                                         <div>
                                             <div className="text-white font-medium">{req.user_name || `User #${req.user_id}`}</div>
                                             <div className="text-xs text-gray-400">{req.user_email || ''}</div>
                                             <div className="text-xs text-gray-500 mt-1">
-                                                {req.from_tier} &rarr; {req.to_tier} &bull; {new Date(req.created_at).toLocaleString()}
+                                                <span className={`px-1.5 py-0.5 rounded ${req.from_tier === 'free' ? 'bg-gray-500/20 text-gray-400' : 'bg-purple-500/20 text-purple-400'}`}>
+                                                    {req.from_tier}
+                                                </span>
+                                                <span className="mx-2">&rarr;</span>
+                                                <span className={`px-1.5 py-0.5 rounded ${req.to_tier === 'pro' ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                                                    {req.to_tier}
+                                                </span>
+                                                <span className="ml-2 text-gray-600">{new Date(req.created_at).toLocaleString()}</span>
                                             </div>
                                         </div>
                                     </div>

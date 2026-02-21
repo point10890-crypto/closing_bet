@@ -35,8 +35,12 @@ def register_blueprints(app):
     from app.routes.auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
+    # Admin routes (관리자 전용)
+    from app.routes.admin import admin_bp
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
+
     # Stripe routes
     from app.routes.stripe_routes import stripe_bp
     app.register_blueprint(stripe_bp, url_prefix='/api/stripe')
 
-    print("[OK] All Blueprints registered (KR + US + Crypto + Econ + Dividend + Auth + Stripe)")
+    print("[OK] All Blueprints registered (KR + US + Crypto + Econ + Dividend + Auth + Admin + Stripe)")
