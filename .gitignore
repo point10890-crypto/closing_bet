@@ -18,6 +18,7 @@ frontend/out/
 
 # Data (large files - keep essential JSON for deployment)
 *.csv
+!ticker_to_yahoo_map.csv
 !package.json
 !package-lock.json
 !tsconfig.json
