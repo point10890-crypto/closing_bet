@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+// Auth disabled for dev — hardcoded Pro+Admin
 
 interface NavItem {
     name: string;
@@ -116,10 +116,9 @@ const adminNavigation: NavItem[] = [
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const { data: session } = useSession();
-    const userName = (session?.user as any)?.name || 'Guest';
-    const userTier = (session?.user as any)?.tier || 'free';
-    const userRole = (session?.user as any)?.role || 'user';
+    const userName = 'Admin';
+    const userTier = 'pro';
+    const userRole = 'admin';
 
     return (
         <>
