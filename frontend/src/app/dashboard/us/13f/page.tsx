@@ -27,7 +27,7 @@ export default function Holdings13FPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/institutional');
+            const res = await fetch('/api/us/13f-holdings');
             if (res.ok) {
                 const json = await res.json();
                 setData(json.holdings || []);

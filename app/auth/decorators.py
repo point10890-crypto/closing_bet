@@ -2,6 +2,7 @@
 
 import hashlib
 import hmac
+import os
 import time
 from functools import wraps
 from flask import request, jsonify, current_app
@@ -55,11 +56,18 @@ def _get_current_user():
     return db.session.get(User, user_id)
 
 
+def _auth_disabled():
+    """인증 비활성화 여부: debug 모드 또는 AUTH_DISABLED=true 환경변수"""
+    if current_app.debug:
+        return True
+    return os.getenv('AUTH_DISABLED', '').lower() in ('true', '1', 'yes')
+
+
 def login_required(f):
-    """인증 필수 — 로그인한 유저만 접근 가능 (개발모드: 우회)"""
+    """인증 필수 — 로그인한 유저만 접근 가능"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if current_app.debug:
+        if _auth_disabled():
             request.current_user = None
             return f(*args, **kwargs)
         user = _get_current_user()
@@ -71,10 +79,10 @@ def login_required(f):
 
 
 def approved_required(f):
-    """승인된 유저 전용 — 관리자가 승인한 유저만 접근 가능 (개발모드: 우회)"""
+    """승인된 유저 전용 — 관리자가 승인한 유저만 접근 가능"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if current_app.debug:
+        if _auth_disabled():
             request.current_user = None
             return f(*args, **kwargs)
         user = _get_current_user()
@@ -88,11 +96,10 @@ def approved_required(f):
 
 
 def pro_required(f):
-    """Pro 구독 유저 전용 — 승인 + Pro tier (개발모드: 인증 우회)"""
+    """Pro 구독 유저 전용 — 승인 + Pro tier"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        # 개발 모드: 인증 없이 통과 (DEBUG=True일 때)
-        if current_app.debug:
+        if _auth_disabled():
             request.current_user = None
             return f(*args, **kwargs)
         user = _get_current_user()
@@ -108,10 +115,10 @@ def pro_required(f):
 
 
 def admin_required(f):
-    """관리자 전용 — role='admin' 유저만 접근 가능 (개발모드: 우회)"""
+    """관리자 전용 — role='admin' 유저만 접근 가능"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if current_app.debug:
+        if _auth_disabled():
             request.current_user = None
             return f(*args, **kwargs)
         user = _get_current_user()
