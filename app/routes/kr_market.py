@@ -298,7 +298,12 @@ def get_vcp_stats():
     try:
         signals_path = os.path.join(DATA_DIR, 'signals_log.csv')
         if not os.path.exists(signals_path):
-            return jsonify({'error': 'No signal data'}), 404
+            return jsonify({
+                'total_signals': 0, 'closed_signals': 0, 'open_signals': 0,
+                'win_rate': 0, 'avg_return_pct': 0, 'max_return_pct': 0,
+                'min_return_pct': 0, 'avg_hold_days': 0,
+                'total_winners': 0, 'total_losers': 0,
+            })
 
         df = pd.read_csv(signals_path, encoding='utf-8-sig')
 

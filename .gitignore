@@ -30,6 +30,7 @@ frontend/out/
 
 # Data directory: exclude heavy/generated files, keep essential
 data/*.csv
+!data/signals_log.csv
 data/*.db
 data/history/
 data/backtest/
