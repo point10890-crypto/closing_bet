@@ -36,9 +36,7 @@ openai>=1.0.0
 # 결제
 stripe>=7.0.0
 
-# Stock Analyzer (ProPicks 스크래핑)
-selenium>=4.15.0
-webdriver-manager>=4.0.0
+# Stock Analyzer (yfinance 기반 — Selenium 불필요)
 openpyxl>=3.1.0
 
 # 배포/운영
