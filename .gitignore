@@ -73,6 +73,12 @@ us_market_preview/output/
 us_market/data/
 us_market/history/
 
+# Chatbot test data
+chatbot/data/
+
+# Crypto analytics cache
+crypto-analytics/crypto_market/vcp_backtest/cache/
+
 # Misc
 .claude/
 *.bak

@@ -65,14 +65,27 @@ netstat -ano | grep 4000 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F 
 │   ├── routes/
 │   │   ├── kr_market.py      # KR API (/api/kr/*) — DATA_DIR 고정경로
 │   │   ├── us_market.py      # US API (/api/us/*)
+│   │   ├── stock_analyzer.py # ProPicks API (/api/stock-analyzer/*)
 │   │   ├── main.py           # 메인 라우트
 │   │   └── auth.py           # 인증 API
 │   └── utils/
 │       ├── cache.py          # 파일 캐시 유틸
 │       └── scheduler.py      # 앱 내 가격갱신 스케줄러 (V2 연동, 고정경로)
 │
+├── app.py                    # Stock Analyzer 단독 웹앱 (포트 5000)
+├── stock_info.py             # 일괄 스크래핑 스크립트
+├── stock_data.xlsx           # 종목 목록 2,500건
+├── templates/index.html      # 단독 웹 UI
+│
 ├── frontend/                 # Next.js 14 대시보드
-│   └── src/app/dashboard/kr/closing-bet/page.tsx  # 종가베팅 대시보드
+│   └── src/
+│       ├── app/dashboard/
+│       │   ├── kr/closing-bet/page.tsx      # 종가베팅 대시보드
+│       │   └── stock-analyzer/page.tsx      # ProPicks 분석 전용 페이지
+│       └── components/layout/
+│           ├── Header.tsx         # ⌘K 단축키 + CommandPalette
+│           ├── Sidebar.tsx        # 사이드바 (ProPicks 포함)
+│           └── CommandPalette.tsx  # 종목 검색 → 리다이렉트
 │
 ├── data/                     # 데이터 저장소 (실시간)
 │   ├── jongga_v2_latest.json      # 최신 종가베팅 결과
@@ -220,7 +233,7 @@ ScreenerResult { date, total_candidates, filtered_count, signals[], by_grade?, b
                  processing_time_ms?, updated_at, claude_picks? }
 ```
 
-### 버전: v2.3.0 (Optimized Structure + Full Sync)
+### 버전: v2.4.0 (Stock Analyzer Dashboard Integration)
 
 ---
 
@@ -398,4 +411,76 @@ Config.BASE_DIR     = /c/closing_bet          # __file__ 기반
 Config.DATA_DIR     = /c/closing_bet/data
 Config.PYTHON_PATH  = /c/closing_bet/.venv/Scripts/python.exe  # venv 우선
 Config.LOG_DIR      = /c/closing_bet/logs
+```
+
+---
+
+## 11. Stock Analyzer / ProPicks (Investing.com 스크래핑)
+
+### 개요
+Investing.com ProPicks 분석 결과(적극 매수/매수/중립/매도/적극 매도)를 종목별로 스크래핑하는 도구.
+**대시보드 통합 완료** — 사이드바 ProPicks + ⌘K CommandPalette에서 접근 가능.
+
+### 파일 구조
+| 파일 | 역할 |
+|------|------|
+| **대시보드 통합** | |
+| `app/routes/stock_analyzer.py` | Blueprint API (search, analyze, export) |
+| `app/routes/__init__.py` | Blueprint 등록 (`/api/stock-analyzer`) |
+| `frontend/src/app/dashboard/stock-analyzer/page.tsx` | 전용 분석 페이지 |
+| `frontend/src/components/layout/CommandPalette.tsx` | ⌘K 검색 → 페이지 리다이렉트 |
+| `frontend/src/components/layout/Sidebar.tsx` | ProPicks 네비 항목 |
+| `frontend/src/components/layout/Header.tsx` | ⌘K 단축키 + CommandPalette 연동 |
+| `frontend/next.config.ts` | API 프록시 (`/api/stock-analyzer/*` → Flask) |
+| **독립 실행형** | |
+| `app.py` | Flask 단독 웹앱 (포트 5000, UI 서빙) |
+| `stock_info.py` | 일괄 스크래핑 스크립트 (2,500개 전체) |
+| `stock_data.xlsx` | 종목 목록 (순번, 종목명, URL) 2,500건 |
+| `templates/index.html` | 단독 웹 UI |
+
+### 대시보드 사용 흐름
+```
+1. 사이드바 → ProPicks 클릭
+   또는 ⌘K → 종목 검색 → 선택
+       ↓
+2. /dashboard/stock-analyzer?name=X&url=Y&id=Z
+       ↓ (URL 파라미터 → 자동 분석 시작)
+3. POST /api/stock-analyzer/analyze → Selenium 스크래핑
+       ↓
+4. 결과 표시 (컬러 배지) + 조회 기록 테이블 누적
+       ↓
+5. POST /api/stock-analyzer/export → Excel 다운로드
+```
+
+### API 엔드포인트
+| Method | Path | 설명 |
+|--------|------|------|
+| GET | `/api/stock-analyzer/search?q=삼성` | 종목 검색 (최대 20건) |
+| POST | `/api/stock-analyzer/analyze` | 단건 스크래핑 (`{url, name}`) |
+| POST | `/api/stock-analyzer/export` | 조회 기록 Excel 변환 (`{records}`) |
+
+### 결과 컬러 매핑
+| ProPicks 결과 | 배지 색상 |
+|---------------|----------|
+| 적극 매수 / 매수 | 빨강 (red) |
+| 중립 | 노랑 (yellow) |
+| 매도 / 적극 매도 | 파랑 (blue) |
+
+### 독립 실행
+```bash
+# 단독 웹앱 - http://localhost:5000
+cd "$PROJECT" && "$PYTHON" app.py
+
+# 일괄 스크래핑 (2,500개 전체)
+cd "$PROJECT" && "$PYTHON" -u stock_info.py
+```
+
+### 핵심 로직
+- **XPath**: `//*[@id='pro-score-mobile']/div/div[2]/div[3]/div/div/div[1]/div`
+- **스크래핑 방식**: Selenium headless Chrome (모바일 UA), 단건 요청마다 새 드라이버 생성→종료
+- **Cloudflare 주의**: 연속 대량 요청 시 차단됨. 단건 호출은 정상 동작
+
+### 의존성
+```
+pandas, selenium, webdriver-manager, flask, openpyxl
 ```

@@ -80,6 +80,12 @@ const navigation: NavItem[] = [
         color: 'text-cyan-400',
     },
     {
+        name: 'ProPicks',
+        href: '/dashboard/stock-analyzer',
+        icon: 'fa-crosshairs',
+        color: 'text-orange-400',
+    },
+    {
         name: 'Data Status',
         href: '/dashboard/data-status',
         icon: 'fa-database',
