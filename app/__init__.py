@@ -64,8 +64,22 @@ def create_app(config=None):
     # Health check endpoint
     @app.route('/api/health')
     def health_check():
+        import subprocess
         from flask import jsonify as _jsonify
-        return _jsonify({'status': 'ok', 'service': 'MarketFlow API'})
+        try:
+            git_hash = subprocess.check_output(
+                ['git', 'rev-parse', '--short', 'HEAD'],
+                stderr=subprocess.DEVNULL, timeout=3
+            ).decode().strip()
+        except Exception:
+            git_hash = 'unknown'
+        vcp_exists = os.path.exists(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'signals_log.csv'))
+        return _jsonify({
+            'status': 'ok',
+            'service': 'MarketFlow API',
+            'version': git_hash,
+            'data': {'signals_log': vcp_exists},
+        })
 
     # ── 스케줄러 상태 API ──
     @app.route('/api/scheduler/status')
