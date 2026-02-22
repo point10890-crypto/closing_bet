@@ -215,23 +215,23 @@ function StockAnalyzerContent() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             {/* Header */}
             <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-xs text-orange-400 font-medium mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-orange-500/20 bg-orange-500/5 text-xs text-orange-400 font-medium mb-3 md:mb-4">
                     <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                     ProPicks Analyzer
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-white leading-tight mb-2">
+                        <h2 className="text-2xl md:text-5xl font-bold tracking-tighter text-white leading-tight mb-1 md:mb-2">
                             Stock <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-400">Analyzer</span>
                         </h2>
-                        <p className="text-gray-400 text-lg">Investing.com ProPicks 분석 결과 조회</p>
+                        <p className="text-gray-400 text-sm md:text-lg">Investing.com ProPicks 분석 결과 조회</p>
                     </div>
                     {history.length > 0 && (
                         <button onClick={exportExcel}
-                            className="px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold rounded-xl hover:bg-emerald-500/20 transition-colors">
+                            className="self-start px-4 md:px-5 py-2 md:py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs md:text-sm font-bold rounded-xl hover:bg-emerald-500/20 transition-colors">
                             <i className="fas fa-file-excel mr-2"></i>Excel 내보내기
                         </button>
                     )}
@@ -239,7 +239,7 @@ function StockAnalyzerContent() {
             </div>
 
             {/* Search Card */}
-            <div className="p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+            <div className="p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                 <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">종목 검색</h3>
                 <div className="relative">
                     <div className="flex items-center">
@@ -306,7 +306,7 @@ function StockAnalyzerContent() {
 
             {/* Loading */}
             {loading && (
-                <div className="p-8 rounded-2xl bg-[#1c1c1e] border border-white/10 text-center">
+                <div className="p-6 md:p-8 rounded-2xl bg-[#1c1c1e] border border-white/10 text-center">
                     <div className="w-10 h-10 border-[3px] border-orange-500/30 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-400 text-sm">분석 결과를 가져오는 중... (약 10~20초 소요)</p>
                     <p className="text-gray-600 text-xs mt-2">{selectedStock?.name}</p>
@@ -315,14 +315,14 @@ function StockAnalyzerContent() {
 
             {/* Analysis Result */}
             {analyzeResult && !loading && (
-                <div className="p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+                <div className="p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">분석 결과</h3>
                         <span className="text-xs text-gray-600">{analyzeResult.date}</span>
                     </div>
                     <div className="text-center py-4">
-                        <p className="text-lg text-gray-300 mb-3">{analyzeResult.name}</p>
-                        <div className={`inline-block px-8 py-4 rounded-xl text-3xl font-bold border ${getResultColor(analyzeResult.result)}`}>
+                        <p className="text-base md:text-lg text-gray-300 mb-3">{analyzeResult.name}</p>
+                        <div className={`inline-block px-6 md:px-8 py-3 md:py-4 rounded-xl text-2xl md:text-3xl font-bold border ${getResultColor(analyzeResult.result)}`}>
                             {analyzeResult.result}
                         </div>
                     </div>
@@ -331,25 +331,45 @@ function StockAnalyzerContent() {
 
             {/* Error */}
             {error && !loading && (
-                <div className="p-6 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
-                    <i className="fas fa-exclamation-triangle text-red-400 text-2xl mb-3 block"></i>
-                    <p className="text-red-400 text-sm">{error}</p>
+                <div className="p-4 md:p-6 rounded-2xl bg-red-500/5 border border-red-500/20 text-center">
+                    <i className="fas fa-exclamation-triangle text-red-400 text-xl md:text-2xl mb-3 block"></i>
+                    <p className="text-red-400 text-xs md:text-sm">{error}</p>
                 </div>
             )}
 
             {/* History Table */}
             {history.length > 0 && (
-                <div className="p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+                <div className="p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">
+                        <h3 className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider">
                             조회 기록 ({history.length}건)
                         </h3>
                         <button onClick={exportExcel}
-                            className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg hover:bg-emerald-500/20 transition-colors">
-                            <i className="fas fa-file-excel mr-2"></i>Excel 저장
+                            className="px-3 md:px-4 py-1.5 md:py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] md:text-xs font-bold rounded-lg hover:bg-emerald-500/20 transition-colors">
+                            <i className="fas fa-file-excel mr-1 md:mr-2"></i>Excel 저장
                         </button>
                     </div>
-                    <div className="overflow-x-auto">
+
+                    {/* Mobile: Card layout */}
+                    <div className="md:hidden space-y-2">
+                        {history.map((h, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <span className="text-xs text-gray-600 shrink-0">#{history.length - i}</span>
+                                    <div className="min-w-0">
+                                        <div className="text-sm text-white font-medium truncate">{h.name}</div>
+                                        <div className="text-[10px] text-gray-600 font-mono mt-0.5">{h.date}</div>
+                                    </div>
+                                </div>
+                                <span className={`shrink-0 ml-2 px-2.5 py-1 rounded text-xs font-bold border ${getResultColor(h.result)}`}>
+                                    {h.result}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop: Table layout */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-white/5">
@@ -382,18 +402,18 @@ function StockAnalyzerContent() {
 
             {/* Empty State */}
             {!loading && !analyzeResult && !error && !selectedStock && history.length === 0 && (
-                <div className="text-center py-20">
-                    <i className="fas fa-chart-bar text-4xl text-gray-700 mb-4 block"></i>
-                    <p className="text-gray-500 text-sm">
+                <div className="text-center py-12 md:py-20">
+                    <i className="fas fa-chart-bar text-3xl md:text-4xl text-gray-700 mb-4 block"></i>
+                    <p className="text-gray-500 text-xs md:text-sm">
                         종목을 검색하고 &quot;분석 조회&quot; 버튼을 클릭하면<br />
                         자동으로 분석 결과를 가져옵니다.
                     </p>
                 </div>
             )}
 
-            {/* Toast */}
+            {/* Toast — bottom-20 on mobile to avoid BottomTabBar overlap */}
             {toast && (
-                <div className={`fixed bottom-6 right-6 z-[100] px-5 py-3 rounded-xl text-sm font-medium text-white shadow-2xl transition-all ${
+                <div className={`fixed bottom-20 md:bottom-6 right-4 md:right-6 left-4 md:left-auto z-[100] px-5 py-3 rounded-xl text-sm font-medium text-white shadow-2xl transition-all text-center md:text-left ${
                     toast.isError ? 'bg-red-600' : 'bg-emerald-600'
                 }`}>
                     {toast.message}

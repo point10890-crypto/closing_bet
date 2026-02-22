@@ -76,6 +76,13 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
+                    {/* Search - mobile only */}
+                    <button
+                        onClick={() => setPaletteOpen(true)}
+                        className="md:hidden p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors active:scale-95"
+                    >
+                        <i className="fas fa-search text-sm"></i>
+                    </button>
                     <button className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors relative active:scale-95">
                         <i className="far fa-bell text-sm"></i>
                         <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full border border-black"></span>

@@ -8,7 +8,7 @@ const tabs = [
     { name: 'KR', href: '/dashboard/kr', icon: 'fa-chart-line', color: 'rose' },
     { name: 'US', href: '/dashboard/us', icon: 'fa-globe-americas', color: 'green' },
     { name: 'Crypto', href: '/dashboard/crypto', icon: 'fa-bitcoin', color: 'yellow' },
-    { name: 'Economy', href: '/dashboard/economy', icon: 'fa-chart-bar', color: 'cyan' },
+    { name: 'ProPicks', href: '/dashboard/stock-analyzer', icon: 'fa-crosshairs', color: 'orange' },
 ];
 
 const activeColors: Record<string, string> = {
@@ -17,6 +17,7 @@ const activeColors: Record<string, string> = {
     green: 'text-green-400',
     yellow: 'text-yellow-400',
     cyan: 'text-cyan-400',
+    orange: 'text-orange-400',
 };
 
 const activeDots: Record<string, string> = {
@@ -25,6 +26,7 @@ const activeDots: Record<string, string> = {
     green: 'bg-green-400',
     yellow: 'bg-yellow-400',
     cyan: 'bg-cyan-400',
+    orange: 'bg-orange-400',
 };
 
 export default function BottomTabBar() {
