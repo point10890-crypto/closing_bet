@@ -507,6 +507,84 @@ def _run_us_update():
 
 
 # ============================================================
+# 전체 데이터 업데이트 (All-in-One)
+# ============================================================
+
+def _run_all_update():
+    """매일 07:00 KST — 전체 데이터 올 업데이트 (US + KR + Crypto)
+
+    모든 시장 데이터를 한 번에 갱신.
+    개별 작업 실패 시에도 나머지 작업 계속 실행.
+    """
+    logger.info("=" * 60)
+    logger.info("🌐 [ALL UPDATE] 전체 데이터 올 업데이트 시작 (07:00 KST)")
+    logger.info("=" * 60)
+
+    start_time = time.time()
+    results = []
+
+    # 1) US Market
+    logger.info("━━━ [1/4] US Market ━━━")
+    try:
+        ok = _run_us_market_update()
+        results.append(('🇺🇸 US Market', ok))
+    except Exception as e:
+        logger.error(f"US Market 실패: {e}")
+        results.append(('🇺🇸 US Market', False))
+
+    # 2) KR 수급/VCP
+    logger.info("━━━ [2/4] KR 수급/VCP ━━━")
+    try:
+        inst_ok = _run_institutional_data()
+        vcp_ok = _run_vcp_signal_scan()
+        results.append(('🇰🇷 KR 수급', inst_ok))
+        results.append(('🇰🇷 KR VCP', vcp_ok))
+    except Exception as e:
+        logger.error(f"KR 수급/VCP 실패: {e}")
+        results.append(('🇰🇷 KR 수급/VCP', False))
+
+    # 3) KR 종가베팅 V2
+    logger.info("━━━ [3/4] KR 종가베팅 V2 ━━━")
+    try:
+        ok = _run_jongga_v2()
+        results.append(('🎯 종가베팅 V2', ok))
+    except Exception as e:
+        logger.error(f"종가베팅 V2 실패: {e}")
+        results.append(('🎯 종가베팅 V2', False))
+
+    # 4) Crypto Pipeline
+    logger.info("━━━ [4/4] Crypto Pipeline ━━━")
+    try:
+        ok = _run_crypto_pipeline()
+        results.append(('🪙 Crypto', ok))
+    except Exception as e:
+        logger.error(f"Crypto 실패: {e}")
+        results.append(('🪙 Crypto', False))
+
+    # 결과 요약
+    elapsed = time.time() - start_time
+    success_count = sum(1 for _, ok in results if ok)
+    total_count = len(results)
+
+    summary_lines = []
+    for name, ok in results:
+        status = "✅" if ok else "❌"
+        summary_lines.append(f"  {status} {name}")
+
+    now_str = _get_kst_now().strftime('%Y-%m-%d %H:%M')
+    msg = (
+        f"<b>🌐 07:00 전체 올 업데이트 완료</b>\n"
+        f"⏰ {now_str} ({elapsed:.0f}초)\n"
+        f"결과: {success_count}/{total_count}\n\n"
+        + "\n".join(summary_lines)
+    )
+    _send_telegram(msg)
+
+    logger.info(f"🌐 [ALL UPDATE] 완료: {success_count}/{total_count} ({elapsed:.0f}초)")
+    return success_count > 0
+
+
+# ============================================================
 # 클라우드 스케줄러 (Flask 백그라운드 스레드)
 # ============================================================
 
@@ -591,6 +669,11 @@ def _cloud_scheduler_loop():
             _safe_run, _run_round2, 'KR Round 2 (수급/VCP)'
         )
 
+    # 07:00 KST — 전체 올 업데이트 (매일, 주말 포함)
+    sched.every().day.at(sched_time('07:00')).do(
+        _safe_run, _run_all_update, 'ALL DATA UPDATE (07:00)'
+    )
+
     # Crypto — 매 4시간 (24/7)
     crypto_times = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00']
     for ct in crypto_times:
@@ -600,6 +683,7 @@ def _cloud_scheduler_loop():
 
     logger.info("📅 클라우드 스케줄 등록 완료:")
     logger.info(f"   환경: {'Render (UTC)' if is_render else 'Local (KST)'}")
+    logger.info(f"   🌐 매일 07:00 KST → 전체 올 업데이트 (US+KR+Crypto)")
     logger.info(f"   🇺🇸 평일 04:00 KST → US Market")
     logger.info(f"   🇰🇷 평일 15:10 KST → 종가베팅 V2")
     logger.info(f"   🇰🇷 평일 16:00 KST → 수급/VCP")
@@ -608,6 +692,7 @@ def _cloud_scheduler_loop():
     # 시작 알림
     _send_telegram(
         "<b>⏰ CloudScheduler 시작</b>\n\n"
+        f"🌐 매일 07:00 KST → 전체 올 업데이트\n"
         f"🇺🇸 US: 04:00 KST (평일)\n"
         f"🇰🇷 KR: 15:10, 16:00 KST (평일)\n"
         f"🪙 Crypto: 4시간마다 (24/7)\n"

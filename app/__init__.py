@@ -80,7 +80,8 @@ def create_app(config=None):
         from flask import jsonify as _jsonify
         import threading
         from app.utils.scheduler import (
-            _run_jongga_v2, _run_round2, _run_us_update, _run_crypto_pipeline
+            _run_jongga_v2, _run_round2, _run_us_update, _run_crypto_pipeline,
+            _run_all_update
         )
 
         tasks_map = {
@@ -88,6 +89,7 @@ def create_app(config=None):
             'round2': _run_round2,
             'us-update': _run_us_update,
             'crypto': _run_crypto_pipeline,
+            'all-update': _run_all_update,
         }
         func = tasks_map.get(task)
         if not func:
