@@ -118,6 +118,7 @@ class ScoreDetail:
     consolidation: int = 0             # 기간조정 (0~1점)
     supply: int = 0                    # 수급 (0~2점)
     disclosure: int = 0                # 공시 (0~2점) - DART 호재공시
+    analyst: int = 0                   # 애널리스트 (0~3점) - yfinance 컨센서스
 
     llm_reason: str = ""               # LLM 분석 결과
     llm_source: str = ""               # LLM 소스 (gemini/claude/openai/keyword_fallback)
@@ -127,7 +128,7 @@ class ScoreDetail:
         """총점"""
         return (self.news + self.volume + self.chart +
                 self.candle + self.consolidation + self.supply +
-                max(0, self.disclosure))
+                max(0, self.disclosure) + self.analyst)
     
     @property
     def mandatory_passed(self) -> bool:
@@ -143,6 +144,7 @@ class ScoreDetail:
             "consolidation": self.consolidation,
             "supply": self.supply,
             "disclosure": self.disclosure,
+            "analyst": self.analyst,
             "llm_reason": self.llm_reason,
             "llm_source": self.llm_source,
             "total": self.total,

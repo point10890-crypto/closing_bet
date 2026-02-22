@@ -8,7 +8,9 @@
 - 캔들형태: 0~1점
 - 기간조정: 0~1점
 - 수급: 0~2점
-- 총점: 12점 만점
+- 공시: 0~2점
+- 애널리스트: 0~3점
+- 총점: 17점 만점
 """
 
 from typing import List, Optional, Tuple
@@ -35,6 +37,7 @@ class Scorer:
         supply: Optional[SupplyData],
         llm_result: Optional[dict] = None,
         dart_result: Optional[dict] = None,
+        analyst_result: Optional[dict] = None,
     ) -> Tuple[ScoreDetail, ChecklistDetail]:
         """
         전체 점수 계산
@@ -92,6 +95,10 @@ class Scorer:
         if disclosure_check.get("negative"):
             score.news = 0
             checklist.negative_news = True
+
+        # 8. 애널리스트 컨센서스 점수 (0~3점)
+        analyst_score = self._score_analyst(analyst_result)
+        score.analyst = analyst_score
 
         return score, checklist
     
@@ -411,6 +418,38 @@ class Scorer:
 
         # score는 DARTCollector가 이미 계산 (0, 1, 2)
         return max(0, min(2, score)), check
+
+    def _score_analyst(self, analyst_result: Optional[dict]) -> int:
+        """
+        애널리스트 컨센서스 점수 계산 (yfinance 기반)
+
+        analyst_result 구조:
+          {"consensus_score": float, "result": str, "analyst_count": int}
+
+        점수 기준:
+        - 3점: 적극매수 (consensus_score >= 4.3)
+        - 2점: 매수 (consensus_score >= 3.7)
+        - 1점: 중립 (consensus_score >= 2.7)
+        - 0점: 매도/적극매도 또는 데이터 없음
+        """
+        if not analyst_result:
+            return 0
+
+        consensus = analyst_result.get("consensus_score", 0)
+        analyst_count = analyst_result.get("analyst_count", 0)
+
+        # 애널리스트 수가 너무 적으면 신뢰도 낮음
+        if analyst_count < 3:
+            return 0
+
+        if consensus >= 4.3:
+            return 3  # 적극매수
+        elif consensus >= 3.7:
+            return 2  # 매수
+        elif consensus >= 2.7:
+            return 1  # 중립
+        else:
+            return 0  # 매도/적극매도
 
     def determine_grade(
         self,

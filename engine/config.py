@@ -56,6 +56,7 @@ class SignalConfig:
         "consolidation": 1,  # 기간조정
         "supply": 2,         # 수급
         "disclosure": 2,     # DART 호재공시
+        "analyst": 3,        # 애널리스트 컨센서스 (yfinance)
     })
     
     # === 등급별 기준 ===

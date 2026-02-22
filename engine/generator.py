@@ -68,7 +68,58 @@ class SignalGenerator:
             await self._collector.__aexit__(exc_type, exc_val, exc_tb)
         if self._news:
             await self._news.__aexit__(exc_type, exc_val, exc_tb)
-    
+
+    @staticmethod
+    def _to_yahoo_ticker(code: str, market: str) -> str:
+        """한국 종목코드 → Yahoo Finance 티커 변환"""
+        if market == "KOSPI":
+            return f"{code}.KS"
+        elif market == "KOSDAQ":
+            return f"{code}.KQ"
+        return code
+
+    def _fetch_analyst_consensus(self, stock: StockData) -> Optional[dict]:
+        """yfinance 애널리스트 컨센서스 조회 (동기, run_in_executor 용)"""
+        try:
+            import yfinance as yf
+
+            yahoo_ticker = self._to_yahoo_ticker(stock.code, stock.market)
+            ticker = yf.Ticker(yahoo_ticker)
+            recs = ticker.recommendations
+
+            if recs is None or recs.empty:
+                return None
+
+            latest = recs.iloc[-1]
+            counts = {k: int(latest.get(k, 0)) for k in
+                      ("strongBuy", "buy", "hold", "sell", "strongSell")}
+            total = sum(counts.values())
+
+            if total == 0:
+                return None
+
+            # 가중 평균 (SB=5, B=4, H=3, S=2, SS=1)
+            weights = {"strongBuy": 5, "buy": 4, "hold": 3, "sell": 2, "strongSell": 1}
+            consensus_score = round(
+                sum(counts[k] * weights[k] for k in counts) / total, 2
+            )
+
+            labels = [(4.3, "적극매수"), (3.7, "매수"), (2.7, "중립"), (2.0, "매도")]
+            result_label = "적극매도"
+            for threshold, label in labels:
+                if consensus_score >= threshold:
+                    result_label = label
+                    break
+
+            return {
+                "consensus_score": consensus_score,
+                "result": result_label,
+                "analyst_count": total,
+            }
+        except Exception as e:
+            print(f"    ⚠ Analyst fetch failed for {stock.name}: {e}")
+            return None
+
     async def generate(
         self,
         target_date: date = None,
@@ -183,15 +234,26 @@ class SignalGenerator:
             if supply:
                 print(f"      -> Supply 5d: Foreign {supply.foreign_buy_5d}, Inst {supply.inst_buy_5d}")
             
-            # 6. 점수 계산 (LLM 결과 + DART 공시 반영)
-            score, checklist = self.scorer.calculate(stock, charts, news_list, supply, llm_result, dart_result)
+            # 6. 애널리스트 컨센서스 조회 (yfinance)
+            analyst_result = None
+            try:
+                analyst_result = await asyncio.get_event_loop().run_in_executor(
+                    None, self._fetch_analyst_consensus, stock
+                )
+                if analyst_result:
+                    print(f"    -> Analyst: {analyst_result['result']} ({analyst_result['consensus_score']}/5.0, {analyst_result['analyst_count']}명)")
+            except Exception as e:
+                print(f"    ⚠ Analyst consensus error: {e}")
+
+            # 7. 점수 계산 (LLM 결과 + DART 공시 + 애널리스트 반영)
+            score, checklist = self.scorer.calculate(stock, charts, news_list, supply, llm_result, dart_result, analyst_result)
             
             # 7. 등급 결정
             grade = self.scorer.determine_grade(stock, score)
             
             # C등급은 제외
             if grade == Grade.C:
-                print(f"    ❌ 탈락 {stock.name}: 점수 {score.total} (뉴스{score.news}, 수급{score.supply}, 거래대금{score.volume}, 차트{score.chart})")
+                print(f"    ❌ 탈락 {stock.name}: 점수 {score.total}/17 (뉴스{score.news}, 수급{score.supply}, 거래대금{score.volume}, 차트{score.chart}, 애널{score.analyst})")
                 return None
             
             # 7. 포지션 계산

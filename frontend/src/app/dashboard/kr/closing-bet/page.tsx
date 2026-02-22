@@ -12,6 +12,7 @@ interface ScoreDetail {
     consolidation: number;
     supply: number;
     disclosure: number;
+    analyst: number;
     llm_reason: string;
     llm_source?: string;
     total: number;
@@ -745,7 +746,7 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                     <div className="text-center mb-6">
                         <div className="inline-flex items-baseline gap-1">
                             <span className="text-4xl font-mono font-bold text-white">{signal.score.total}</span>
-                            <span className="text-sm text-gray-500">/ 14</span>
+                            <span className="text-sm text-gray-500">/ 17</span>
                         </div>
                         <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Total Score</div>
                     </div>
@@ -758,6 +759,7 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                         <ScoreBar label="Candle" score={signal.score.candle} max={1} />
                         <ScoreBar label="Consol" score={signal.score.consolidation} max={1} />
                         <ScoreBar label="DART" score={signal.score.disclosure || 0} max={2} />
+                        <ScoreBar label="Analyst" score={signal.score.analyst || 0} max={3} />
                     </div>
                 </div>
 
