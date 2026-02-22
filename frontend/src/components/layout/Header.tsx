@@ -25,15 +25,15 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
 
     return (
         <>
-            <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5 bg-[#09090b]/80 backdrop-blur-md shrink-0 z-40">
+            <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/10 md:border-white/5 bg-[#111113] md:bg-[#09090b]/80 backdrop-blur-md shrink-0 z-40">
                 {/* Left: Hamburger (mobile) + Breadcrumbs */}
                 <div className="flex items-center gap-3">
                     {/* Hamburger - mobile only */}
                     <button
                         onClick={onMenuClick}
-                        className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition-colors active:scale-95"
+                        className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors active:scale-95"
                     >
-                        <i className="fas fa-bars text-sm"></i>
+                        <i className="fas fa-bars text-base"></i>
                     </button>
 
                     {/* Brand - mobile only */}

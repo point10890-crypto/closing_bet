@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import BottomTabBar from '@/components/layout/BottomTabBar';
+import MobileSubNav from '@/components/layout/MobileSubNav';
 
 export default function DashboardLayout({
     children,
@@ -32,6 +33,7 @@ export default function DashboardLayout({
                     title="Dashboard"
                     onMenuClick={() => setSidebarOpen(true)}
                 />
+                <MobileSubNav />
                 <div className="flex-1 overflow-y-auto p-3 md:p-6 pb-20 md:pb-6 scroll-smooth">
                     {children}
                 </div>
