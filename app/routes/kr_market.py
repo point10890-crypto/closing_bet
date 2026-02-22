@@ -263,11 +263,15 @@ def get_vcp_history():
             hold_days = int(row.get('hold_days', 0)) if pd.notna(row.get('hold_days')) else None
             status = str(row.get('status', 'OPEN'))
 
+            # CSV에 name/market 컬럼이 없거나 비어있으면 ticker_map에서 조회
+            csv_name = str(row.get('name', '')).strip() if pd.notna(row.get('name')) else ''
+            csv_market = str(row.get('market', '')).strip() if pd.notna(row.get('market')) else ''
+
             signals.append({
                 'id': int(idx),
                 'ticker': ticker,
-                'name': row.get('name', '') if pd.notna(row.get('name', '')) else name_map.get(ticker, ticker),
-                'market': row.get('market', '') if pd.notna(row.get('market', '')) else market_map.get(ticker, ''),
+                'name': csv_name or name_map.get(ticker, ticker),
+                'market': csv_market or market_map.get(ticker, ''),
                 'signalDate': row['signal_date'].strftime('%m월 %d일') if hasattr(row['signal_date'], 'strftime') else str(row['signal_date']),
                 'foreign5d': int(row.get('foreign_5d', 0)) if pd.notna(row.get('foreign_5d')) else 0,
                 'inst5d': int(row.get('inst_5d', 0)) if pd.notna(row.get('inst_5d')) else 0,
