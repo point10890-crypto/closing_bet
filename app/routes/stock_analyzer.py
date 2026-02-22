@@ -6,15 +6,22 @@ import time
 import pandas as pd
 from io import BytesIO
 from flask import Blueprint, jsonify, request, send_file
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, WebDriverException
-from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
+
+# --- Selenium (선택적 import — 클라우드 환경에서는 Chrome 미설치) ---
+_SELENIUM_AVAILABLE = False
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import TimeoutException, WebDriverException
+    from webdriver_manager.chrome import ChromeDriverManager
+    _SELENIUM_AVAILABLE = True
+except ImportError:
+    print("[StockAnalyzer] selenium 미설치 — 분석 기능 비활성화 (검색/내보내기만 가능)")
 
 stock_analyzer_bp = Blueprint('stock_analyzer', __name__)
 
@@ -31,6 +38,10 @@ XPATH = "//*[@id='pro-score-mobile']/div/div[2]/div[3]/div/div/div[1]/div"
 
 # ChromeDriver 서비스 (lazy init)
 _chrome_service = None
+
+# Render 등 클라우드 환경 감지
+_IS_CLOUD = bool(os.environ.get('RENDER') or os.environ.get('RAILWAY_ENVIRONMENT')
+                 or os.environ.get('FLY_APP_NAME') or os.environ.get('DYNO'))
 
 
 def _load_stocks():
@@ -51,6 +62,8 @@ def _load_stocks():
 def _get_chrome_service():
     """ChromeDriver 서비스 (lazy init)"""
     global _chrome_service
+    if not _SELENIUM_AVAILABLE:
+        return None
     if _chrome_service is None:
         _chrome_service = Service(ChromeDriverManager().install())
     return _chrome_service
@@ -58,6 +71,8 @@ def _get_chrome_service():
 
 def _create_driver():
     """Headless Chrome 드라이버 생성"""
+    if not _SELENIUM_AVAILABLE:
+        raise RuntimeError("Selenium 미설치")
     opts = Options()
     opts.add_argument("--headless")
     opts.add_argument("--window-size=375,812")
@@ -66,6 +81,7 @@ def _create_driver():
         "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1")
     opts.add_argument("--disable-gpu")
     opts.add_argument("--no-sandbox")
+    opts.add_argument("--disable-dev-shm-usage")
     opts.add_experimental_option('excludeSwitches', ['enable-logging'])
     opts.page_load_strategy = 'eager'
     return webdriver.Chrome(service=_get_chrome_service(), options=opts)
@@ -73,6 +89,8 @@ def _create_driver():
 
 def _scrape_single(url):
     """단건 스크래핑: 드라이버 생성 → 접속 → 결과 추출 → 드라이버 종료"""
+    if not _SELENIUM_AVAILABLE or _IS_CLOUD:
+        return None
     driver = _create_driver()
     try:
         driver.get(url)
@@ -125,6 +143,19 @@ def analyze_stock():
 
     if not url:
         return jsonify({'error': 'URL이 없습니다.'}), 400
+
+    # 클라우드 환경 체크
+    if _IS_CLOUD:
+        return jsonify({
+            'error': '클라우드 환경에서는 Selenium 스크래핑을 지원하지 않습니다. 로컬 서버에서 실행해주세요.',
+            'name': name
+        }), 503
+
+    if not _SELENIUM_AVAILABLE:
+        return jsonify({
+            'error': 'Selenium이 설치되지 않았습니다. (pip install selenium webdriver-manager)',
+            'name': name
+        }), 503
 
     result = _scrape_single(url)
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
