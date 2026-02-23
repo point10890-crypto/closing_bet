@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
       { source: '/api/realtime-prices', destination: `${BACKEND_URL}/api/realtime-prices` },
       { source: '/api/data-version', destination: `${BACKEND_URL}/api/data-version` },
       { source: '/api/stock-analyzer/:path*', destination: `${BACKEND_URL}/api/stock-analyzer/:path*` },
+      { source: '/api/scheduler/:path*', destination: `${BACKEND_URL}/api/scheduler/:path*` },
     ];
   },
 };

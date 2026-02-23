@@ -159,9 +159,9 @@ def _run_jongga_v2():
 
         from engine.generator import run_screener
 
-        # 분석 기준일 계산
-        now = datetime.now()
-        target_date = date.today()
+        # 분석 기준일 계산 (KST 기준)
+        now = _get_kst_now()
+        target_date = now.date()
         if now.hour < 9:
             target_date = target_date - timedelta(days=1)
         if target_date.weekday() == 6:  # 일요일
@@ -598,6 +598,8 @@ def start_cloud_scheduler():
     - gunicorn 내에서 백그라운드 스레드로 실행
     - 멀티워커 환경에서 한 번만 실행 (파일 락)
     - schedule 라이브러리로 KST 기준 스케줄링
+    - 시작 시 stale 데이터 감지 → 즉시 catch-up 실행
+    - keep-alive self-ping으로 Render sleep 방지
     """
     global _scheduler_started
 
@@ -619,6 +621,11 @@ def start_cloud_scheduler():
     thread = threading.Thread(target=_cloud_scheduler_loop, daemon=True, name='CloudScheduler')
     thread.start()
     logger.info("[CloudScheduler] 백그라운드 스케줄러 시작됨")
+
+    # keep-alive 스레드: Render free tier sleep 방지 (12분마다 self-ping)
+    keepalive_thread = threading.Thread(target=_keep_alive_loop, daemon=True, name='KeepAlive')
+    keepalive_thread.start()
+    logger.info("[CloudScheduler] Keep-alive 스레드 시작됨")
 
 
 def _cloud_scheduler_loop():
@@ -699,6 +706,13 @@ def _cloud_scheduler_loop():
         f"📍 {'Render' if is_render else 'Local'}"
     )
 
+    # ── 시작 시 catch-up: stale 데이터 감지 → 즉시 실행 ──
+    try:
+        _check_and_catchup()
+    except Exception as e:
+        logger.error(f"Catch-up 실패: {e}")
+        traceback.print_exc()
+
     # ── 메인 루프 ──
     while True:
         try:
@@ -707,6 +721,113 @@ def _cloud_scheduler_loop():
             logger.error(f"스케줄 실행 에러: {e}")
             traceback.print_exc()
         time.sleep(30)
+
+
+def _check_and_catchup():
+    """서버 시작 시 stale 데이터 감지 → 놓친 작업 즉시 실행
+
+    Render free tier는 15분 비활성 시 서버를 sleep시킴.
+    깨어났을 때 놓친 스케줄을 catch-up하여 데이터 갱신.
+    """
+    now = _get_kst_now()
+    today = now.date()
+    is_weekday = now.weekday() < 5
+
+    logger.info(f"🔍 Catch-up 확인 중... KST: {now.strftime('%Y-%m-%d %H:%M')} ({'평일' if is_weekday else '주말'})")
+
+    # 1. 종가베팅 V2 — 가장 최근 영업일의 데이터가 있는지 확인
+    latest_path = os.path.join(DATA_DIR, 'jongga_v2_latest.json')
+    jongga_stale = False
+
+    # 마지막 영업일 계산
+    last_biz_day = today
+    if last_biz_day.weekday() == 6:  # 일요일
+        last_biz_day -= timedelta(days=2)
+    elif last_biz_day.weekday() == 5:  # 토요일
+        last_biz_day -= timedelta(days=1)
+    # 오전 9시 이전이면 전일 기준
+    if is_weekday and now.hour < 15:
+        # 15시(종가베팅 시간) 이전이면 전 영업일 확인
+        check_date = last_biz_day - timedelta(days=1)
+        if check_date.weekday() >= 5:
+            check_date -= timedelta(days=(check_date.weekday() - 4))
+    else:
+        check_date = last_biz_day
+
+    if os.path.exists(latest_path):
+        try:
+            with open(latest_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            data_date = data.get('date', '')
+            if data_date:
+                from datetime import date as date_cls
+                parts = data_date.split('-')
+                file_date = date_cls(int(parts[0]), int(parts[1]), int(parts[2]))
+                if file_date < check_date:
+                    jongga_stale = True
+                    logger.info(f"   📊 종가베팅 데이터 stale: 파일={data_date}, 기대={check_date}")
+            else:
+                jongga_stale = True
+        except Exception as e:
+            logger.warning(f"   종가베팅 파일 읽기 실패: {e}")
+            jongga_stale = True
+    else:
+        jongga_stale = True
+        logger.info("   📊 종가베팅 데이터 파일 없음")
+
+    # 2. 평일 + 15시 이후 + 데이터 stale → 종가베팅 즉시 실행
+    if is_weekday and now.hour >= 15 and jongga_stale:
+        logger.info("🚀 [Catch-up] 종가베팅 V2 즉시 실행!")
+        _send_telegram("🔄 <b>Catch-up 실행</b>\n서버 재시작 후 종가베팅 데이터 갱신 시작")
+        threading.Thread(
+            target=_safe_run, args=(_run_jongga_v2, 'Catch-up: 종가베팅 V2'),
+            daemon=True
+        ).start()
+    elif jongga_stale:
+        # 평일 오전이거나 주말 → 전체 올 업데이트
+        logger.info("🚀 [Catch-up] 전체 올 업데이트 즉시 실행!")
+        _send_telegram("🔄 <b>Catch-up 실행</b>\n서버 재시작 후 전체 데이터 갱신 시작")
+        threading.Thread(
+            target=_safe_run, args=(_run_all_update, 'Catch-up: ALL UPDATE'),
+            daemon=True
+        ).start()
+    else:
+        logger.info("✅ 데이터 최신 상태 — catch-up 불필요")
+
+
+def _keep_alive_loop():
+    """Render free tier sleep 방지 — 12분마다 self-ping
+
+    Render는 15분 비활성 시 서버를 sleep시킴.
+    /api/health 엔드포인트를 주기적으로 호출하여 서버를 깨어있게 함.
+    """
+    import requests
+
+    # 서버 완전 시작 대기
+    time.sleep(30)
+
+    # Render 배포 URL 자동 감지
+    render_url = os.getenv('RENDER_EXTERNAL_URL', '')
+    if not render_url:
+        # Render가 자동 설정하는 서비스 URL 시도
+        service_name = os.getenv('RENDER_SERVICE_NAME', '')
+        if service_name:
+            render_url = f"https://{service_name}.onrender.com"
+
+    if not render_url:
+        logger.info("[KeepAlive] RENDER_EXTERNAL_URL 미설정 — self-ping 비활성")
+        return
+
+    health_url = f"{render_url}/api/health"
+    logger.info(f"[KeepAlive] 시작: {health_url} (12분 간격)")
+
+    while True:
+        try:
+            resp = requests.get(health_url, timeout=10)
+            logger.debug(f"[KeepAlive] ping OK: {resp.status_code}")
+        except Exception as e:
+            logger.warning(f"[KeepAlive] ping 실패: {e}")
+        time.sleep(720)  # 12분
 
 
 def _safe_run(func, name: str):

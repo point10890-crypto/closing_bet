@@ -31,6 +31,17 @@ from engine.llm_analyzer import LLMAnalyzer, MultiAIConsensusScreener
 from engine.dart_collector import DARTCollector
 
 
+def _get_kst_now():
+    """현재 KST 시간 반환"""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.now(ZoneInfo('Asia/Seoul'))
+    except ImportError:
+        from datetime import timezone
+        kst = timezone(timedelta(hours=9))
+        return datetime.now(kst)
+
+
 class SignalGenerator:
     """종가베팅 시그널 생성기 (v2)"""
     
@@ -478,7 +489,7 @@ def save_result_to_json(result: ScreenerResult, claude_picks: dict = None):
         "by_grade": result.by_grade,
         "by_market": result.by_market,
         "processing_time_ms": result.processing_time_ms,
-        "updated_at": datetime.now().isoformat(),
+        "updated_at": _get_kst_now().isoformat(),
         "claude_picks": claude_picks or {}
     }
     

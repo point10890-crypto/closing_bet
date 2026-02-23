@@ -14,13 +14,19 @@ from app.utils.cache import get_sector, SECTOR_MAP
 
 common_bp = Blueprint('common', __name__)
 
+# ── 고정 경로 (상대경로 의존 제거) ──────────────────────
+_ROUTES_DIR = os.path.dirname(os.path.abspath(__file__))  # app/routes/
+_APP_DIR = os.path.dirname(_ROUTES_DIR)                    # app/
+_BASE_DIR = os.path.dirname(_APP_DIR)                      # project root
+_DATA_DIR = os.path.join(_BASE_DIR, 'data')
+
 # Ticker 맵 로드
 try:
-    # Load ticker map (Root directory)
-    map_path = 'ticker_to_yahoo_map.csv'
+    # Load ticker map (절대경로 사용)
+    map_path = os.path.join(_BASE_DIR, 'ticker_to_yahoo_map.csv')
     if not os.path.exists(map_path):
-        map_path = os.path.join('data', 'ticker_to_yahoo_map.csv')
-    
+        map_path = os.path.join(_DATA_DIR, 'ticker_to_yahoo_map.csv')
+
     try:
         map_df = pd.read_csv(map_path, dtype=str)
     except FileNotFoundError:
@@ -41,7 +47,7 @@ def get_portfolio_data():
         
         if target_date:
             # --- Historical Data Mode ---
-            csv_path = os.path.join('us_market', 'data', 'recommendation_history.csv')
+            csv_path = os.path.join(_BASE_DIR, 'us_market', 'data', 'recommendation_history.csv')
             if not os.path.exists(csv_path):
                 return jsonify({'error': 'History not found'}), 404
                 
@@ -115,7 +121,7 @@ def get_portfolio_data():
 
         else:
             # --- Current Live Data Mode ---
-            csv_path = os.path.join('data', 'wave_transition_analysis_results.csv')
+            csv_path = os.path.join(_DATA_DIR, 'wave_transition_analysis_results.csv')
             if not os.path.exists(csv_path):
                 return jsonify({
                     'data_missing': True,
@@ -240,7 +246,7 @@ def portfolio_summary():
         }
         
         # KR Market
-        kr_path = os.path.join('data', 'kr_ai_analysis.json')
+        kr_path = os.path.join(_DATA_DIR, 'kr_ai_analysis.json')
         if os.path.exists(kr_path):
             with open(kr_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -433,7 +439,7 @@ def _fetch_market_indices():
 def _fetch_performance_data():
     """성과 데이터 조회"""
     performance_data = []
-    perf_csv_path = os.path.join('us_market', 'data', 'performance_report.csv')
+    perf_csv_path = os.path.join(_BASE_DIR, 'us_market', 'data', 'performance_report.csv')
     
     if os.path.exists(perf_csv_path):
         perf_df = pd.read_csv(perf_csv_path)
@@ -463,74 +469,74 @@ def get_data_status():
     data_files_to_check = [
         {
             'name': 'Daily Prices',
-            'path': 'data/daily_prices.csv',
+            'path': os.path.join(_DATA_DIR, 'daily_prices.csv'),
             'link': '/dashboard/kr/closing-bet',
             'menu': 'Closing Bet'
         },
         {
             'name': 'Institutional Trend',
-            'path': 'data/all_institutional_trend_data.csv',
+            'path': os.path.join(_DATA_DIR, 'all_institutional_trend_data.csv'),
             'link': '/dashboard/kr/vcp',
             'menu': 'VCP Signals'
         },
         {
             'name': 'AI Analysis',
-            'path': 'data/kr_ai_analysis.json',
+            'path': os.path.join(_DATA_DIR, 'kr_ai_analysis.json'),
             'link': '/dashboard/kr/vcp',
             'menu': 'VCP Signals'
         },
         {
             'name': 'VCP Signals',
-            'path': 'data/signals_log.csv',
+            'path': os.path.join(_DATA_DIR, 'signals_log.csv'),
             'link': '/dashboard/kr/vcp',
             'menu': 'VCP Signals'
         },
         {
             'name': 'AI Jongga V2',
-            'path': 'data/jongga_v2_latest.json',
+            'path': os.path.join(_DATA_DIR, 'jongga_v2_latest.json'),
             'link': '/dashboard/kr/closing-bet',
             'menu': 'Closing Bet'
         },
         # ── Crypto Analytics ──
         {
             'name': 'Crypto Market Gate',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'market_gate.json'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'output', 'market_gate.json'),
             'link': '/dashboard/crypto',
             'menu': 'Crypto Overview'
         },
         {
             'name': 'Crypto Briefing',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'crypto_briefing.json'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'output', 'crypto_briefing.json'),
             'link': '/dashboard/crypto/briefing',
             'menu': 'Crypto Briefing'
         },
         {
             'name': 'BTC Prediction',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'btc_prediction.json'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'output', 'btc_prediction.json'),
             'link': '/dashboard/crypto/prediction',
             'menu': 'Crypto Prediction'
         },
         {
             'name': 'Crypto Risk',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'crypto_risk.json'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'output', 'crypto_risk.json'),
             'link': '/dashboard/crypto/risk',
             'menu': 'Crypto Risk'
         },
         {
             'name': 'Lead-Lag Analysis',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'lead_lag', 'results.json'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'lead_lag', 'results.json'),
             'link': '/dashboard/crypto/leadlag',
             'menu': 'Crypto Lead-Lag'
         },
         {
             'name': 'Crypto VCP Signals',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'signals.sqlite3'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'signals.sqlite3'),
             'link': '/dashboard/crypto/signals',
             'menu': 'Crypto Signals'
         },
         {
             'name': 'Crypto Backtest',
-            'path': os.path.join('crypto-analytics', 'crypto_market', 'output', 'backtest_result.json'),
+            'path': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'output', 'backtest_result.json'),
             'link': '/dashboard/crypto/backtest',
             'menu': 'Crypto Backtest'
         },
@@ -602,7 +608,7 @@ def get_data_status():
     }
     
     # Check log file for last run info
-    log_path = 'logs/kr_update.log'
+    log_path = os.path.join(_BASE_DIR, 'logs', 'kr_update.log')
     if os.path.exists(log_path):
         stat = os.stat(log_path)
         mtime = datetime.fromtimestamp(stat.st_mtime)
@@ -649,32 +655,32 @@ def update_single_data():
         # ── Crypto Analytics ──
         'crypto_gate': {
             'name': 'Crypto Market Gate',
-            'script': os.path.join('crypto-analytics', 'crypto_market', 'market_gate.py'),
+            'script': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'market_gate.py'),
             'args': []
         },
         'crypto_scan': {
             'name': 'Crypto VCP Scan',
-            'script': os.path.join('crypto-analytics', 'crypto_market', 'run_scan.py'),
+            'script': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'run_scan.py'),
             'args': []
         },
         'crypto_briefing': {
             'name': 'Crypto Briefing',
-            'script': os.path.join('crypto-analytics', 'crypto_market', 'crypto_briefing.py'),
+            'script': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'crypto_briefing.py'),
             'args': []
         },
         'crypto_prediction': {
             'name': 'Crypto Prediction',
-            'script': os.path.join('crypto-analytics', 'crypto_market', 'crypto_prediction.py'),
+            'script': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'crypto_prediction.py'),
             'args': []
         },
         'crypto_risk': {
             'name': 'Crypto Risk',
-            'script': os.path.join('crypto-analytics', 'crypto_market', 'crypto_risk.py'),
+            'script': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'crypto_risk.py'),
             'args': []
         },
         'crypto_leadlag': {
             'name': 'Crypto Lead-Lag',
-            'script': os.path.join('crypto-analytics', 'crypto_market', 'lead_lag', 'lead_lag_analysis.py'),
+            'script': os.path.join(_BASE_DIR, 'crypto-analytics', 'crypto_market', 'lead_lag', 'lead_lag_analysis.py'),
             'args': []
         },
     }
@@ -851,9 +857,9 @@ def get_backtest_summary():
     try:
         # Check potential paths for VCP results
         candidates = [
-            os.path.join('data', 'backtest', 'final_backtest_results.csv'),
-            os.path.join('data', 'final_backtest_results.csv'),
-            'final_backtest_results.csv'
+            os.path.join(_DATA_DIR, 'backtest', 'final_backtest_results.csv'),
+            os.path.join(_DATA_DIR, 'final_backtest_results.csv'),
+            os.path.join(_BASE_DIR, 'final_backtest_results.csv')
         ]
         csv_path = None
         for p in candidates:
@@ -899,7 +905,7 @@ def get_backtest_summary():
 
     # 2. Closing Bet (Jongga V2) Backtest
     try:
-        data_dir = 'data'
+        data_dir = _DATA_DIR
         history_files = glob.glob(os.path.join(data_dir, 'jongga_v2_results_*.json'))
         debug_info['jongga_files_count'] = len(history_files)
         
