@@ -1,56 +1,52 @@
 // API utility functions
+//
+// Architecture:
+//   Local:  /api/kr/* → next.config.ts rewrite → Flask (localhost:5002)
+//   Vercel: /api/data/kr/* → static JSON snapshot (direct route handler)
+//
+// On Vercel, we bypass rewrite by calling /api/data/* directly to avoid ISR cache issues.
 
-// Use NEXT_PUBLIC_API_URL for deployed environments, empty for local (rewrites proxy)
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
-/**
- * Convert /api/kr/signals → /api/data/kr/signals (static data fallback)
- */
-function toDataPath(endpoint: string): string {
-    return endpoint.replace(/^\/api\//, '/api/data/');
+// NEXT_PUBLIC_API_URL이 비어있으면 Vercel 배포 환경
+// Vercel에서는 /api/kr/signals → /api/data/kr/signals 로 직접 변환
+// rewrite에 의존하지 않고 직접 route handler로 라우팅
+const USE_DATA_PREFIX = !API_BASE;
+function resolveEndpoint(endpoint: string): string {
+    if (!USE_DATA_PREFIX) return endpoint;
+
+    // /api/health → /api/data/health
+    // /api/kr/signals → /api/data/kr/signals
+    // /api/us/decision-signal → /api/data/us/decision-signal
+    // /api/data-version → /api/data/data-version
+    const match = endpoint.match(/^\/api\/(.+)$/);
+    if (match && !endpoint.startsWith('/api/data/')) {
+        return `/api/data/${match[1]}`;
+    }
+    return endpoint;
 }
 
 export async function fetchAPI<T>(endpoint: string): Promise<T> {
-    // Try main API (Flask proxy on local, or direct)
-    try {
-        const response = await fetch(`${API_BASE}${endpoint}`);
-        if (response.ok) return response.json();
-    } catch {
-        // Network error — try fallback
+    const resolvedEndpoint = resolveEndpoint(endpoint);
+    const response = await fetch(`${API_BASE}${resolvedEndpoint}`, {
+        cache: 'no-store',  // 항상 최신 데이터 — ISR 캐시 비활성화
+    });
+    if (!response.ok) {
+        throw new Error(`API Error: ${resolvedEndpoint} (${response.status})`);
     }
-
-    // Fallback: static data snapshot (for Vercel without backend)
-    try {
-        const fallbackResponse = await fetch(`${API_BASE}${toDataPath(endpoint)}`);
-        if (fallbackResponse.ok) return fallbackResponse.json();
-    } catch {
-        // Fallback also failed
-    }
-
-    throw new Error(`API Error: ${endpoint}`);
+    return response.json();
 }
 
 export async function postAPI<T>(endpoint: string, body?: any): Promise<T> {
-    try {
-        const response = await fetch(`${API_BASE}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: body ? JSON.stringify(body) : undefined,
-        });
-        if (response.ok) return response.json();
-    } catch {
-        // POST fallback: try GET on static data
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!response.ok) {
+        throw new Error(`API Error: ${endpoint} (${response.status})`);
     }
-
-    // POST endpoints fallback to static GET
-    try {
-        const fallbackResponse = await fetch(`${API_BASE}${toDataPath(endpoint)}`);
-        if (fallbackResponse.ok) return fallbackResponse.json();
-    } catch {
-        // No fallback
-    }
-
-    throw new Error(`API Error: ${endpoint}`);
+    return response.json();
 }
 
 // KR Market API Types
