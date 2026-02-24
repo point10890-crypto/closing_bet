@@ -723,19 +723,134 @@ def get_backtest():
 
 @us_bp.route('/decision-signal')
 def get_decision_signal():
-    """Decision signal (market gate + prediction combined)"""
+    """Decision signal — 5개 데이터 소스를 종합하여 투자 신호 생성
+
+    Components:
+      market_gate (±15), regime (±15), prediction (±10), risk (±10), sector (±10)
+    Base score: 50 → final 0~100
+    """
     try:
-        gate = _load_preview_json('market_data.json')
-        pred = _load_preview_json('prediction.json')
-        regime = _load_preview_json('regime_config.json')
-        data = {
-            'market_gate': gate,
-            'prediction': pred,
-            'regime': regime,
+        gate_data = _load_preview_json('market_data.json') or {}
+        pred_data = _load_preview_json('prediction.json') or {}
+        regime_data = _load_preview_json('regime_config.json') or {}
+        risk_data = _load_preview_json('risk_alerts.json') or {}
+        sector_data = _load_preview_json('sector_rotation.json') or {}
+        top_picks = _load_preview_json('final_top10_report.json') or _load_preview_json('top_picks.json') or {}
+
+        # --- 1. Market Gate (±15) ---
+        gate_score_raw = 0
+        gate_val = '--'
+        # gate_data from market_data.json contains fear_greed, indices etc.
+        # Try direct gate endpoint data
+        try:
+            import requests as _req
+            _gate_resp = _req.get('http://localhost:5002/api/us/market-gate', timeout=3).json()
+            gate_val = str(_gate_resp.get('score', '--'))
+            _gs = _gate_resp.get('score', 50)
+            gate_score_raw = (_gs - 50) / 50 * 15  # 0~100 → ±15
+        except Exception:
+            pass
+
+        # --- 2. Regime (±15) ---
+        regime_label = regime_data.get('regime', 'neutral')
+        regime_score_raw = 0
+        regime_map = {'risk_on': 15, 'neutral': 0, 'risk_off': -10, 'crisis': -15}
+        regime_score_raw = regime_map.get(regime_label, 0)
+
+        # --- 3. ML Prediction (±10) ---
+        spy_pred = {}
+        if 'predictions' in pred_data:
+            spy_pred = pred_data['predictions'].get('spy', pred_data['predictions'].get('SPY', {}))
+        elif 'spy' in pred_data:
+            spy_pred = pred_data['spy']
+        bullish_prob = spy_pred.get('bullish_probability', 50)
+        pred_score_raw = (bullish_prob - 50) / 50 * 10  # 0~100 → ±10
+
+        # --- 4. Risk (±10) ---
+        risk_level = 'N/A'
+        risk_score_raw = 0
+        if risk_data:
+            risk_level = risk_data.get('portfolio_summary', {}).get('risk_level', 'N/A')
+            risk_map = {'low': 10, 'medium': 0, 'high': -7, 'critical': -10}
+            risk_score_raw = risk_map.get(risk_level.lower(), 0)
+
+        # --- 5. Sector Phase (±10) ---
+        sector_phase = 'N/A'
+        sector_score_raw = 0
+        if sector_data:
+            rotation = sector_data.get('rotation_signals', {})
+            sector_phase = rotation.get('current_phase', 'N/A')
+            phase_map = {'expansion': 10, 'recovery': 7, 'peak': 0, 'slowdown': -5, 'contraction': -10}
+            sector_score_raw = phase_map.get(sector_phase.lower(), 0)
+
+        # --- Final Score ---
+        final_score = max(0, min(100, round(50 + gate_score_raw + regime_score_raw + pred_score_raw + risk_score_raw + sector_score_raw)))
+
+        # --- Action ---
+        if final_score >= 75:
+            action = 'STRONG_BUY'
+        elif final_score >= 60:
+            action = 'BUY'
+        elif final_score >= 40:
+            action = 'NEUTRAL'
+        elif final_score >= 25:
+            action = 'CAUTIOUS'
+        else:
+            action = 'DEFENSIVE'
+
+        # --- Timing ---
+        if action in ('STRONG_BUY', 'BUY'):
+            timing = 'NOW'
+        elif action == 'NEUTRAL':
+            timing = 'WAIT'
+        else:
+            timing = 'HOLD'
+
+        # --- Warnings ---
+        warnings = []
+        if regime_label == 'risk_off':
+            warnings.append('시장 레짐이 Risk-Off 상태입니다')
+        if risk_level.lower() in ('high', 'critical'):
+            warnings.append(f'포트폴리오 리스크 레벨: {risk_level}')
+        if bullish_prob < 40:
+            warnings.append(f'ML 모델 하락 확률 {100 - bullish_prob:.0f}%')
+        alerts = risk_data.get('alerts', [])
+        for a in alerts[:3]:
+            if a.get('severity') in ('high', 'critical'):
+                warnings.append(a.get('message', ''))
+
+        # --- Top Picks ---
+        top_pick_list = []
+        raw_picks = top_picks.get('top_picks', [])[:5]
+        for p in raw_picks:
+            top_pick_list.append({
+                'ticker': p.get('ticker', ''),
+                'name': p.get('name', ''),
+                'final_score': p.get('final_score', 0),
+                'grade': p.get('grade', ''),
+                'ai_recommendation': p.get('ai_recommendation', ''),
+                'target_upside': p.get('target_upside', 0),
+            })
+
+        result = {
+            'action': action,
+            'score': final_score,
+            'components': {
+                'market_gate': {'score': float(gate_val) if gate_val != '--' else 0, 'contribution': round(gate_score_raw, 1)},
+                'regime': {'regime': regime_label, 'contribution': round(regime_score_raw, 1)},
+                'prediction': {'spy_bullish': round(bullish_prob, 1), 'contribution': round(pred_score_raw, 1)},
+                'risk': {'level': risk_level, 'contribution': round(risk_score_raw, 1)},
+                'sector_phase': {'phase': sector_phase, 'contribution': round(sector_score_raw, 1)},
+            },
+            'top_picks': top_pick_list,
+            'timing': timing,
+            'warnings': [w for w in warnings if w],
             'timestamp': datetime.now().isoformat(),
         }
-        return jsonify(data)
+        return jsonify(result)
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 

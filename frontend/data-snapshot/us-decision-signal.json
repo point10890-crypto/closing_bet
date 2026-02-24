@@ -1,0 +1,71 @@
+{
+  "action": "BUY",
+  "components": {
+    "market_gate": {
+      "contribution": 4.5,
+      "score": 65.0
+    },
+    "prediction": {
+      "contribution": 4.3,
+      "spy_bullish": 71.3
+    },
+    "regime": {
+      "contribution": 0,
+      "regime": "neutral"
+    },
+    "risk": {
+      "contribution": 10,
+      "level": "Low"
+    },
+    "sector_phase": {
+      "contribution": 0,
+      "phase": "Late Cycle"
+    }
+  },
+  "score": 69,
+  "timestamp": "2026-02-24T19:04:47.537817",
+  "timing": "NOW",
+  "top_picks": [
+    {
+      "ai_recommendation": "매수",
+      "final_score": 75.0,
+      "grade": "🌟 A급 (적극 매수)",
+      "name": "Align Technology, Inc.",
+      "target_upside": 4.1,
+      "ticker": "ALGN"
+    },
+    {
+      "ai_recommendation": "매수",
+      "final_score": 73.4,
+      "grade": "📈 B급 (매수 고려)",
+      "name": "Aptiv PLC",
+      "target_upside": 20.8,
+      "ticker": "APTV"
+    },
+    {
+      "ai_recommendation": "매수",
+      "final_score": 72.3,
+      "grade": "📈 B급 (매수 고려)",
+      "name": "Applied Materials, Inc.",
+      "target_upside": 9.7,
+      "ticker": "AMAT"
+    },
+    {
+      "ai_recommendation": "매수",
+      "final_score": 71.0,
+      "grade": "📈 B급 (매수 고려)",
+      "name": "Amgen Inc.",
+      "target_upside": -7.8,
+      "ticker": "AMGN"
+    },
+    {
+      "ai_recommendation": "매수",
+      "final_score": 70.8,
+      "grade": "🌟 A급 (적극 매수)",
+      "name": "The Allstate Corporation",
+      "target_upside": 14.6,
+      "ticker": "ALL"
+    }
+  ],
+  "warnings": []
+}

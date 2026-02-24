@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5001';
+// Local: BACKEND_URL=http://localhost:5002 → rewrites proxy to Flask
+// Vercel: BACKEND_URL not set → no rewrites → Next.js API routes serve static data
+const BACKEND_URL = process.env.BACKEND_URL || '';
 
 const nextConfig: NextConfig = {
-  // Allow external access (ngrok, mobile devices on same network)
   async headers() {
     return [
       {
@@ -15,8 +16,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Flask Backend Proxy (exclude NextAuth routes which are handled by Next.js)
+  // Flask Backend Proxy — only when BACKEND_URL is explicitly set (local dev)
   async rewrites() {
+    if (!BACKEND_URL) {
+      // Vercel: no backend → Next.js API routes handle data
+      return [];
+    }
     return [
       { source: '/api/auth/register', destination: `${BACKEND_URL}/api/auth/register` },
       { source: '/api/auth/login', destination: `${BACKEND_URL}/api/auth/login` },

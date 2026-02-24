@@ -3,24 +3,54 @@
 // Use NEXT_PUBLIC_API_URL for deployed environments, empty for local (rewrites proxy)
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
+/**
+ * Convert /api/kr/signals → /api/data/kr/signals (static data fallback)
+ */
+function toDataPath(endpoint: string): string {
+    return endpoint.replace(/^\/api\//, '/api/data/');
+}
+
 export async function fetchAPI<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${API_BASE}${endpoint}`);
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+    // Try main API (Flask proxy on local, or direct)
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`);
+        if (response.ok) return response.json();
+    } catch {
+        // Network error — try fallback
     }
-    return response.json();
+
+    // Fallback: static data snapshot (for Vercel without backend)
+    try {
+        const fallbackResponse = await fetch(`${API_BASE}${toDataPath(endpoint)}`);
+        if (fallbackResponse.ok) return fallbackResponse.json();
+    } catch {
+        // Fallback also failed
+    }
+
+    throw new Error(`API Error: ${endpoint}`);
 }
 
 export async function postAPI<T>(endpoint: string, body?: any): Promise<T> {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        if (response.ok) return response.json();
+    } catch {
+        // POST fallback: try GET on static data
     }
-    return response.json();
+
+    // POST endpoints fallback to static GET
+    try {
+        const fallbackResponse = await fetch(`${API_BASE}${toDataPath(endpoint)}`);
+        if (fallbackResponse.ok) return fallbackResponse.json();
+    } catch {
+        // No fallback
+    }
+
+    throw new Error(`API Error: ${endpoint}`);
 }
 
 // KR Market API Types

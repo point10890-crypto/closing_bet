@@ -397,13 +397,9 @@ def collect_historical_institutional():
 
 
 def run_ai_analysis_scan():
-    """AI 분석 및 JSON 생성 (kr_ai_analysis.json)"""
-    logger.info("🤖 AI 종목 분석 및 데이터 생성 중...")
+    """AI 분석 JSON 생성 (kr_ai_analysis.json) — signals_log.csv OPEN 시그널 기반"""
+    logger.info("🤖 AI 분석 JSON 생성 중 (signals_log.csv → kr_ai_analysis.json)...")
     try:
-        if Config.BASE_DIR not in sys.path:
-            sys.path.append(Config.BASE_DIR)
-
-        from kr_ai_analyzer import generate_ai_recommendations
         import pandas as pd
 
         signals_path = os.path.join(Config.DATA_DIR, 'signals_log.csv')
@@ -412,7 +408,9 @@ def run_ai_analysis_scan():
             return True
 
         with safe_read(signals_path):
-            df = pd.read_csv(signals_path)
+            df = pd.read_csv(signals_path, dtype={'ticker': str})
+        df['ticker'] = df['ticker'].str.zfill(6)
+
         if 'status' not in df.columns:
             return True
 
@@ -421,29 +419,48 @@ def run_ai_analysis_scan():
             logger.info("분석할 OPEN 시그널이 없습니다.")
             return True
 
+        # 종목명 매핑
+        name_map, market_map = {}, {}
+        try:
+            stocks_path = os.path.join(Config.DATA_DIR, 'korean_stocks_list.csv')
+            if os.path.exists(stocks_path):
+                stocks = pd.read_csv(stocks_path, dtype={'ticker': str})
+                stocks['ticker'] = stocks['ticker'].str.zfill(6)
+                name_map = dict(zip(stocks['ticker'], stocks['name']))
+                if 'market' in stocks.columns:
+                    market_map = dict(zip(stocks['ticker'], stocks['market']))
+        except Exception:
+            pass
+
+        # 점수 상위 + 중복 제거
+        df = df.sort_values('score', ascending=False).drop_duplicates('ticker')
         signals = []
         for _, row in df.iterrows():
+            t = row['ticker']
             signals.append({
-                'ticker': str(row['ticker']).zfill(6),
-                'name': row.get('name', ''),
+                'ticker': t,
+                'name': name_map.get(t, t),
                 'score': float(row.get('score', 0)),
                 'contraction_ratio': float(row.get('contraction_ratio', 0)),
                 'foreign_5d': int(row.get('foreign_5d', 0)),
                 'inst_5d': int(row.get('inst_5d', 0)),
-                'entry_price': float(row.get('entry_price', 0))
+                'entry_price': float(row.get('entry_price', 0)),
+                'current_price': float(row.get('entry_price', 0)),
+                'return_pct': 0,
+                'signal_date': str(row.get('signal_date', '')),
+                'market': market_map.get(t, ''),
+                'status': 'OPEN'
             })
 
-        signals.sort(key=lambda x: x['score'], reverse=True)
-        seen_tickers = set()
-        unique_signals = []
-        for s in signals:
-            if s['ticker'] not in seen_tickers:
-                seen_tickers.add(s['ticker'])
-                unique_signals.append(s)
-        target_signals = unique_signals[:20]
+        target_signals = signals[:20]
 
-        logger.info(f"   Top {len(target_signals)}개 종목 분석 시작 (Gemini/GPT)...")
-        result = generate_ai_recommendations(target_signals)
+        result = {
+            'market_indices': {},
+            'signals': target_signals,
+            'api_status': 'ok',
+            'generated_at': datetime.now().isoformat(),
+            'signal_date': datetime.now().strftime('%Y-%m-%d')
+        }
 
         json_path = os.path.join(Config.DATA_DIR, 'kr_ai_analysis.json')
         with open(json_path, 'w', encoding='utf-8') as f:
@@ -457,7 +474,7 @@ def run_ai_analysis_scan():
         with open(history_path, 'w', encoding='utf-8') as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
 
-        logger.info(f"✅ AI 분석 데이터 저장 완료: {json_path}")
+        logger.info(f"✅ AI 분석 JSON 저장 완료: {len(target_signals)}개 시그널 → {json_path}")
         return True
 
     except Exception as e:
