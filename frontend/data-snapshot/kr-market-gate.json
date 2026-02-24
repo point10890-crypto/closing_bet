@@ -1,8 +1,9 @@
 {
-  "status": "RED",
+  "status": "GREEN",
   "score": 85,
-  "label": "BEARISH",
+  "label": "BULLISH",
   "reasons": [
+    "⚠️ 환율 경계 (1440원)",
     "RSI(69.7), MACD: BULLISH",
     "코스피 정배열 강세",
     "🔥 강세: KOSPI200 (95)",
@@ -59,7 +60,7 @@
     }
   ],
   "metrics": {
-    "usd_krw": null,
+    "usd_krw": 1439.780029296875,
     "kospi": 5969.64,
     "kospi_change_pct": 2.11,
     "kosdaq": 1165.0,
@@ -70,5 +71,5 @@
   "kospi_change_pct": 2.11,
   "kosdaq_close": 1165.0,
   "kosdaq_change_pct": 1.13,
-  "updated_at": "2026-02-24T21:58:42.924609"
+  "updated_at": "2026-02-25T02:13:07.849550"
 }
