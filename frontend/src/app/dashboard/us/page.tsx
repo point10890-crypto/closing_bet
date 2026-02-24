@@ -8,11 +8,14 @@ import {
     BacktestData, TopPicksReportData
 } from '@/lib/api';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import ErrorBanner from '@/components/ui/ErrorBanner';
 import HelpButton from '@/components/ui/HelpButton';
-import StockDetailModal from '@/components/us/StockDetailModal';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+
+// lightweight-charts는 window/DOM 필수 → SSR 비활성화
+const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
 
 export default function USMarketDashboard() {
     const [loading, setLoading] = useState(true);
@@ -184,7 +187,7 @@ export default function USMarketDashboard() {
                                         cx="40" cy="40" r="35"
                                         stroke="currentColor" strokeWidth="6" fill="transparent"
                                         strokeDasharray="220"
-                                        strokeDashoffset={220 - (220 * decisionSignal.score / 100)}
+                                        strokeDashoffset={220 - (220 * (decisionSignal.score || 0) / 100)}
                                         className={`${getActionColor(decisionSignal.action)} transition-all duration-1000`}
                                     />
                                 </svg>
@@ -462,19 +465,19 @@ export default function USMarketDashboard() {
                                         <div className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors">{pick.ticker}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-sm font-black text-white">${pick.current_price.toFixed(2)}</div>
-                                        <div className={`text-xs font-bold ${pick.target_upside >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {pick.target_upside > 0 ? '+' : ''}{pick.target_upside.toFixed(1)}%
+                                        <div className="text-sm font-black text-white">${(pick.current_price ?? 0).toFixed(2)}</div>
+                                        <div className={`text-xs font-bold ${(pick.target_upside ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                            {(pick.target_upside ?? 0) > 0 ? '+' : ''}{(pick.target_upside ?? 0).toFixed(1)}%
                                         </div>
                                     </div>
                                 </div>
                                 <div className="text-xs text-gray-500 truncate mb-2">{pick.name}</div>
                                 <div className="flex gap-1 flex-wrap">
                                     <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-400 font-bold">
-                                        {pick.final_score.toFixed(1)}
+                                        {(pick.final_score ?? 0).toFixed(1)}
                                     </span>
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${pick.ai_recommendation.includes('매수') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
-                                        {pick.ai_recommendation}
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${(pick.ai_recommendation ?? '').includes('매수') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
+                                        {pick.ai_recommendation ?? '-'}
                                     </span>
                                 </div>
                             </div>

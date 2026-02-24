@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { usAPI, CumulativePerformanceData, CumulativePerformancePick, CumulativePerformanceByDate } from '@/lib/api';
-import { createChart, IChartApi, BaselineSeries, AreaSeries, LineSeries, LineData, Time, CrosshairMode } from 'lightweight-charts';
+import type { IChartApi, LineData, Time } from 'lightweight-charts';
 import Tip from '@/components/ui/Tip';
 import Pagination from '@/components/ui/Pagination';
 import ErrorBanner from '@/components/ui/ErrorBanner';
@@ -76,104 +76,117 @@ export function PerformanceView() {
     // Chart tooltip state
     const [chartTooltip, setChartTooltip] = useState<{ date: string; picks: number; spy: number } | null>(null);
 
-    /* ─── Chart ─── */
+    /* ─── Chart (dynamic import: lightweight-charts requires DOM) ─── */
     useEffect(() => {
         if (!data || !chartContainerRef.current) return;
 
-        if (chartRef.current) chartRef.current.remove();
+        let cancelled = false;
+        let cleanup: (() => void) | undefined;
 
-        const chart = createChart(chartContainerRef.current, {
-            width: chartContainerRef.current.clientWidth,
-            height: 400,
-            layout: {
-                background: { color: 'transparent' },
-                textColor: '#6b7280',
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-                fontSize: 11,
-            },
-            grid: {
-                vertLines: { color: 'rgba(255,255,255,0.04)' },
-                horzLines: { color: 'rgba(255,255,255,0.04)' },
-            },
-            rightPriceScale: {
-                borderColor: 'rgba(255,255,255,0.06)',
-                scaleMargins: { top: 0.1, bottom: 0.1 },
-            },
-            timeScale: {
-                borderColor: 'rgba(255,255,255,0.06)',
-                timeVisible: false,
-                rightOffset: 5,
-                barSpacing: 12,
-            },
-            crosshair: {
-                mode: CrosshairMode.Normal,
-                vertLine: { color: 'rgba(255,255,255,0.15)', width: 1, style: 3, labelBackgroundColor: '#2563eb' },
-                horzLine: { color: 'rgba(255,255,255,0.15)', width: 1, style: 3, labelBackgroundColor: '#1c1c1e' },
-            },
-        });
-        chartRef.current = chart;
+        (async () => {
+            const lc = await import('lightweight-charts');
+            if (cancelled || !chartContainerRef.current) return;
 
-        // Picks — Baseline series (green above 0%, red below)
-        const pickLine = chart.addSeries(BaselineSeries, {
-            baseValue: { type: 'price', price: 0 },
-            topLineColor: '#10b981',
-            topFillColor1: 'rgba(16, 185, 129, 0.25)',
-            topFillColor2: 'rgba(16, 185, 129, 0.01)',
-            bottomLineColor: '#ef4444',
-            bottomFillColor1: 'rgba(239, 68, 68, 0.01)',
-            bottomFillColor2: 'rgba(239, 68, 68, 0.25)',
-            lineWidth: 2,
-            priceFormat: { type: 'custom', formatter: (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)}%` },
-        });
-        const pickData: LineData<Time>[] = (data.chart_data ?? []).map(d => ({
-            time: d.date as Time,
-            value: d.avg_return,
-        }));
-        pickLine.setData(pickData);
+            if (chartRef.current) chartRef.current.remove();
 
-        // SPY — subtle area series
-        const spyLine = chart.addSeries(AreaSeries, {
-            lineColor: 'rgba(107, 114, 128, 0.7)',
-            topColor: 'rgba(107, 114, 128, 0.08)',
-            bottomColor: 'rgba(107, 114, 128, 0.0)',
-            lineWidth: 1,
-            lineStyle: 2,
-            crosshairMarkerVisible: false,
-            priceFormat: { type: 'custom', formatter: (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)}%` },
-        });
-        const spyData: LineData<Time>[] = (data.chart_data ?? []).map(d => ({
-            time: d.date as Time,
-            value: d.spy_return,
-        }));
-        spyLine.setData(spyData);
-
-        chart.timeScale().fitContent();
-
-        // Live crosshair tooltip
-        chart.subscribeCrosshairMove((param) => {
-            if (!param.time || !param.seriesData.size) {
-                setChartTooltip(null);
-                return;
-            }
-            const pickVal = param.seriesData.get(pickLine);
-            const spyVal = param.seriesData.get(spyLine);
-            setChartTooltip({
-                date: String(param.time),
-                picks: (pickVal as { value: number })?.value ?? 0,
-                spy: (spyVal as { value: number })?.value ?? 0,
+            const chart = lc.createChart(chartContainerRef.current, {
+                width: chartContainerRef.current.clientWidth,
+                height: 400,
+                layout: {
+                    background: { color: 'transparent' },
+                    textColor: '#6b7280',
+                    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                    fontSize: 11,
+                },
+                grid: {
+                    vertLines: { color: 'rgba(255,255,255,0.04)' },
+                    horzLines: { color: 'rgba(255,255,255,0.04)' },
+                },
+                rightPriceScale: {
+                    borderColor: 'rgba(255,255,255,0.06)',
+                    scaleMargins: { top: 0.1, bottom: 0.1 },
+                },
+                timeScale: {
+                    borderColor: 'rgba(255,255,255,0.06)',
+                    timeVisible: false,
+                    rightOffset: 5,
+                    barSpacing: 12,
+                },
+                crosshair: {
+                    mode: lc.CrosshairMode.Normal,
+                    vertLine: { color: 'rgba(255,255,255,0.15)', width: 1, style: 3, labelBackgroundColor: '#2563eb' },
+                    horzLine: { color: 'rgba(255,255,255,0.15)', width: 1, style: 3, labelBackgroundColor: '#1c1c1e' },
+                },
             });
-        });
+            chartRef.current = chart;
 
-        const handleResize = () => {
-            if (chartContainerRef.current) {
-                chart.applyOptions({ width: chartContainerRef.current.clientWidth });
-            }
-        };
-        window.addEventListener('resize', handleResize);
+            // Picks — Baseline series (green above 0%, red below)
+            const pickLine = chart.addSeries(lc.BaselineSeries, {
+                baseValue: { type: 'price', price: 0 },
+                topLineColor: '#10b981',
+                topFillColor1: 'rgba(16, 185, 129, 0.25)',
+                topFillColor2: 'rgba(16, 185, 129, 0.01)',
+                bottomLineColor: '#ef4444',
+                bottomFillColor1: 'rgba(239, 68, 68, 0.01)',
+                bottomFillColor2: 'rgba(239, 68, 68, 0.25)',
+                lineWidth: 2,
+                priceFormat: { type: 'custom', formatter: (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)}%` },
+            });
+            const pickData: LineData<Time>[] = (data.chart_data ?? []).map(d => ({
+                time: d.date as Time,
+                value: d.avg_return,
+            }));
+            pickLine.setData(pickData);
+
+            // SPY — subtle area series
+            const spyLine = chart.addSeries(lc.AreaSeries, {
+                lineColor: 'rgba(107, 114, 128, 0.7)',
+                topColor: 'rgba(107, 114, 128, 0.08)',
+                bottomColor: 'rgba(107, 114, 128, 0.0)',
+                lineWidth: 1,
+                lineStyle: 2,
+                crosshairMarkerVisible: false,
+                priceFormat: { type: 'custom', formatter: (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(1)}%` },
+            });
+            const spyData: LineData<Time>[] = (data.chart_data ?? []).map(d => ({
+                time: d.date as Time,
+                value: d.spy_return,
+            }));
+            spyLine.setData(spyData);
+
+            chart.timeScale().fitContent();
+
+            // Live crosshair tooltip
+            chart.subscribeCrosshairMove((param) => {
+                if (!param.time || !param.seriesData.size) {
+                    setChartTooltip(null);
+                    return;
+                }
+                const pickVal = param.seriesData.get(pickLine);
+                const spyVal = param.seriesData.get(spyLine);
+                setChartTooltip({
+                    date: String(param.time),
+                    picks: (pickVal as { value: number })?.value ?? 0,
+                    spy: (spyVal as { value: number })?.value ?? 0,
+                });
+            });
+
+            const handleResize = () => {
+                if (chartContainerRef.current) {
+                    chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+                }
+            };
+            window.addEventListener('resize', handleResize);
+            cleanup = () => {
+                window.removeEventListener('resize', handleResize);
+                chart.remove();
+                chartRef.current = null;
+            };
+        })();
+
         return () => {
-            window.removeEventListener('resize', handleResize);
-            chart.remove();
-            chartRef.current = null;
+            cancelled = true;
+            cleanup?.();
         };
     }, [data]);
 

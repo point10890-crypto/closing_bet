@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { SessionProvider } from "next-auth/react";
 import "./globals.css";
+import AuthProvider from "@/components/AuthProvider";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -37,7 +37,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="antialiased">
-        <SessionProvider>{children}</SessionProvider>
+        <AuthProvider>{children}</AuthProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `

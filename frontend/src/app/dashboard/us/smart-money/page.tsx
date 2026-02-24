@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { usAPI, SmartMoneyStock } from '@/lib/api';
-import StockDetailModal from '@/components/us/StockDetailModal';
+
+const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
 import { PerformanceView } from '../cumulative-performance/page';
 import ErrorBanner from '@/components/ui/ErrorBanner';
 import SearchInput from '@/components/ui/SearchInput';

@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import StockDetailModal from '@/components/us/StockDetailModal';
+import dynamic from 'next/dynamic';
+
+const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
 import SearchInput from '@/components/ui/SearchInput';
 
 interface VCPStock {
