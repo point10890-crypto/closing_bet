@@ -8,9 +8,10 @@ import { SessionProvider } from 'next-auth/react';
  * 앱 전체가 크래시하지 않도록 에러를 격리합니다.
  */
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
-    // Vercel 정적 모드: SessionProvider 비활성화
-    // NEXT_PUBLIC_API_URL이 비어있으면 정적 스냅샷 모드 (auth 불필요)
-    if (!process.env.NEXT_PUBLIC_API_URL) {
+    // Auth는 로컬 개발 환경에서만 활성화 (localhost API 연결 시)
+    // Vercel/정적 배포에서는 /api/auth/session이 없으므로 SessionProvider 비활성화
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    if (!apiUrl.includes('localhost')) {
         return <>{children}</>;
     }
 

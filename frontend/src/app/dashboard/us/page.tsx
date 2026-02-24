@@ -209,8 +209,8 @@ export default function USMarketDashboard() {
                                 <div key={comp.label} className="px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
                                     <div className="text-[10px] text-gray-500">{comp.label}</div>
                                     <div className="text-xs font-bold text-white">{comp.value}</div>
-                                    <div className={`text-[10px] font-bold ${comp.contrib > 0 ? 'text-green-400' : comp.contrib < 0 ? 'text-red-400' : 'text-gray-500'}`}>
-                                        {comp.contrib > 0 ? '+' : ''}{comp.contrib.toFixed(1)}
+                                    <div className={`text-[10px] font-bold ${(comp.contrib ?? 0) > 0 ? 'text-green-400' : (comp.contrib ?? 0) < 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                                        {(comp.contrib ?? 0) > 0 ? '+' : ''}{(comp.contrib ?? 0).toFixed(1)}
                                     </div>
                                 </div>
                             ))}
@@ -301,9 +301,9 @@ export default function USMarketDashboard() {
                                 <div key={idx.name} className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all">
                                     <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{idx.name}</div>
                                     <div className="text-lg font-black text-white mt-1">{idx.price}</div>
-                                    <div className={`text-xs font-bold ${idx.change_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        <i className={`fas fa-caret-${idx.change_pct >= 0 ? 'up' : 'down'} mr-0.5`}></i>
-                                        {idx.change_pct >= 0 ? '+' : ''}{idx.change_pct?.toFixed(2)}%
+                                    <div className={`text-xs font-bold ${(idx.change_pct ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        <i className={`fas fa-caret-${(idx.change_pct ?? 0) >= 0 ? 'up' : 'down'} mr-0.5`}></i>
+                                        {(idx.change_pct ?? 0) >= 0 ? '+' : ''}{(idx.change_pct ?? 0).toFixed(2)}%
                                     </div>
                                 </div>
                             ))
@@ -436,8 +436,8 @@ export default function USMarketDashboard() {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-sm font-black text-white">${stock.price?.toFixed(2) ?? '--'}</div>
-                                        <div className={`text-xs font-bold ${getChangeColor(stock.change_pct)}`}>
-                                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct?.toFixed(2)}%
+                                        <div className={`text-xs font-bold ${getChangeColor(stock.change_pct ?? 0)}`}>
+                                            {(stock.change_pct ?? 0) >= 0 ? '+' : ''}{(stock.change_pct ?? 0).toFixed(2)}%
                                         </div>
                                     </div>
                                 </div>
