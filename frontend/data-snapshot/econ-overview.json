@@ -1,0 +1,93 @@
+{
+  "indicators": [
+    {
+      "change": -0.057,
+      "change_pct": -1.4,
+      "name": "US 10Y Treasury",
+      "ticker": "^TNX",
+      "unit": "%",
+      "value": 4.029
+    },
+    {
+      "change": -0.068,
+      "change_pct": -1.86,
+      "name": "US 5Y Treasury",
+      "ticker": "^FVX",
+      "unit": "%",
+      "value": 3.582
+    },
+    {
+      "change": -0.007,
+      "change_pct": -0.19,
+      "name": "US 3M T-Bill",
+      "ticker": "^IRX",
+      "unit": "%",
+      "value": 3.588
+    },
+    {
+      "change": 0.141,
+      "change_pct": 0.14,
+      "name": "Dollar Index",
+      "ticker": "DX-Y.NYB",
+      "unit": "",
+      "value": 97.841
+    },
+    {
+      "change": -11.4004,
+      "change_pct": -0.22,
+      "name": "Gold",
+      "ticker": "GC=F",
+      "unit": "$",
+      "value": 5193.2998
+    },
+    {
+      "change": 0.12,
+      "change_pct": 0.18,
+      "name": "Crude Oil (WTI)",
+      "ticker": "CL=F",
+      "unit": "$",
+      "value": 66.43
+    },
+    {
+      "change": 1.832,
+      "change_pct": 2.12,
+      "name": "Silver",
+      "ticker": "SI=F",
+      "unit": "$",
+      "value": 88.355
+    },
+    {
+      "change": -0.075,
+      "change_pct": -2.51,
+      "name": "Natural Gas",
+      "ticker": "NG=F",
+      "unit": "$",
+      "value": 2.91
+    },
+    {
+      "change": -0.96,
+      "change_pct": -0.07,
+      "name": "USD/KRW",
+      "ticker": "KRW=X",
+      "unit": "KRW",
+      "value": 1442.48
+    },
+    {
+      "change": 1.536,
+      "change_pct": 1.0,
+      "name": "USD/JPY",
+      "ticker": "JPY=X",
+      "unit": "JPY",
+      "value": 155.875
+    },
+    {
+      "change": -0.0045,
+      "change_pct": -0.38,
+      "name": "EUR/USD",
+      "ticker": "EURUSD=X",
+      "unit": "$",
+      "value": 1.179
+    }
+  ],
+  "timestamp": "2026-02-24T19:30:37.512741"
+}

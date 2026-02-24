@@ -1,0 +1,26 @@
+{
+  "inverted": false,
+  "timestamp": "2026-02-24T19:30:40.069872",
+  "yields": [
+    {
+      "months": 3,
+      "tenor": "3M",
+      "yield_pct": 3.588
+    },
+    {
+      "months": 60,
+      "tenor": "5Y",
+      "yield_pct": 3.582
+    },
+    {
+      "months": 120,
+      "tenor": "10Y",
+      "yield_pct": 4.029
+    },
+    {
+      "months": 360,
+      "tenor": "30Y",
+      "yield_pct": 4.696
+    }
+  ]
+}

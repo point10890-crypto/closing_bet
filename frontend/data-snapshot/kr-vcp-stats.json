@@ -1,11 +1,5 @@
 {
   "total_signals": 859,
-  "closed_signals": 813,
   "open_signals": 46,
-  "win_rate": 39.5,
-  "avg_return_pct": 1.96,
-  "date_range": {
-    "start": "2026-02-05",
-    "end": "2026-02-24"
-  }
+  "avg_score": 72.5
 }

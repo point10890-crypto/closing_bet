@@ -1,4 +1,5 @@
 {
+  "market_indices": {},
   "signals": [
     {
       "ticker": "059090",
@@ -281,7 +282,7 @@
       "status": "OPEN"
     }
   ],
-  "count": 20,
+  "api_status": "ok",
   "generated_at": "2026-02-24T18:14:31.161893",
-  "source": "json_live"
+  "signal_date": "2026-02-24"
 }

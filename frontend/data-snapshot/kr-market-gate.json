@@ -1,0 +1,74 @@
+{
+  "status": "RED",
+  "score": 85,
+  "label": "BEARISH",
+  "reasons": [
+    "RSI(69.7), MACD: BULLISH",
+    "코스피 정배열 강세",
+    "🔥 강세: KOSPI200 (95)",
+    "❄️ 약세: IT (60)"
+  ],
+  "sectors": [
+    {
+      "name": "KOSPI200",
+      "signal": "bullish",
+      "change_pct": 2.47,
+      "score": 95
+    },
+    {
+      "name": "반도체",
+      "signal": "bullish",
+      "change_pct": 3.58,
+      "score": 95
+    },
+    {
+      "name": "2차전지",
+      "signal": "bullish",
+      "change_pct": 4.27,
+      "score": 85
+    },
+    {
+      "name": "증권",
+      "signal": "bullish",
+      "change_pct": -2.25,
+      "score": 75
+    },
+    {
+      "name": "은행",
+      "signal": "bullish",
+      "change_pct": -0.06,
+      "score": 70
+    },
+    {
+      "name": "철강",
+      "signal": "neutral",
+      "change_pct": 2.73,
+      "score": 65
+    },
+    {
+      "name": "자동차",
+      "signal": "neutral",
+      "change_pct": -2.26,
+      "score": 60
+    },
+    {
+      "name": "IT",
+      "signal": "neutral",
+      "change_pct": 1.76,
+      "score": 60
+    }
+  ],
+  "metrics": {
+    "usd_krw": null,
+    "kospi": 5969.64,
+    "kospi_change_pct": 2.11,
+    "kosdaq": 1165.0,
+    "kosdaq_change_pct": 1.13,
+    "rsi": 69.72579535228417
+  },
+  "kospi_close": 5969.64,
+  "kospi_change_pct": 2.11,
+  "kosdaq_close": 1165.0,
+  "kosdaq_change_pct": 1.13,
+  "updated_at": "2026-02-24T20:35:17.123004"
+}
