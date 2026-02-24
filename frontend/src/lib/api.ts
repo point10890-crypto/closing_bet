@@ -7,20 +7,23 @@
 // On Vercel, we bypass rewrite by calling /api/data/* directly to avoid ISR cache issues.
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const IS_SERVER = typeof window === 'undefined';
 
-// NEXT_PUBLIC_API_URL이 비어있으면 Vercel 배포 환경
-// Vercel에서는 /api/kr/signals → /api/data/kr/signals 로 직접 변환
-// rewrite에 의존하지 않고 직접 route handler로 라우팅
+// NEXT_PUBLIC_API_URL이 비어있으면 Vercel 배포 환경 (Static Snapshot 모드)
 const USE_DATA_PREFIX = !API_BASE;
-function resolveEndpoint(endpoint: string): string {
-    if (!USE_DATA_PREFIX) return endpoint;
 
-    // /api/health → /api/data/health
-    // /api/kr/signals → /api/data/kr/signals
-    // /api/us/decision-signal → /api/data/us/decision-signal
-    // /api/data-version → /api/data/data-version
+/**
+ * API 엔드포인트를 Vercel 환경에 맞게 변환
+ * 예: /api/kr/signals -> /api/data/kr/signals
+ */
+function resolveEndpoint(endpoint: string): string {
+    if (!USE_DATA_PREFIX || !endpoint) return endpoint;
+
+    // 이미 /api/data/ 로 시작하면 무시
+    if (endpoint.startsWith('/api/data/')) return endpoint;
+
     const match = endpoint.match(/^\/api\/(.+)$/);
-    if (match && !endpoint.startsWith('/api/data/')) {
+    if (match && match[1]) {
         return `/api/data/${match[1]}`;
     }
     return endpoint;
@@ -28,25 +31,49 @@ function resolveEndpoint(endpoint: string): string {
 
 export async function fetchAPI<T>(endpoint: string): Promise<T> {
     const resolvedEndpoint = resolveEndpoint(endpoint);
-    const response = await fetch(`${API_BASE}${resolvedEndpoint}`, {
-        cache: 'no-store',  // 항상 최신 데이터 — ISR 캐시 비활성화
-    });
-    if (!response.ok) {
-        throw new Error(`API Error: ${resolvedEndpoint} (${response.status})`);
+    const url = `${API_BASE}${resolvedEndpoint}`;
+
+    // Next.js fetch 옵션 설정
+    // 클라이언트 사이드에서는 cache와 next 옵션이 충돌하거나 에러를 유발할 수 있으므로 서버 사이드에서만 적용
+    const options: RequestInit = {};
+    if (IS_SERVER) {
+        options.cache = 'no-store' as any;
     }
-    return response.json();
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`API Error: ${resolvedEndpoint} (${response.status})`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`[fetchAPI Error] ${url}:`, error);
+        throw error;
+    }
 }
 
 export async function postAPI<T>(endpoint: string, body?: any): Promise<T> {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    const url = `${API_BASE}${endpoint}`;
+    const options: RequestInit = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!response.ok) {
-        throw new Error(`API Error: ${endpoint} (${response.status})`);
+    };
+
+    if (IS_SERVER) {
+        options.cache = 'no-store' as any;
     }
-    return response.json();
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`API Error: ${endpoint} (${response.status})`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error(`[postAPI Error] ${url}:`, error);
+        throw error;
+    }
 }
 
 // KR Market API Types
