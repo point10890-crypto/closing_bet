@@ -11,6 +11,8 @@ services:
         value: utf-8
       - key: AUTH_DISABLED
         value: "true"
+      - key: RENDER_EXTERNAL_URL
+        value: "https://closing-bet-api.onrender.com"
       # Render 환경 자동 감지 (Render가 자동 설정)
       # RENDER=true 이면 클라우드 스케줄러 자동 시작
       # ── 아래 API 키들은 Render Dashboard > Environment에서 직접 설정 ──
