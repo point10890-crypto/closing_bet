@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { usAPI } from '@/lib/api';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 interface TrackRecordSummary {
@@ -71,22 +72,16 @@ export default function TrackRecordPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/track-record');
-            if (res.ok) {
-                const result = await res.json();
-                if (!result.error) setData(result);
-            }
+            const result = await usAPI.getTrackRecord();
+            if (!result.error) setData(result);
         } catch { /* silent */ }
         finally { setLoading(false); }
     };
 
     const silentRefresh = useCallback(async () => {
         try {
-            const res = await fetch('/api/us/track-record');
-            if (res.ok) {
-                const result = await res.json();
-                if (!result.error) setData(result);
-            }
+            const result = await usAPI.getTrackRecord();
+            if (!result.error) setData(result);
         } catch { /* silent */ }
     }, []);
     useAutoRefresh(silentRefresh, 60000);

@@ -93,3 +93,4 @@ crypto-analytics/crypto_market/vcp_backtest/cache/
 *.lock
 nul
 *.db
+us_market/output/

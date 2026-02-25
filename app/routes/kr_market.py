@@ -2,6 +2,7 @@
 """KR 마켓 API 라우트"""
 
 import os
+import sys
 import json
 import traceback
 from datetime import datetime, date
@@ -15,6 +16,10 @@ _ROUTES_DIR = os.path.dirname(os.path.abspath(__file__))  # app/routes/
 _APP_DIR = os.path.dirname(_ROUTES_DIR)                    # app/
 _BASE_DIR = os.path.dirname(_APP_DIR)                      # /c/closing_bet
 DATA_DIR = os.path.join(_BASE_DIR, 'data')
+
+# market_gate 임포트를 위한 경로 등록
+if _BASE_DIR not in sys.path:
+    sys.path.insert(0, _BASE_DIR)
 
 
 @kr_bp.route('/market-status')
@@ -569,12 +574,6 @@ def kr_update():
 def kr_market_gate():
     """KR Market Gate 상태 (Enhanced)"""
     try:
-        # sys.path 오염 방지: 프로젝트 루트를 확실히 맨 앞에
-        import sys as _sys
-        _base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        if _sys.path[0] != _base:
-            _sys.path.insert(0, _base)
-
         from market_gate import run_kr_market_gate
         
         # Run enhanced analysis
@@ -582,11 +581,10 @@ def kr_market_gate():
         
         # Helper to safely convert float/NaN
         def safe_float(val):
-            import math
-            import numpy as np
-            if isinstance(val, (float, np.floating)):
-                if math.isnan(val) or math.isinf(val):
-                    return None
+            if not pd.notna(val):
+                return None
+            if isinstance(val, float) and (val == float('inf') or val == float('-inf')):
+                return None
             return val
 
         # Map sectors to frontend format

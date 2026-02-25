@@ -160,7 +160,7 @@ export default function RegimePage() {
                                                 <div key={k} className="flex justify-between">
                                                     <span className="text-gray-500 text-xs">{k.replace(/_/g, ' ')}</span>
                                                     <span className="text-white text-xs font-mono">
-                                                        {v == null ? '--' : typeof v === 'number' ? v.toFixed(2) : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}
+                                                        {v === null ? '--' : typeof v === 'number' ? v.toFixed(2) : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : String(v)}
                                                     </span>
                                                 </div>
                                             );

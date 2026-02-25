@@ -689,3 +689,62 @@ cd "$PROJECT" && "$PYTHON" -u stock_info.py
 ### v2.3.0 — DART + Multi-AI Consensus
 ### v2.2.0 — Signal 모델 완성
 ### v2.0.0 — 종가베팅 V2 엔진
+
+---
+
+## 15. 개발 도구 통합 (로컬 환경)
+
+### 설치된 도구 및 CLI 활용법
+
+| 도구 | 용도 | CLI 명령 |
+|------|------|---------|
+| **Everything** | 초고속 파일 검색 | `es.exe <검색어>` (CLI 버전) |
+| **Postman** | API 테스트 | GUI 또는 `newman run <collection.json>` |
+| **DB Browser for SQLite** | `.db` 파일 조회 | `sqlite3 data/users.db ".tables"` |
+| **DevToys** | JSON 포맷팅, 인코딩 | GUI 도구 |
+| **ngrok** | 로컬 서버 외부 노출 | `ngrok http 5001` (Flask) / `ngrok http 4000` (Next.js) |
+| **Vercel CLI** | 프론트엔드 배포 | `cd frontend && vercel --prod` |
+| **GitHub Desktop** | 소스 관리 GUI | GUI 도구 |
+| **Cursor** | AI 코드 에디터 | GUI 도구 |
+| **Notion** | 프로젝트 문서 관리 | GUI 도구 |
+
+### 스킬 8: ngrok으로 로컬 서버 외부 공유
+```bash
+# Flask API 외부 노출 (모바일 테스트, 외부 공유용)
+ngrok http 5001
+
+# Next.js 대시보드 외부 노출
+ngrok http 4000
+```
+
+### 스킬 9: SQLite DB 조회
+```bash
+PROJECT="/c/closing_bet"
+sqlite3 "$PROJECT/data/users.db" ".tables"
+sqlite3 "$PROJECT/data/users.db" "SELECT * FROM users LIMIT 10;"
+```
+
+### 스킬 10: Vercel 프론트엔드 배포
+```bash
+PROJECT="/c/closing_bet"
+cd "$PROJECT/frontend" && vercel --prod
+```
+
+### 스킬 11: API 일괄 테스트 (curl 기반)
+```bash
+PROJECT="/c/closing_bet"
+echo "=== API Health Check ==="
+endpoints=(
+  "http://localhost:5001/api/kr/jongga-v2/latest"
+  "http://localhost:5001/api/kr/market-gate"
+  "http://localhost:5001/api/us/market-briefing"
+  "http://localhost:5001/api/us/heatmap-data"
+  "http://localhost:5001/api/us/earnings-impact"
+  "http://localhost:5001/api/us/decision-signal"
+)
+for ep in "${endpoints[@]}"; do
+  status=$(curl -s -o /dev/null -w "%{http_code}" "$ep")
+  echo "  [$status] $ep"
+done
+echo "=== Done ==="
+```

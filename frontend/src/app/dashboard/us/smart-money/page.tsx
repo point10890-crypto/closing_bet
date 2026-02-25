@@ -1,110 +1,118 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-import { usAPI, SmartMoneyStock } from '@/lib/api';
-
-const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
+import { usAPI } from '@/lib/api';
+import StockDetailModal from '@/components/us/StockDetailModal';
 import { PerformanceView } from '../cumulative-performance/page';
-import ErrorBanner from '@/components/ui/ErrorBanner';
-import SearchInput from '@/components/ui/SearchInput';
-import Pagination from '@/components/ui/Pagination';
-import HelpButton from '@/components/ui/HelpButton';
+
+interface SmartPick {
+    ticker: string;
+    name: string;
+    rank: number;
+    final_score: number;
+    quant_score: number;
+    ai_bonus: number;
+    ai_recommendation: string;
+    price_at_analysis: number;
+    target_upside: number;
+    sd_stage: string;
+    inst_pct: number;
+    rsi: number;
+    ai_summary?: string;
+}
 
 type PageTab = 'picks' | 'performance';
-type SortKey = 'composite_score' | 'swing_score' | 'trend_score' | 'price' | 'change_pct' | 'ticker';
-
-const PAGE_SIZE = 20;
+type SortKey = 'final_score' | 'quant_score' | 'ai_bonus' | 'inst_pct' | 'rsi' | 'target_upside' | 'ticker';
 
 export default function SmartMoneyPage() {
     const [pageTab, setPageTab] = useState<PageTab>('picks');
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [stocks, setStocks] = useState<SmartMoneyStock[]>([]);
-    const [sortBy, setSortBy] = useState<SortKey>('composite_score');
+    const [stocks, setStocks] = useState<SmartPick[]>([]);
+    const [sortBy, setSortBy] = useState<SortKey>('final_score');
     const [sortAsc, setSortAsc] = useState(false);
-    const [lastUpdated, setLastUpdated] = useState<string>('');
+    const [lastUpdated, setLastUpdated] = useState('');
     const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
-    const [search, setSearch] = useState('');
-    const [page, setPage] = useState(0);
+    const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    useEffect(() => { loadData(); }, []);
 
     const loadData = async () => {
         setLoading(true);
-        setError(null);
         try {
             const res = await usAPI.getSmartMoney();
-            setStocks(res.picks || []);
-            setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
-        } catch {
-            setError('Failed to load Smart Money data.');
-        } finally {
-            setLoading(false);
-        }
+            setStocks((res.picks || []) as unknown as SmartPick[]);
+            setLastUpdated(res.updated_at || new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
+        } catch { /* ignore */ }
+        setLoading(false);
     };
 
     const handleSort = (key: SortKey) => {
-        if (sortBy === key) {
-            setSortAsc(!sortAsc);
-        } else {
-            setSortBy(key);
-            setSortAsc(false);
-        }
-        setPage(0);
+        if (sortBy === key) setSortAsc(!sortAsc);
+        else { setSortBy(key); setSortAsc(false); }
     };
 
-    const handleSearch = (value: string) => {
-        setSearch(value);
-        setPage(0);
-    };
-
-    const filtered = stocks.filter(s => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return s.ticker.toLowerCase().includes(q)
-            || s.name.toLowerCase().includes(q)
-            || s.sector?.toLowerCase().includes(q);
+    const sorted = [...stocks].sort((a, b) => {
+        const av = a[sortBy] ?? 0, bv = b[sortBy] ?? 0;
+        if (typeof av === 'string') return sortAsc ? (av as string).localeCompare(bv as string) : (bv as string).localeCompare(av as string);
+        return sortAsc ? (av as number) - (bv as number) : (bv as number) - (av as number);
     });
 
-    const sorted = [...filtered].sort((a, b) => {
-        const aVal = a[sortBy] ?? 0;
-        const bVal = b[sortBy] ?? 0;
-        if (typeof aVal === 'string') {
-            return sortAsc ? aVal.localeCompare(bVal as string) : (bVal as string).localeCompare(aVal);
-        }
-        return sortAsc ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
-    });
+    const avgScore = stocks.length > 0 ? stocks.reduce((s, p) => s + (p.final_score || 0), 0) / stocks.length : 0;
+    const topStage = stocks.filter(s => s.sd_stage?.includes('Strong')).length;
 
-    const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
-    const paged = sorted.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-    const getChangeColor = (change: number) => {
-        if (change > 0) return 'text-green-400';
-        if (change < 0) return 'text-red-400';
+    const getScoreColor = (score: number) => {
+        if (score >= 75) return 'text-emerald-400';
+        if (score >= 65) return 'text-blue-400';
+        if (score >= 50) return 'text-amber-400';
         return 'text-gray-400';
     };
 
-    const getGradeColor = (grade: string) => {
-        if (grade.includes('A')) return 'bg-green-500/20 text-green-400';
-        if (grade.includes('B')) return 'bg-blue-500/20 text-blue-400';
-        if (grade.includes('C')) return 'bg-yellow-500/20 text-yellow-400';
-        return 'bg-gray-500/20 text-gray-400';
+    const getScoreBar = (score: number) => {
+        if (score >= 75) return 'bg-emerald-500';
+        if (score >= 65) return 'bg-blue-500';
+        if (score >= 50) return 'bg-amber-500';
+        return 'bg-gray-500';
     };
 
-    const SortIcon = ({ column }: { column: SortKey }) => {
-        if (sortBy !== column) return <span className="text-gray-600 ml-1">↕</span>;
-        return <span className="text-blue-400 ml-1">{sortAsc ? '↑' : '↓'}</span>;
+    const getStageBadge = (stage: string) => {
+        if (stage?.includes('Strong Acc')) return 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30';
+        if (stage?.includes('Acc')) return 'bg-blue-500/15 text-blue-400 border-blue-500/30';
+        if (stage?.includes('Dist')) return 'bg-red-500/15 text-red-400 border-red-500/30';
+        return 'bg-gray-500/15 text-gray-400 border-gray-500/30';
     };
 
-    const ThButton = ({ column, label, align = 'left' }: { column: SortKey; label: string; align?: string }) => (
+    const getRecBadge = (rec: string) => {
+        const r = rec?.toLowerCase() || '';
+        if (r.includes('적극') || r.includes('strong')) return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+        if (r.includes('매수') || r.includes('buy')) return 'bg-green-500/15 text-green-400 border-green-500/30';
+        if (r.includes('중립') || r.includes('hold')) return 'bg-amber-500/15 text-amber-400 border-amber-500/30';
+        return 'bg-gray-500/15 text-gray-400 border-gray-500/30';
+    };
+
+    const getRsiColor = (rsi: number) => {
+        if (rsi >= 70) return 'text-red-400';
+        if (rsi <= 30) return 'text-green-400';
+        return 'text-gray-300';
+    };
+
+    const parseAiThesis = (summary: string | undefined): string => {
+        if (!summary) return '';
+        try {
+            const cleaned = summary.replace(/```json\n?/g, '').replace(/```/g, '').trim();
+            const parsed = JSON.parse(cleaned);
+            return parsed.thesis || '';
+        } catch {
+            return summary.slice(0, 200);
+        }
+    };
+
+    const SortTh = ({ col, label, align = 'right' }: { col: SortKey; label: string; align?: string }) => (
         <th
-            className={`px-3 py-3 text-[10px] uppercase tracking-wider font-bold cursor-pointer hover:text-blue-400 transition-colors whitespace-nowrap ${align === 'right' ? 'text-right' : 'text-left'} ${sortBy === column ? 'text-blue-400' : 'text-gray-500'}`}
-            onClick={() => handleSort(column)}
+            onClick={() => handleSort(col)}
+            className={`px-3 py-3.5 text-[10px] uppercase tracking-wider font-semibold cursor-pointer hover:text-white transition-colors whitespace-nowrap ${align === 'left' ? 'text-left' : 'text-right'} ${sortBy === col ? 'text-blue-400' : 'text-gray-500'}`}
         >
-            {label}<SortIcon column={column} />
+            {label}
+            <span className="ml-1">{sortBy === col ? (sortAsc ? '▲' : '▼') : ''}</span>
         </th>
     );
 
@@ -112,14 +120,8 @@ export default function SmartMoneyPage() {
         return (
             <div className="space-y-6">
                 <div className="flex gap-2">
-                    <button onClick={() => setPageTab('picks')}
-                        className="px-4 py-2 rounded-lg text-sm font-bold bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 transition-all">
-                        Current Picks
-                    </button>
-                    <button
-                        className="px-4 py-2 rounded-lg text-sm font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 transition-all">
-                        Track Record
-                    </button>
+                    <button onClick={() => setPageTab('picks')} className="px-4 py-2 rounded-lg text-sm font-bold bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10">Current Picks</button>
+                    <button className="px-4 py-2 rounded-lg text-sm font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Track Record</button>
                 </div>
                 <PerformanceView />
             </div>
@@ -130,178 +132,189 @@ export default function SmartMoneyPage() {
         <div className="space-y-6">
             {/* Tab Toggle */}
             <div className="flex gap-2">
-                <button
-                    className="px-4 py-2 rounded-lg text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-all">
-                    Current Picks
-                </button>
-                <button onClick={() => setPageTab('performance')}
-                    className="px-4 py-2 rounded-lg text-sm font-bold bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10 transition-all">
-                    Track Record
-                </button>
+                <button className="px-4 py-2 rounded-lg text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Current Picks</button>
+                <button onClick={() => setPageTab('performance')} className="px-4 py-2 rounded-lg text-sm font-bold bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10">Track Record</button>
             </div>
 
             {/* Header */}
-            <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/20 bg-blue-500/5 text-xs text-blue-400 font-medium mb-4">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
-                    Institutional Flow
+            <div className="flex items-start justify-between">
+                <div>
+                    <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-1">
+                        Smart Money <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">Top Picks</span>
+                    </h2>
+                    <p className="text-sm text-gray-500">S&P 500 + NASDAQ 100 — Institutional Accumulation Screener</p>
                 </div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white leading-tight mb-2">
-                                Smart Money <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Top Picks</span>
-                            </h2>
-                            <HelpButton title="Smart Money 가이드" sections={[
-                                { heading: '작동 원리', body: 'S&P 500 + NASDAQ 100 종목 중 기관 매집 신호가 감지된 종목을 스크리닝합니다.\n\n• Composite Score: Swing Score + Trend Score 가중 합산\n• Supply/Demand Stage: OBV(On-Balance Volume) 기반 수급 단계\n  - Strong Accumulation: 기관 강력 매집\n  - Accumulation: 매집 진행 중\n  - Distribution: 매도 압력 우위' },
-                                { heading: '점수 해석', body: '• Composite Score 80+: 강력한 기관 매집 + 기술적 강세\n• Swing Score: 단기(2~4주) 스윙 트레이딩 적합도\n• Trend Score: 중장기 추세 강도\n• RSI 30~70: 정상 범위, 70+: 과매수, 30-: 과매도\n• Inst%: 기관 보유 비율 (높을수록 안정적)' },
-                                { heading: '활용 팁', body: '• 테이블 헤더를 클릭하면 정렬 가능\n• 종목명을 클릭하면 상세 차트와 분석을 볼 수 있습니다\n• Track Record 탭에서 과거 추천 종목의 수익률을 확인하세요\n• Strong Accumulation + Score 80+ 조합이 가장 신뢰도 높음' },
-                            ]} />
-                        </div>
-                        <p className="text-gray-400">S&P 500 + NASDAQ 100 기관 매집 신호 기반 종목</p>
-                    </div>
-                    <button
-                        onClick={loadData}
-                        disabled={loading}
-                        className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white hover:bg-white/10 transition-all disabled:opacity-50"
-                    >
-                        <i className={`fas fa-sync-alt mr-2 ${loading ? 'animate-spin' : ''}`}></i>
-                        Refresh
-                    </button>
-                </div>
+                <button onClick={loadData} disabled={loading}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300 hover:bg-white/10 hover:text-white transition-all disabled:opacity-50">
+                    <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    Refresh
+                </button>
             </div>
 
-            {/* Error Banner */}
-            {error && <ErrorBanner message={error} onRetry={loadData} />}
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Total Picks</div>
-                    <div className="text-2xl font-black text-white">{stocks.length}</div>
-                </div>
-                <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Avg Score</div>
-                    <div className="text-2xl font-black text-blue-400">
-                        {stocks.length > 0 ? (stocks.reduce((a, b) => a + (b.composite_score || 0), 0) / stocks.length).toFixed(1) : '--'}
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                    { label: 'Total Picks', value: stocks.length.toString(), sub: 'screened stocks', color: 'text-white' },
+                    { label: 'Avg Score', value: avgScore.toFixed(1), sub: '/ 100', color: getScoreColor(avgScore) },
+                    { label: 'Strong Accumulation', value: topStage.toString(), sub: `of ${stocks.length} picks`, color: 'text-emerald-400' },
+                    { label: 'Updated', value: lastUpdated ? new Date(lastUpdated).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }) || lastUpdated : '--', sub: lastUpdated ? new Date(lastUpdated).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '', color: 'text-gray-300' },
+                ].map((stat, i) => (
+                    <div key={i} className="p-4 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.06] backdrop-blur">
+                        <div className="text-[10px] text-gray-500 uppercase tracking-widest font-medium">{stat.label}</div>
+                        <div className={`text-2xl font-black mt-1 ${stat.color}`}>{stat.value}</div>
+                        <div className="text-[11px] text-gray-600 mt-0.5">{stat.sub}</div>
                     </div>
-                </div>
-                <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Last Updated</div>
-                    <div className="text-2xl font-black text-white">{lastUpdated || '--'}</div>
-                </div>
+                ))}
             </div>
 
-            {/* Search */}
-            {!loading && stocks.length > 0 && (
-                <div className="max-w-sm">
-                    <SearchInput value={search} onChange={handleSearch} placeholder="Search ticker, name, sector..." />
-                </div>
-            )}
-
-            {/* Table */}
+            {/* Loading Skeleton */}
             {loading ? (
-                <div className="rounded-2xl bg-[#1c1c1e] border border-white/10 p-8">
-                    <div className="space-y-3">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                            <div key={i} className="h-10 rounded bg-white/5 animate-pulse"></div>
-                        ))}
-                    </div>
+                <div className="space-y-3">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="h-16 rounded-xl bg-white/[0.03] animate-pulse" />
+                    ))}
                 </div>
             ) : stocks.length === 0 ? (
-                !error && (
-                    <div className="p-12 rounded-2xl bg-[#1c1c1e] border border-white/10 text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/10 flex items-center justify-center">
-                            <i className="fas fa-chart-pie text-2xl text-blue-500"></i>
-                        </div>
-                        <div className="text-gray-500 text-lg mb-2">No Smart Money data available</div>
-                        <div className="text-xs text-gray-600">Run: python3 us_market/smart_money_screener_v2.py</div>
-                    </div>
-                )
+                <div className="p-16 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+                    <div className="text-gray-500 text-lg">No Smart Money data available</div>
+                    <div className="text-xs text-gray-600 mt-2">Run the screener to generate picks</div>
+                </div>
             ) : (
-                <div className="rounded-2xl bg-[#1c1c1e] border border-white/10 overflow-hidden">
+                /* Table */
+                <div className="rounded-2xl bg-white/[0.02] border border-white/[0.06] overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-white/10 bg-white/[0.02]">
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-center w-10">#</th>
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-center w-16">Grade</th>
-                                    <ThButton column="ticker" label="Ticker" />
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-left">Name</th>
-                                    <ThButton column="price" label="Price" align="right" />
-                                    <ThButton column="change_pct" label="Change" align="right" />
-                                    <ThButton column="composite_score" label="Composite" align="right" />
-                                    <ThButton column="swing_score" label="Swing" align="right" />
-                                    <ThButton column="trend_score" label="Trend" align="right" />
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-left">Sector</th>
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-center">Rec</th>
+                                <tr className="border-b border-white/[0.06]">
+                                    <th className="px-3 py-3.5 text-[10px] text-gray-600 uppercase tracking-wider font-semibold text-center w-10">#</th>
+                                    <SortTh col="ticker" label="Ticker" align="left" />
+                                    <th className="px-3 py-3.5 text-[10px] text-gray-600 uppercase tracking-wider font-semibold text-left">Name</th>
+                                    <SortTh col="final_score" label="Score" />
+                                    <th className="px-3 py-3.5 text-[10px] text-gray-600 uppercase tracking-wider font-semibold text-left">S/D Stage</th>
+                                    <SortTh col="rsi" label="RSI" />
+                                    <SortTh col="inst_pct" label="Inst %" />
+                                    <SortTh col="target_upside" label="Upside" />
+                                    <th className="px-3 py-3.5 text-[10px] text-gray-600 uppercase tracking-wider font-semibold text-center">AI Rec</th>
+                                    <th className="px-3 py-3.5 text-[10px] text-gray-600 uppercase tracking-wider font-semibold text-right">Price</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {paged.map((stock, idx) => (
-                                    <tr
-                                        key={stock.ticker}
-                                        onClick={() => setSelectedTicker(stock.ticker)}
-                                        className="border-b border-white/5 hover:bg-blue-500/5 cursor-pointer transition-colors"
-                                    >
-                                        <td className="px-3 py-3 text-xs text-gray-500 font-mono text-center">{page * PAGE_SIZE + idx + 1}</td>
-                                        <td className="px-3 py-3 text-center">
-                                            {stock.grade && (
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getGradeColor(stock.grade)}`}>
-                                                    {stock.grade.split(' ')[0]}
+                                {sorted.map((s, idx) => (
+                                    <>
+                                        <tr
+                                            key={s.ticker}
+                                            onClick={() => setExpandedRow(expandedRow === s.ticker ? null : s.ticker)}
+                                            className="border-b border-white/[0.04] hover:bg-white/[0.03] cursor-pointer transition-all group"
+                                        >
+                                            {/* Rank */}
+                                            <td className="px-3 py-4 text-center">
+                                                <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-black ${idx < 3 ? 'bg-gradient-to-br from-amber-500/30 to-orange-500/20 text-amber-300 border border-amber-500/30' : 'text-gray-600'}`}>
+                                                    {idx + 1}
                                                 </span>
-                                            )}
-                                        </td>
-                                        <td className="px-3 py-3 text-sm font-black text-white">{stock.ticker}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-400 max-w-[200px] truncate">{stock.name}</td>
-                                        <td className="px-3 py-3 text-sm font-bold text-white text-right">${stock.price?.toFixed(2)}</td>
-                                        <td className={`px-3 py-3 text-xs font-bold text-right ${getChangeColor(stock.change_pct)}`}>
-                                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct?.toFixed(2)}%
-                                        </td>
-                                        <td className="px-3 py-3 text-sm font-black text-blue-400 text-right">{stock.composite_score?.toFixed(1)}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-400 text-right">{stock.swing_score?.toFixed(1)}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-400 text-right">{stock.trend_score?.toFixed(1)}</td>
-                                        <td className="px-3 py-3">
-                                            <span className="px-2 py-1 rounded-full bg-white/5 text-[10px] text-gray-400 font-bold whitespace-nowrap">
-                                                {stock.sector || 'N/A'}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-3 text-center">
-                                            {stock.recommendation && (
-                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${stock.recommendation === 'buy' || stock.recommendation === 'strong_buy'
-                                                        ? 'bg-green-500/20 text-green-400'
-                                                        : stock.recommendation === 'hold'
-                                                            ? 'bg-yellow-500/20 text-yellow-400'
-                                                            : 'bg-gray-500/20 text-gray-400'
-                                                    }`}>
-                                                    {stock.recommendation.toUpperCase().replace('_', ' ')}
+                                            </td>
+
+                                            {/* Ticker */}
+                                            <td className="px-3 py-4">
+                                                <button onClick={(e) => { e.stopPropagation(); setSelectedTicker(s.ticker); }}
+                                                    className="text-sm font-black text-white hover:text-blue-400 transition-colors">
+                                                    {s.ticker}
+                                                </button>
+                                            </td>
+
+                                            {/* Name */}
+                                            <td className="px-3 py-4 text-xs text-gray-400 max-w-[180px] truncate">{s.name}</td>
+
+                                            {/* Score */}
+                                            <td className="px-3 py-4">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                                                        <div className={`h-full rounded-full ${getScoreBar(s.final_score)} transition-all`}
+                                                            style={{ width: `${Math.min(s.final_score, 100)}%` }} />
+                                                    </div>
+                                                    <span className={`text-sm font-black tabular-nums ${getScoreColor(s.final_score)}`}>
+                                                        {s.final_score?.toFixed(1)}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            {/* SD Stage */}
+                                            <td className="px-3 py-4">
+                                                <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${getStageBadge(s.sd_stage)}`}>
+                                                    {s.sd_stage?.replace('Strong ', '⚡ ') || 'N/A'}
                                                 </span>
-                                            )}
-                                        </td>
-                                    </tr>
+                                            </td>
+
+                                            {/* RSI */}
+                                            <td className={`px-3 py-4 text-sm font-mono text-right ${getRsiColor(s.rsi)}`}>
+                                                {s.rsi?.toFixed(1)}
+                                            </td>
+
+                                            {/* Inst % */}
+                                            <td className="px-3 py-4 text-sm text-gray-300 text-right font-mono">
+                                                {s.inst_pct?.toFixed(1)}%
+                                            </td>
+
+                                            {/* Target Upside */}
+                                            <td className="px-3 py-4 text-right">
+                                                <span className={`text-sm font-bold ${(s.target_upside || 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                    {s.target_upside > 0 ? '+' : ''}{s.target_upside?.toFixed(1)}%
+                                                </span>
+                                            </td>
+
+                                            {/* AI Recommendation */}
+                                            <td className="px-3 py-4 text-center">
+                                                <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${getRecBadge(s.ai_recommendation)}`}>
+                                                    {s.ai_recommendation || 'N/A'}
+                                                </span>
+                                            </td>
+
+                                            {/* Price */}
+                                            <td className="px-3 py-4 text-sm font-bold text-gray-300 text-right tabular-nums">
+                                                ${s.price_at_analysis?.toFixed(2)}
+                                            </td>
+                                        </tr>
+
+                                        {/* Expanded AI Summary Row */}
+                                        {expandedRow === s.ticker && s.ai_summary && (
+                                            <tr key={`${s.ticker}-detail`} className="bg-white/[0.02]">
+                                                <td colSpan={10} className="px-6 py-4">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-5 h-5 mt-0.5 rounded-md bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                                            <svg className="w-3 h-3 text-purple-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z" /></svg>
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-[10px] text-purple-400 uppercase tracking-wider font-bold mb-1">AI Analysis</div>
+                                                            <p className="text-xs text-gray-400 leading-relaxed max-w-3xl">
+                                                                {parseAiThesis(s.ai_summary)}
+                                                            </p>
+                                                            <div className="flex gap-4 mt-2 text-[10px] text-gray-600">
+                                                                <span>Quant: <span className="text-gray-400 font-bold">{s.quant_score?.toFixed(1)}</span></span>
+                                                                <span>AI Bonus: <span className="text-purple-400 font-bold">+{s.ai_bonus}</span></span>
+                                                                <span>Final: <span className={`font-bold ${getScoreColor(s.final_score)}`}>{s.final_score?.toFixed(1)}</span></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    {totalPages > 1 && (
-                        <Pagination
-                            current={page}
-                            total={totalPages}
-                            count={sorted.length}
-                            pageSize={PAGE_SIZE}
-                            onChange={setPage}
-                        />
-                    )}
+
+                    {/* Footer Legend */}
+                    <div className="px-4 py-3 border-t border-white/[0.04] flex flex-wrap gap-x-6 gap-y-1 text-[10px] text-gray-600">
+                        <span><span className="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>Score 75+</span>
+                        <span><span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span>Score 65+</span>
+                        <span><span className="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span>Score 50+</span>
+                        <span className="ml-auto">Click row to expand AI analysis</span>
+                    </div>
                 </div>
             )}
 
             {/* Stock Detail Modal */}
-            {selectedTicker && (
-                <StockDetailModal
-                    ticker={selectedTicker}
-                    onClose={() => setSelectedTicker(null)}
-                />
-            )}
+            {selectedTicker && <StockDetailModal ticker={selectedTicker} onClose={() => setSelectedTicker(null)} />}
         </div>
     );
 }

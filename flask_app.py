@@ -31,8 +31,9 @@ os.chdir(BASE_DIR)
 
 # sys.path 오염 방지: 프로젝트 내 하위 패키지(korean market/, crypto-analytics/ 등)와
 # 외부 프로젝트(C:\Projects 등)의 app/config 패키지 충돌을 차단
-_blocked = ['korean market', 'crypto-analytics', 'us-market-pro', 'kr_market_package']
-sys.path = [p for p in sys.path if not any(b in p for b in _blocked)]
+_blocked = ['korean market', 'crypto-analytics', 'us-market-pro', 'kr_market_package',
+            'C:\\Projects', 'OneDrive', '바탕 화면']
+sys.path = [p for p in sys.path if not any(b.lower() in p.lower() for b in _blocked)]
 sys.path.insert(0, BASE_DIR)
 
 from app import create_app
@@ -61,5 +62,5 @@ if __name__ == '__main__':
     app.run(
         host='0.0.0.0',
         port=port,
-        debug=True
+        debug=False
     )

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usAPI } from '@/lib/api';
 
 interface InstitutionalData {
     ticker: string;
@@ -27,11 +28,8 @@ export default function Holdings13FPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/13f-holdings');
-            if (res.ok) {
-                const json = await res.json();
-                setData(json.holdings || []);
-            }
+            const json = await usAPI.get13FHoldings();
+            setData(json.holdings || []);
         } catch (error) {
             console.error('Failed to load 13F:', error);
         } finally {
@@ -64,7 +62,7 @@ export default function Holdings13FPage() {
                         13F SEC Filings
                     </div>
                     <h2 className="text-3xl font-bold tracking-tighter text-white mb-2">
-                        🏦 Institutional <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Holdings</span>
+                        Institutional <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Holdings</span>
                     </h2>
                     <p className="text-gray-400">기관 투자자 보유 현황</p>
                 </div>

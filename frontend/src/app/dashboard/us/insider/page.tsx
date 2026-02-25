@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usAPI } from '@/lib/api';
 
 interface InsiderTransaction {
     ticker: string;
@@ -23,11 +24,8 @@ export default function InsiderPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/insider-trading');
-            if (res.ok) {
-                const data = await res.json();
-                setTransactions(data.transactions || []);
-            }
+            const data = await usAPI.getInsiderTrading();
+            setTransactions(data.transactions || []);
         } catch (error) {
             console.error('Failed to load insider:', error);
         } finally {
@@ -50,7 +48,7 @@ export default function InsiderPage() {
                     SEC Form 4
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter text-white mb-2">
-                    🕵️ Insider <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">Trading</span>
+                    Insider <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">Trading</span>
                 </h2>
                 <p className="text-gray-400">내부자 매수/매도 추적</p>
             </div>

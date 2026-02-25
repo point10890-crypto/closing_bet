@@ -1,35 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ETF Fund Flow Analysis
-Analyzes 24 major ETFs for fund flow signals using volume and price data.
-Generates AI analysis using Gemini.
-
-Tracks 24 major ETFs (SPY, QQQ, IWM, GLD, USO, etc.)
-Calculates Flow Score (0-100) based on OBV, Volume Ratio, Price Momentum
-Generates Gemini AI analysis for fund flow interpretation
-Outputs: us_etf_flows.csv, etf_flow_analysis.json
+US ETF Fund Flow Analysis
+Tracks money flows into/out of major ETFs (SPY, QQQ, Sector ETFs)
 """
 
 import os
-import sys
-
-# Add parent project to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import json
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import logging
-import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List
 from tqdm import tqdm
 from dotenv import load_dotenv
+import json
 
+# Load environment variables
 load_dotenv()
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+
+try:
+    from macro_analyzer import MacroAIAnalyzer
+except ImportError:
+    # Handle case where script is run from different directory
+    import sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from macro_analyzer import MacroAIAnalyzer
 
 # Logging Configuration
 logging.basicConfig(
@@ -38,279 +35,422 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Set data_dir to this script's directory
-data_dir = os.path.dirname(os.path.abspath(__file__))
-
 
 class ETFFlowAnalyzer:
-    """
-    Analyze ETF fund flows using volume/price proxy indicators.
-    Tracks 24 major ETFs across Broad Market, Sector, Commodity, Bond, and International categories.
-    """
-
-    def __init__(self, data_dir: str = None):
-        if data_dir is None:
-            data_dir = os.path.dirname(os.path.abspath(__file__))
+    """ETF Fund Flow Analysis for market sentiment"""
+    
+    def __init__(self, data_dir: str = '.'):
         self.data_dir = data_dir
-        os.makedirs(self.data_dir, exist_ok=True)
-        self.output_csv = os.path.join(self.data_dir, 'us_etf_flows.csv')
-        self.output_json = os.path.join(self.data_dir, 'etf_flow_analysis.json')
-
-        # 24 major ETFs to track
-        self.etfs = {
-            'SPY': {'name': 'S&P 500', 'category': 'Broad Market'},
-            'QQQ': {'name': 'NASDAQ 100', 'category': 'Broad Market'},
-            'IWM': {'name': 'Russell 2000', 'category': 'Broad Market'},
-            'DIA': {'name': 'Dow Jones', 'category': 'Broad Market'},
-            'XLK': {'name': 'Technology', 'category': 'Sector'},
-            'XLF': {'name': 'Financials', 'category': 'Sector'},
-            'XLV': {'name': 'Healthcare', 'category': 'Sector'},
-            'XLE': {'name': 'Energy', 'category': 'Sector'},
-            'XLY': {'name': 'Consumer Disc.', 'category': 'Sector'},
-            'XLP': {'name': 'Consumer Staples', 'category': 'Sector'},
-            'XLI': {'name': 'Industrials', 'category': 'Sector'},
-            'XLB': {'name': 'Materials', 'category': 'Sector'},
-            'XLU': {'name': 'Utilities', 'category': 'Sector'},
-            'XLRE': {'name': 'Real Estate', 'category': 'Sector'},
-            'XLC': {'name': 'Comm. Services', 'category': 'Sector'},
-            'GLD': {'name': 'Gold', 'category': 'Commodity'},
-            'SLV': {'name': 'Silver', 'category': 'Commodity'},
-            'USO': {'name': 'Crude Oil', 'category': 'Commodity'},
-            'TLT': {'name': '20Y Treasury', 'category': 'Bond'},
-            'SHY': {'name': '1-3Y Treasury', 'category': 'Bond'},
-            'LQD': {'name': 'IG Corporate', 'category': 'Bond'},
-            'HYG': {'name': 'High Yield', 'category': 'Bond'},
-            'EEM': {'name': 'Emerging Markets', 'category': 'International'},
-            'EFA': {'name': 'Developed Markets', 'category': 'International'},
+        self.output_file = os.path.join(data_dir, 'output', 'us_etf_flows.csv')
+        
+        # Major ETFs to track
+        self.etf_list = {
+            # Broad Market
+            'SPY': ('S&P 500', 'Broad Market'),
+            'QQQ': ('NASDAQ 100', 'Broad Market'),
+            'IWM': ('Russell 2000', 'Broad Market'),
+            'DIA': ('Dow Jones', 'Broad Market'),
+            
+            # Sector ETFs (SPDR Select Sector)
+            'XLK': ('Technology', 'Sector'),
+            'XLF': ('Financials', 'Sector'),
+            'XLV': ('Health Care', 'Sector'),
+            'XLE': ('Energy', 'Sector'),
+            'XLI': ('Industrials', 'Sector'),
+            'XLP': ('Consumer Staples', 'Sector'),
+            'XLY': ('Consumer Discretionary', 'Sector'),
+            'XLU': ('Utilities', 'Sector'),
+            'XLB': ('Materials', 'Sector'),
+            'XLRE': ('Real Estate', 'Sector'),
+            'XLC': ('Communication Services', 'Sector'),
+            
+            # Thematic/Leveraged
+            'ARKK': ('ARK Innovation', 'Thematic'),
+            'TQQQ': ('NASDAQ 3x Bull', 'Leveraged'),
+            'SQQQ': ('NASDAQ 3x Bear', 'Leveraged'),
+            
+            # International
+            'EEM': ('Emerging Markets', 'International'),
+            'VEA': ('Developed Markets', 'International'),
+            
+            # Bonds
+            'TLT': ('20+ Year Treasury', 'Bonds'),
+            'HYG': ('High Yield Corporate', 'Bonds'),
+            
+            # Commodities
+            'GLD': ('Gold', 'Commodities'),
+            'USO': ('Crude Oil', 'Commodities'),
         }
-
+        
+        # Initialize AI Analyzer
+        self.ai_analyzer = MacroAIAnalyzer()
+        self.ai_output_file = os.path.join(data_dir, 'output', 'etf_flow_analysis.json')
+    
+    def download_etf_data(self, ticker: str, period: str = '3mo') -> pd.DataFrame:
+        """Download ETF price and volume data"""
+        try:
+            etf = yf.Ticker(ticker)
+            hist = etf.history(period=period)
+            
+            if hist.empty:
+                return pd.DataFrame()
+            
+            hist = hist.reset_index()
+            hist['ticker'] = ticker
+            return hist
+            
+        except Exception as e:
+            logger.debug(f"Failed to download {ticker}: {e}")
+            return pd.DataFrame()
+    
     def calculate_flow_proxy(self, df: pd.DataFrame) -> Dict:
         """
-        Calculate flow proxy score from volume/price data.
-        Uses OBV, Volume Ratio, and Price Momentum to estimate fund flows.
-
-        Returns dict with flow metrics and score (0-100).
+        Calculate fund flow proxy using price-volume analysis
+        Note: True AUM flows require premium data, this is an approximation
         """
         if len(df) < 20:
             return None
-
-        close = df['Close']
-        volume = df['Volume']
-
-        # OBV trend calculation
-        obv = [0]
-        for i in range(1, len(df)):
-            if close.iloc[i] > close.iloc[i-1]:
-                obv.append(obv[-1] + volume.iloc[i])
-            elif close.iloc[i] < close.iloc[i-1]:
-                obv.append(obv[-1] - volume.iloc[i])
-            else:
-                obv.append(obv[-1])
-
-        obv_change = (obv[-1] - obv[-20]) / abs(obv[-20]) * 100 if obv[-20] != 0 else 0
-
-        # Volume ratio (5-day avg vs 20-day avg)
-        vol_5d = volume.tail(5).mean()
-        vol_20d = volume.tail(20).mean()
-        vol_ratio = vol_5d / vol_20d if vol_20d > 0 else 1
-
+        
+        df = df.sort_values('Date').reset_index(drop=True)
+        
+        # Dollar Volume (proxy for flow magnitude)
+        df['dollar_volume'] = df['Close'] * df['Volume']
+        
+        # Daily Return
+        df['return'] = df['Close'].pct_change()
+        
+        # Signed Dollar Volume (positive on up days, negative on down days)
+        df['signed_flow'] = df['dollar_volume'] * np.sign(df['return'].fillna(0))
+        
+        # Calculate metrics
+        latest = df.iloc[-1]
+        
+        # 5-day and 20-day aggregates
+        flow_5d = df['signed_flow'].tail(5).sum()
+        flow_20d = df['signed_flow'].tail(20).sum()
+        
+        # Average dollar volume
+        avg_dollar_vol_5d = df['dollar_volume'].tail(5).mean()
+        avg_dollar_vol_20d = df['dollar_volume'].tail(20).mean()
+        
+        # Volume trend
+        vol_ratio = avg_dollar_vol_5d / avg_dollar_vol_20d if avg_dollar_vol_20d > 0 else 1
+        
         # Price momentum
-        ret_5d = (close.iloc[-1] / close.iloc[-5] - 1) * 100 if len(close) >= 5 else 0
-        ret_20d = (close.iloc[-1] / close.iloc[-20] - 1) * 100 if len(close) >= 20 else 0
-
-        # Flow score calculation (0-100)
+        price_5d = (latest['Close'] / df['Close'].iloc[-6] - 1) * 100 if len(df) >= 6 else 0
+        price_20d = (latest['Close'] / df['Close'].iloc[-21] - 1) * 100 if len(df) >= 21 else 0
+        
+        # Flow score (0-100)
         score = 50
-
-        # OBV contribution
-        if obv_change > 10:
+        
+        # 5-day flow contribution
+        flow_5d_norm = flow_5d / avg_dollar_vol_20d if avg_dollar_vol_20d > 0 else 0
+        if flow_5d_norm > 2:
             score += 20
-        elif obv_change > 5:
+        elif flow_5d_norm > 1:
             score += 10
-        elif obv_change < -10:
+        elif flow_5d_norm < -2:
             score -= 20
-        elif obv_change < -5:
+        elif flow_5d_norm < -1:
             score -= 10
-
+        
         # Volume ratio contribution
-        if vol_ratio > 1.5:
+        if vol_ratio > 1.3:
             score += 10
-        elif vol_ratio > 1.2:
+        elif vol_ratio > 1.1:
             score += 5
-        elif vol_ratio < 0.7:
+        elif vol_ratio < 0.8:
             score -= 5
-
+        
         # Price momentum contribution
-        if ret_5d > 2:
+        if price_5d > 3:
             score += 10
-        elif ret_5d > 0:
+        elif price_5d > 1:
             score += 5
-        elif ret_5d < -2:
+        elif price_5d < -3:
             score -= 10
-
+        elif price_5d < -1:
+            score -= 5
+        
         score = max(0, min(100, score))
-
-        # Determine flow stage
+        
+        # Determine flow status
         if score >= 70:
-            stage = "Strong Inflow"
+            status = "Strong Inflow"
         elif score >= 55:
-            stage = "Inflow"
+            status = "Inflow"
         elif score >= 45:
-            stage = "Neutral"
+            status = "Neutral"
         elif score >= 30:
-            stage = "Outflow"
+            status = "Outflow"
         else:
-            stage = "Strong Outflow"
-
+            status = "Strong Outflow"
+        
         return {
-            'current_price': round(float(close.iloc[-1]), 2),
-            'return_5d': round(ret_5d, 2),
-            'return_20d': round(ret_20d, 2),
+            'date': latest['Date'],
+            'close': round(latest['Close'], 2),
+            'volume': int(latest['Volume']),
+            'dollar_volume': round(latest['dollar_volume'] / 1e6, 2),  # In millions
+            'flow_5d': round(flow_5d / 1e9, 3),  # In billions
+            'flow_20d': round(flow_20d / 1e9, 3),  # In billions
             'vol_ratio': round(vol_ratio, 2),
-            'obv_change': round(obv_change, 2),
+            'price_5d': round(price_5d, 2),
+            'price_20d': round(price_20d, 2),
             'flow_score': round(score, 1),
-            'flow_stage': stage
+            'flow_status': status
         }
+    
+    def run(self) -> pd.DataFrame:
+        """Analyze fund flows for all ETFs"""
+        logger.info("🚀 Starting ETF Fund Flow Analysis...")
+        
+        results = []
+        
+        for ticker, (name, category) in tqdm(self.etf_list.items(), desc="Analyzing ETFs"):
+            df = self.download_etf_data(ticker)
+            
+            if df.empty:
+                continue
+            
+            analysis = self.calculate_flow_proxy(df)
+            
+            if analysis:
+                result = {
+                    'ticker': ticker,
+                    'name': name,
+                    'category': category,
+                    **analysis
+                }
+                results.append(result)
+        
+        # Create DataFrame
+        results_df = pd.DataFrame(results)
+        
+        # Save results
+        results_df.to_csv(self.output_file, index=False)
+        logger.info(f"✅ Analysis complete! Saved to {self.output_file}")
+        
+        # Print summary by category
+        logger.info("\n📊 Summary by Category:")
+        for category in results_df['category'].unique():
+            cat_df = results_df[results_df['category'] == category]
+            avg_score = cat_df['flow_score'].mean()
+            logger.info(f"   {category}: Avg Score {avg_score:.1f}")
+        
+        return results_df
+    
+    def generate_ai_analysis(self, results_df: pd.DataFrame) -> None:
+        """Generate AI analysis for ETF flows"""
+        logger.info("🤖 Generating AI analysis for ETF flows...")
+        
+        # Prepare data for prompt
+        sentiment = self.get_market_sentiment(results_df)
+        top_inflows = results_df.nlargest(5, 'flow_score')
+        top_outflows = results_df.nsmallest(5, 'flow_score')
+        
+        inflow_text = ""
+        for _, row in top_inflows.iterrows():
+            inflow_text += f"- {row['ticker']} ({row['name']}): Score {row['flow_score']}\n"
+            
+        outflow_text = ""
+        for _, row in top_outflows.iterrows():
+            outflow_text += f"- {row['ticker']} ({row['name']}): Score {row['flow_score']}\n"
+            
+        prompt = f"""You are a professional ETF strategist. Analyze the current fund flows.
 
-    def generate_ai_analysis(self, results_df: pd.DataFrame) -> str:
-        """
-        Generate AI analysis of ETF fund flows using Gemini.
-        Interprets the "why" behind fund flow movements.
+## Market Sentiment
+- Overall: {sentiment['sentiment']} (Score: {sentiment['overall_score']})
+- Risk-On Score: {sentiment['risk_on_score']}
+- Risk-Off Score: {sentiment['risk_off_score']}
 
-        Returns AI-generated analysis text.
-        """
+## 📈 Top Inflows (Money moving INTO)
+{inflow_text}
+
+## 📉 Top Outflows (Money moving OUT OF)
+{outflow_text}
+
+## Analysis Request
+1. Interpret the rotation: What does the flow from Top Outflows to Top Inflows signify? (e.g., Rotation to Small Caps, Defensive shift, etc.)
+2. Risk Sentiment: Is the market risking on or off? Why?
+3. Actionable Insight: One sentence strategy.
+
+Write in Korean (한국어). Use emojis. Be professional but concise."""
+
+        # Call AI
+        # We can reuse the macro_analyzer's method but we need to pass dummy args or create a new method?
+        # MacroAIAnalyzer.analyze_macro_conditions expects specifics.
+        # Let's use the internal _build_macro_prompt... wait, no.
+        # We should use the base_url and api_key directly or extend the class.
+        # But for simplicity, let's just call the private method style or make a direct request here?
+        # NO, re-using existing logic is better. But MacroAIAnalyzer is specific to Macro.
+        # Let's actually use the raw call logic here to be safe and avoid modifying macro_analyzer heavily.
+        # OR, since I already verified MacroAIAnalyzer has a generic structure?
+        # It has `analyze_macro_conditions`.
+        
+        # Let's TRY to use MacroAIAnalyzer but we need to format it to fit.
+        # Actually, `analyze_macro_conditions` calls `_build_macro_prompt`.
+        # It's tightly coupled.
+        # It's better to implement a simple call here using the API key from env.
+        
         api_key = os.getenv('GOOGLE_API_KEY')
         if not api_key:
-            logger.warning("GOOGLE_API_KEY not set. Skipping AI analysis.")
-            return "API Key not set. Skip AI analysis."
+            logger.warning("⚠️ GOOGLE_API_KEY not found, skipping AI analysis")
+            return
 
-        summary = results_df.to_string(index=False)
-        prompt = f"""Analyze the following ETF fund flow data and suggest investment strategies.
-
-{summary}
-
-Please provide:
-1. Overall market fund flow summary (2-3 lines)
-2. Notable sectors/assets (top fund inflows)
-3. Sectors/assets to watch out for (fund outflows)
-4. Investment strategy suggestions
-Write in Korean."""
-
+        import requests
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent" 
+        # Note: using 2.0 flash or 1.5 flash for speed/cost, or reuse 3.0? User asked for 3.0.
+        # Let's use the same model as macro_analyzer: gemini-3-pro-preview if possible, or fall back to flash.
+        # I'll use 1.5 flash for reliability as 3.0 is preview. User asked for 3.0 "모델 1.5를 쓰는거야 3.0 사용해달라고 했는데".
+        # So I MUST use 3.0.
+        
+        # User requested COMPULSORY Gemini 3.0 usage
+        model = "gemini-3-pro-preview"
+        logger.info(f"🤖 User requested 3.0. Using {model} exclusively...")
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        
         try:
-            url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-            payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {
-                    "temperature": 0.7,
-                    "maxOutputTokens": 1500
-                }
-            }
-            resp = requests.post(f"{url}?key={api_key}", json=payload, timeout=30)
+            response = requests.post(
+                f"{url}?key={api_key}",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "contents": [{
+                        "role": "user",
+                        "parts": [{"text": prompt}]
+                    }],
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "maxOutputTokens": 8000,
+                        # Gemini 3.0 requires explicit thinking config or large token budget
+                        "thinkingConfig": {
+                            "thinkingLevel": "low"
+                        }
+                    },
+                    # Safety settings to preventing blocking
+                    "safetySettings": [
+                        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                        {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                        {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+                    ]
+                },
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                result_json = response.json()
+                
+                # Debug logging
+                # logger.info(f"Debug Response: {json.dumps(result_json)[:200]}...")
 
-            if resp.status_code == 200:
-                data = resp.json()
-                return data['candidates'][0]['content']['parts'][0]['text']
+                # Check for valid content
+                if 'candidates' in result_json and result_json['candidates']:
+                    candidate = result_json['candidates'][0]
+                    if 'content' in candidate and 'parts' in candidate['content']:
+                        text = candidate['content']['parts'][0]['text']
+                        
+                        # Add version info
+                        final_text = f"**[Analysis by Gemini 3.0]**\n\n{text}"
+                        
+                        # Save
+                        with open(self.ai_output_file, 'w', encoding='utf-8') as f:
+                            json.dump({
+                                'ai_analysis': final_text, 
+                                'timestamp': datetime.now().isoformat(),
+                                'model': model
+                            }, f, ensure_ascii=False)
+                        
+                        logger.info(f"✅ AI Analysis saved to {self.ai_output_file}")
+                    else:
+                        logger.error(f"❌ '{model}' response content missing. Full response: {json.dumps(result_json)}")
+                else:
+                    logger.error(f"❌ '{model}' candidates missing. Full response: {json.dumps(result_json)}")
             else:
-                logger.error(f"Gemini API error: {resp.status_code}")
-                return f"AI analysis failed with status {resp.status_code}."
-
+                logger.error(f"❌ API Error: {response.status_code} - {response.text}")
+                
         except Exception as e:
-            logger.error(f"AI analysis error: {e}")
-            return "AI analysis failed."
+            logger.error(f"❌ Failed to generate AI analysis: {e}")
 
-    def run(self) -> pd.DataFrame:
-        """
-        Run ETF flow analysis for all tracked ETFs.
-        Downloads 3-month price history, calculates flow scores,
-        generates AI analysis, and saves results.
-        """
-        logger.info("Starting ETF Flow Analysis...")
-
-        results = []
-
-        for ticker, info in tqdm(self.etfs.items(), desc="Analyzing ETFs"):
-            try:
-                stock = yf.Ticker(ticker)
-                hist = stock.history(period='3mo')
-
-                if hist.empty or len(hist) < 20:
-                    logger.debug(f"Insufficient data for {ticker}")
-                    continue
-
-                flow = self.calculate_flow_proxy(hist)
-                if flow:
-                    results.append({
-                        'ticker': ticker,
-                        'name': info['name'],
-                        'category': info['category'],
-                        **flow
-                    })
-
-            except Exception as e:
-                logger.debug(f"Error analyzing {ticker}: {e}")
-
-        results_df = pd.DataFrame(results)
-
-        if not results_df.empty:
-            # Save CSV results
-            results_df.to_csv(self.output_csv, index=False)
-            logger.info(f"Saved CSV to {self.output_csv}")
-
-            # Generate and save AI Analysis
-            ai_text = self.generate_ai_analysis(results_df)
-
-            output = {
-                'timestamp': datetime.now().isoformat(),
-                'ai_analysis': ai_text,
-                'etf_count': len(results_df),
-                'categories': results_df['category'].unique().tolist(),
-                'avg_flow_score': round(results_df['flow_score'].mean(), 1),
-                'top_inflow': results_df.nlargest(3, 'flow_score')[['ticker', 'name', 'flow_score']].to_dict('records'),
-                'top_outflow': results_df.nsmallest(3, 'flow_score')[['ticker', 'name', 'flow_score']].to_dict('records')
-            }
-
-            with open(self.output_json, 'w', encoding='utf-8') as f:
-                json.dump(output, f, ensure_ascii=False, indent=2)
-            logger.info(f"Saved AI analysis to {self.output_json}")
-
-            # Print summary
-            logger.info("\nETF Flow Summary by Category:")
-            for category in results_df['category'].unique():
-                cat_data = results_df[results_df['category'] == category]
-                avg_score = cat_data['flow_score'].mean()
-                logger.info(f"   {category}: Avg Score {avg_score:.1f}")
-
+    def get_market_sentiment(self, results_df: pd.DataFrame = None) -> Dict:
+        """Calculate overall market sentiment from ETF flows"""
+        if results_df is None:
+            if os.path.exists(self.output_file):
+                results_df = pd.read_csv(self.output_file)
+            else:
+                return None
+        
+        # Broad market sentiment
+        broad = results_df[results_df['category'] == 'Broad Market']
+        broad_score = broad['flow_score'].mean() if not broad.empty else 50
+        
+        # Risk-on vs Risk-off
+        # Risk-on: Tech, Discretionary, Small Cap
+        risk_on_tickers = ['XLK', 'XLY', 'IWM', 'ARKK', 'TQQQ']
+        risk_on = results_df[results_df['ticker'].isin(risk_on_tickers)]
+        risk_on_score = risk_on['flow_score'].mean() if not risk_on.empty else 50
+        
+        # Risk-off: Utilities, Staples, Bonds, Gold
+        risk_off_tickers = ['XLU', 'XLP', 'TLT', 'GLD']
+        risk_off = results_df[results_df['ticker'].isin(risk_off_tickers)]
+        risk_off_score = risk_off['flow_score'].mean() if not risk_off.empty else 50
+        
+        # Overall sentiment
+        sentiment_score = (broad_score * 0.5 + risk_on_score * 0.3 + (100 - risk_off_score) * 0.2)
+        
+        if sentiment_score >= 65:
+            sentiment = "Risk-On (Bullish)"
+        elif sentiment_score >= 55:
+            sentiment = "Slightly Bullish"
+        elif sentiment_score >= 45:
+            sentiment = "Neutral"
+        elif sentiment_score >= 35:
+            sentiment = "Slightly Bearish"
         else:
-            logger.warning("No ETF results to save")
-
-        return results_df
+            sentiment = "Risk-Off (Bearish)"
+        
+        return {
+            'overall_score': round(sentiment_score, 1),
+            'sentiment': sentiment,
+            'broad_market_score': round(broad_score, 1),
+            'risk_on_score': round(risk_on_score, 1),
+            'risk_off_score': round(risk_off_score, 1)
+        }
 
 
 def main():
     """Main execution"""
     import argparse
-
+    
     parser = argparse.ArgumentParser(description='ETF Fund Flow Analysis')
-    parser.add_argument('--dir', default=None, help='Data directory')
+    parser.add_argument('--dir', default='.', help='Data directory')
     args = parser.parse_args()
-
+    
     analyzer = ETFFlowAnalyzer(data_dir=args.dir)
     results = analyzer.run()
-
-    if not results.empty:
-        print("\nETF Flow Summary:")
-        print(results[['ticker', 'name', 'category', 'flow_score', 'flow_stage']].to_string(index=False))
-
-        # Show top inflows
-        print("\nTop 5 Inflows:")
-        top_5 = results.nlargest(5, 'flow_score')
-        for _, row in top_5.iterrows():
-            print(f"   {row['ticker']} ({row['name']}): Score {row['flow_score']} - {row['flow_stage']}")
-
-        # Show top outflows
-        print("\nTop 5 Outflows:")
-        bottom_5 = results.nsmallest(5, 'flow_score')
-        for _, row in bottom_5.iterrows():
-            print(f"   {row['ticker']} ({row['name']}): Score {row['flow_score']} - {row['flow_stage']}")
+    
+    # Generate AI Analysis
+    analyzer.generate_ai_analysis(results)
+    
+    # Show market sentiment
+    sentiment = analyzer.get_market_sentiment(results)
+    if sentiment:
+        print(f"\n🎯 Market Sentiment: {sentiment['sentiment']} (Score: {sentiment['overall_score']})")
+        print(f"   Broad Market: {sentiment['broad_market_score']}")
+        print(f"   Risk-On Assets: {sentiment['risk_on_score']}")
+        print(f"   Risk-Off Assets: {sentiment['risk_off_score']}")
+    
+    # Show top inflows
+    print("\n📈 Top 5 Inflows:")
+    top_inflows = results.nlargest(5, 'flow_score')
+    for _, row in top_inflows.iterrows():
+        print(f"   {row['ticker']} ({row['name']}): Score {row['flow_score']} - {row['flow_status']}")
+    
+    # Show top outflows
+    print("\n📉 Top 5 Outflows:")
+    top_outflows = results.nsmallest(5, 'flow_score')
+    for _, row in top_outflows.iterrows():
+        print(f"   {row['ticker']} ({row['name']}): Score {row['flow_score']} - {row['flow_status']}")
 
 
 if __name__ == "__main__":

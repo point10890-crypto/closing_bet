@@ -94,7 +94,7 @@ export default function StockDetailModal({ ticker, onClose }: StockDetailModalPr
             wickUpColor: '#22c55e',
         });
 
-        const candleData: CandlestickData<Time>[] = data.chart.map((c: any) => ({
+        const candleData: CandlestickData<Time>[] = data.chart.map(c => ({
             time: c.date as Time,
             open: c.open,
             high: c.high,
@@ -109,8 +109,8 @@ export default function StockDetailModal({ ticker, onClose }: StockDetailModalPr
             lineWidth: 1,
         });
         const ma20Data: LineData<Time>[] = data.chart
-            .filter((c: any) => c.ma20 !== null)
-            .map((c: any) => ({
+            .filter(c => c.ma20 !== null)
+            .map(c => ({
                 time: c.date as Time,
                 value: c.ma20!,
             }));
@@ -122,8 +122,8 @@ export default function StockDetailModal({ ticker, onClose }: StockDetailModalPr
             lineWidth: 1,
         });
         const ma50Data: LineData<Time>[] = data.chart
-            .filter((c: any) => c.ma50 !== null)
-            .map((c: any) => ({
+            .filter(c => c.ma50 !== null)
+            .map(c => ({
                 time: c.date as Time,
                 value: c.ma50!,
             }));
@@ -229,7 +229,7 @@ export default function StockDetailModal({ ticker, onClose }: StockDetailModalPr
                                     왜 사야 하는가?
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {data.why_buy.map((reason: any, idx: number) => (
+                                    {data.why_buy.map((reason, idx) => (
                                         <div
                                             key={idx}
                                             className="flex items-start gap-3 p-3 rounded-lg bg-white/5"

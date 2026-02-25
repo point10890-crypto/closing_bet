@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usAPI } from '@/lib/api';
 
 interface OptionsFlow {
     ticker: string;
@@ -24,11 +25,8 @@ export default function OptionsFlowPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/options-flow');
-            if (res.ok) {
-                const data = await res.json();
-                setFlows(data.flows || []);
-            }
+            const data = await usAPI.getOptionsFlow();
+            setFlows(data.flows || []);
         } catch (error) {
             console.error('Failed to load options:', error);
         } finally {
@@ -51,7 +49,7 @@ export default function OptionsFlowPage() {
                     Unusual Activity
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter text-white mb-2">
-                    📊 Options <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Flow</span>
+                    Options <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Flow</span>
                 </h2>
                 <p className="text-gray-400">대규모 옵션 거래 활동</p>
             </div>

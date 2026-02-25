@@ -33,9 +33,20 @@ MarketFlow 통합 스케줄러 — US / KR / Crypto
   python scheduler.py --crypto-scan   # Crypto VCP Scan만
 """
 import os
+import sys
+
+# ── 경로 강제 고정 (scheduler.py 위치 = 프로젝트 루트) ──
+_FIXED_BASE = os.path.dirname(os.path.abspath(__file__))
+os.chdir(_FIXED_BASE)
+
+# sys.path 오염 방지: 바탕화면 복사본, OneDrive 등 외부 경로 차단
+_blocked_paths = ['kr_market_package', 'OneDrive', '바탕 화면', 'desktop',
+                  'korean market', 'crypto-analytics', 'us-market-pro']
+sys.path = [p for p in sys.path if not any(b.lower() in p.lower() for b in _blocked_paths)]
+sys.path.insert(0, _FIXED_BASE)
+
 from dotenv import load_dotenv
 load_dotenv(override=True)
-import sys
 import time
 import logging
 import subprocess
@@ -171,7 +182,12 @@ def run_command(cmd: list, description: str, timeout: int = 600,
     start = time.time()
 
     try:
-        env = {**os.environ, 'PYTHONPATH': Config.BASE_DIR, 'PYTHONIOENCODING': 'utf-8'}
+        # 환경변수 클린업: PYTHONPATH를 고정 경로만 사용, 외부 경로 제거
+        clean_env = {k: v for k, v in os.environ.items()}
+        clean_env['PYTHONPATH'] = Config.BASE_DIR
+        clean_env['PYTHONIOENCODING'] = 'utf-8'
+        # 바탕화면/OneDrive 경로가 PATH에 섞이지 않도록 보호
+        env = clean_env
         if env_extra:
             env.update(env_extra)
 
@@ -685,7 +701,7 @@ def _build_vcp_top10_text() -> str:
 
 # ── KR Round 1 & 2 ──
 
-def run_round1():
+def run_round1(skip_sync: bool = False):
     """1차 업데이트 (15:10) — 종가베팅 + AI 분석"""
     logger.info("=" * 60)
     logger.info("🇰🇷 [1차] 종가베팅 + AI 분석 시작 (15:10)")
@@ -699,16 +715,17 @@ def run_round1():
     logger.info(f"📋 [1차] 완료: {success_count}/{len(results)} 성공")
 
     # 대시보드 자동 동기화 + 배포
-    try:
-        logger.info("🔄 대시보드 동기화 시작 (KR)...")
-        sync_dashboard(scope='kr', deploy=True)
-    except Exception as e:
-        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+    if not skip_sync:
+        try:
+            logger.info("🔄 대시보드 동기화 시작 (KR)...")
+            sync_dashboard(scope='kr', deploy=True)
+        except Exception as e:
+            logger.error(f"❌ 대시보드 동기화 실패: {e}")
 
     return all(r[1] for r in results)
 
 
-def run_round2():
+def run_round2(skip_sync: bool = False):
     """2차 업데이트 (16:00) — 데이터 갱신 + VCP + AI → VCP Top10 포함 요약"""
     logger.info("=" * 60)
     logger.info("🇰🇷 [2차] 데이터 갱신 + VCP 시그널 시작 (16:00)")
@@ -744,11 +761,12 @@ def run_round2():
     send_telegram(msg)
 
     # 대시보드 자동 동기화 + 배포
-    try:
-        logger.info("🔄 대시보드 동기화 시작 (KR)...")
-        sync_dashboard(scope='kr', deploy=True)
-    except Exception as e:
-        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+    if not skip_sync:
+        try:
+            logger.info("🔄 대시보드 동기화 시작 (KR)...")
+            sync_dashboard(scope='kr', deploy=True)
+        except Exception as e:
+            logger.error(f"❌ 대시보드 동기화 실패: {e}")
 
     return all(r[1] for r in results)
 
@@ -757,25 +775,22 @@ def run_round2():
 # [US Market] 작업 함수들
 # ============================================================
 
-def run_us_market_update():
-    """US Market 전체 업데이트 (04:00) → Smart Money Top 5 텔레그램"""
+def run_us_market_update(skip_sync: bool = False):
+    """US 마켓 전체 업데이트 (us-market-pro 파이프라인)"""
     logger.info("=" * 60)
-    logger.info("🇺🇸 US Market 전체 업데이트 시작 (04:00)")
+    logger.info("🇺🇸 US Market 전체 업데이트 시작 (us_market/update_all.py)")
     logger.info("=" * 60)
 
-    # 1. update_us.py 실행 (전체 파이프라인 — 내부 텔레그램 전송은 무시, 별도 전송)
-    update_script = os.path.join(Config.BASE_DIR, 'update_us.py')
-    if not os.path.exists(update_script):
-        # fallback: us_market_preview/update_all.py
-        update_script = os.path.join(Config.BASE_DIR, 'us_market_preview', 'update_all.py')
+    # 1. us_market/update_all.py 실행 (Parallel Pipeline v2.0)
+    update_script = os.path.join(Config.BASE_DIR, 'us_market', 'update_all.py')
 
     if not os.path.exists(update_script):
-        logger.warning(f"⚠️ US update script 없음")
+        logger.warning(f"⚠️ US update script 없음: {update_script}")
         return False
 
     success = run_command(
         [Config.PYTHON_PATH, update_script, '--no-telegram'],
-        'US Market 전체 데이터 갱신',
+        'US Market Pipeline',
         timeout=1200
     )
 
@@ -793,11 +808,12 @@ def run_us_market_update():
         logger.error(f"❌ US 텔레그램 전송 실패: {e}")
 
     # 대시보드 자동 동기화 + 배포
-    try:
-        logger.info("🔄 대시보드 동기화 시작 (US)...")
-        sync_dashboard(scope='us', deploy=True)
-    except Exception as e:
-        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+    if not skip_sync:
+        try:
+            logger.info("🔄 대시보드 동기화 시작 (US)...")
+            sync_dashboard(scope='us', deploy=True)
+        except Exception as e:
+            logger.error(f"❌ 대시보드 동기화 실패: {e}")
 
     return success
 
@@ -1166,7 +1182,7 @@ def notify_crypto_briefing() -> bool:
 
 # ── Crypto 전체 파이프라인 ──
 
-def run_crypto_pipeline():
+def run_crypto_pipeline(skip_sync: bool = False):
     """Crypto 전체 파이프라인 (4시간마다 실행)"""
     logger.info("=" * 60)
     logger.info("🪙 Crypto 전체 파이프라인 시작 (4시간 주기)")
@@ -1207,11 +1223,12 @@ def run_crypto_pipeline():
     logger.info(f"🪙 Crypto 파이프라인 완료: {success_count}/{total_count} ({elapsed:.0f}초)")
 
     # 대시보드 자동 동기화 + 배포
-    try:
-        logger.info("🔄 대시보드 동기화 시작 (Crypto)...")
-        sync_dashboard(scope='crypto', deploy=True)
-    except Exception as e:
-        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+    if not skip_sync:
+        try:
+            logger.info("🔄 대시보드 동기화 시작 (Crypto)...")
+            sync_dashboard(scope='crypto', deploy=True)
+        except Exception as e:
+            logger.error(f"❌ 대시보드 동기화 실패: {e}")
 
     return success_count == total_count
 
@@ -1221,29 +1238,73 @@ def run_crypto_pipeline():
 # ============================================================
 
 def run_full_update():
-    """전체 업데이트 (--now 수동 실행용)"""
+    """전체 올 업데이트 (--now) — 5개 작업 순차 실행 + 통합 sync/deploy + 텔레그램"""
     logger.info("=" * 60)
-    logger.info("🔄 전체 업데이트 시작 (수동) — US + KR + Crypto")
+    logger.info("🌐 전체 올 업데이트 시작 — US + KR + Crypto")
     logger.info("=" * 60)
 
-    # US Market (개별 sync는 각 함수 내부에서 실행됨)
-    run_us_market_update()
+    overall_start = time.time()
 
-    # KR Market
-    run_round1()
-    run_round2()
+    # 5개 작업 정의: (label, emoji, callable)
+    tasks = [
+        ("US Market",   "🇺🇸", lambda: run_us_market_update(skip_sync=True)),
+        ("KR 수급",     "🇰🇷", lambda: update_institutional_data()),
+        ("KR VCP",      "🇰🇷", lambda: run_vcp_signal_scan(send_alert=False)),
+        ("종가베팅 V2",  "🎯", lambda: update_jongga_v2()),
+        ("Crypto",      "🪙", lambda: run_crypto_pipeline(skip_sync=True)),
+    ]
 
-    # Crypto
-    run_crypto_pipeline()
+    results = []  # (label, emoji, success, elapsed)
 
-    # 전체 최종 동기화 (Economy 포함)
+    for label, emoji, task_fn in tasks:
+        task_start = time.time()
+        try:
+            success = task_fn()
+            if success is None:
+                success = True
+        except Exception as e:
+            logger.error(f"❌ {label} 예외: {e}")
+            success = False
+        elapsed = time.time() - task_start
+        results.append((label, emoji, success, elapsed))
+        status = "✅" if success else "❌"
+        logger.info(f"{status} {emoji} {label} ({elapsed:.0f}초)")
+
+    # ── 통합 대시보드 동기화 + Vercel 배포 (1회) ──
+    deploy_ok = False
     try:
-        logger.info("🔄 Economy 데이터 동기화...")
-        sync_dashboard(scope='econ', deploy=False)  # 이미 개별 배포됨
+        logger.info("🔄 전체 대시보드 동기화 + Vercel 배포...")
+        sync_result = sync_dashboard(scope='all', deploy=True)
+        deploy_ok = sync_result.get('deployed', False) if isinstance(sync_result, dict) else bool(sync_result)
     except Exception as e:
-        logger.error(f"❌ Economy 동기화 실패: {e}")
+        logger.error(f"❌ 대시보드 동기화/배포 실패: {e}")
 
-    return True
+    # ── 통합 텔레그램 요약 ──
+    overall_elapsed = int(time.time() - overall_start)
+    success_count = sum(1 for _, _, s, _ in results if s)
+    total_count = len(results)
+    hour_str = datetime.now().strftime('%H:%M')
+    now_str = datetime.now().strftime('%Y-%m-%d %H:%M')
+
+    task_lines = []
+    for label, emoji, success, _ in results:
+        icon = "✅" if success else "❌"
+        task_lines.append(f"  {icon} {emoji} {label}")
+
+    deploy_text = "✅ Vercel 배포 완료" if deploy_ok else "❌ Vercel 배포 실패"
+
+    msg = (
+        f"<b>🌐 {hour_str} 전체 올 업데이트 완료</b>\n"
+        f"⏰ {now_str} ({overall_elapsed}초)\n"
+        f"결과: {success_count}/{total_count}\n\n"
+        + "\n".join(task_lines)
+        + f"\n\n📦 {deploy_text}"
+    )
+
+    send_telegram(msg)
+    logger.info(f"🌐 전체 업데이트 완료: {success_count}/{total_count} ({overall_elapsed}초)")
+
+    return success_count == total_count
 
 
 # ============================================================

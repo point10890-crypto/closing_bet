@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usAPI } from '@/lib/api';
 import ErrorBanner from '@/components/ui/ErrorBanner';
 
 interface NewsAnalysis {
@@ -32,9 +33,7 @@ export function NewsView() {
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch('/api/us/news-analysis');
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
+            const data = await usAPI.getNewsAnalysis();
             setNewsData(data.analysis || []);
         } catch {
             setError('Failed to load news analysis.');

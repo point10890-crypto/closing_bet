@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
 import { usAPI, TopPicksReportData } from '@/lib/api';
 import HelpButton from '@/components/ui/HelpButton';
-
-const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
+import StockDetailModal from '@/components/us/StockDetailModal';
 
 interface ParsedAISummary {
     thesis: string;

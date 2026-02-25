@@ -209,13 +209,6 @@ export interface USMarketGate {
     };
 }
 
-export interface USSector {
-    ticker: string;
-    name: string;
-    price: number;
-    change_pct: number;
-}
-
 // US Market Extended Types (us-market-pro)
 export interface PortfolioIndex {
     name: string;
@@ -476,9 +469,7 @@ export interface CumulativePerformanceData {
 export const usAPI = {
     getPortfolio: () => fetchAPI<{ market_indices: (USMarketIndex | PortfolioIndex)[]; timestamp: string }>('/api/us/portfolio'),
     getMarketGate: () => fetchAPI<USMarketGate>('/api/us/market-gate'),
-    getStockChart: (ticker: string, period = '6mo') =>
-        fetchAPI<{ ticker: string; data: any[]; period: string }>(`/api/us/stock-chart/${ticker}?period=${period}`),
-    getSmartMoney: () => fetchAPI<{ picks: SmartMoneyStock[]; count: number }>('/api/us/smart-money'),
+    getSmartMoney: () => fetchAPI<{ picks: SmartMoneyStock[]; count: number; updated_at?: string }>('/api/us/smart-money'),
     getSmartMoneyDetail: (ticker: string) => fetchAPI<SmartMoneyDetail>(`/api/us/smart-money/${ticker}/detail`),
     getMacroAnalysis: () => fetchAPI<MacroAnalysisResponse>('/api/us/macro-analysis'),
     getSectorRotation: () => fetchAPI<SectorRotationData>('/api/us/sector-rotation'),
@@ -492,21 +483,15 @@ export const usAPI = {
     getTopPicksReport: () => fetchAPI<TopPicksReportData>('/api/us/top-picks-report'),
     getCumulativePerformance: () => fetchAPI<{ summary: CumulativePerformanceSummary; picks: any[]; snapshots: any[] }>('/api/us/cumulative-performance'),
     getInsiderTrading: () => fetchAPI<any>('/api/us/insider-trading'),
-    getOptionsFlow: () => fetchAPI<any>('/api/us/options-flow-analysis'),
+    getOptionsFlow: () => fetchAPI<any>('/api/us/options-flow'),
     getNewsAnalysis: () => fetchAPI<any>('/api/us/news-analysis'),
-    getEtfFlowAnalysis: () => fetchAPI<any>('/api/us/etf-flow-analysis'),
-    get13FHoldings: () => fetchAPI<{ holdings: any[]; count: number }>('/api/us/13f-holdings'),
-    getEarningsAnalysis: () => fetchAPI<any>('/api/us/earnings-analysis'),
-    getPortfolioRisk: () => fetchAPI<any>('/api/us/portfolio-risk'),
-    getPredictionHistory: () => fetchAPI<any>('/api/us/prediction-history'),
-    getDataStatus: () => fetchAPI<{ files: any[]; count: number }>('/api/us/data-status'),
+    getEtfFlowAnalysis: () => fetchAPI<any>('/api/us/etf-flows'),
+    get13FHoldings: () => fetchAPI<{ holdings: any[]; count: number }>('/api/us/institutional'),
     getCalendar: () => fetchAPI<any>('/api/us/calendar'),
     getAISummary: (ticker: string) => fetchAPI<any>(`/api/us/ai-summary/${ticker}`),
-    getPreviewTopPicks: () => fetchAPI<any>('/api/us/preview/top-picks'),
-    getPreviewBriefing: () => fetchAPI<any>('/api/us/preview/briefing'),
-    getPreviewPrediction: () => fetchAPI<any>('/api/us/preview/prediction'),
-    getPreviewMarketData: () => fetchAPI<any>('/api/us/preview/market-data'),
     getHeatmapData: () => fetchAPI<any>('/api/us/heatmap-data'),
+    getSuperPerformance: () => fetchAPI<any>('/api/us/super-performance'),
+    getTrackRecord: () => fetchAPI<any>('/api/us/track-record'),
 };
 
 // Crypto API Types

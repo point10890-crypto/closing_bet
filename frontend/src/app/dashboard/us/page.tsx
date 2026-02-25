@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
     usAPI, SmartMoneyStock, USMarketGate, CumulativePerformanceSummary,
     MacroAnalysisResponse, PortfolioIndex, DecisionSignalData,
@@ -8,14 +8,10 @@ import {
     BacktestData, TopPicksReportData
 } from '@/lib/api';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import ErrorBanner from '@/components/ui/ErrorBanner';
 import HelpButton from '@/components/ui/HelpButton';
-import { useAutoRefresh } from '@/hooks/useAutoRefresh';
-
-// lightweight-charts는 window/DOM 필수 → SSR 비활성화
-const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
+import StockDetailModal from '@/components/us/StockDetailModal';
 
 export default function USMarketDashboard() {
     const [loading, setLoading] = useState(true);
@@ -35,8 +31,13 @@ export default function USMarketDashboard() {
     const [backtestData, setBacktestData] = useState<BacktestData | null>(null);
     const [topPicksData, setTopPicksData] = useState<TopPicksReportData | null>(null);
 
-    const fetchAllData = useCallback(async (silent = false) => {
-        if (!silent) { setLoading(true); setError(null); }
+    useEffect(() => {
+        loadData();
+    }, []);
+
+    const loadData = async () => {
+        setLoading(true);
+        setError(null);
         try {
             const [portfolioRes, smartMoneyRes, macroRes, gateRes, perfRes, dsRes, regimeRes, predRes, riskRes, sectorRes, btRes, tpRes] = await Promise.all([
                 usAPI.getPortfolio().catch(() => null),
@@ -54,7 +55,7 @@ export default function USMarketDashboard() {
             ]);
 
             if (!portfolioRes && !smartMoneyRes) {
-                if (!silent) setError('Failed to load market data. Check server connection.');
+                setError('Failed to load market data. Check server connection.');
             }
 
             setIndices(portfolioRes?.market_indices ?? []);
@@ -72,17 +73,11 @@ export default function USMarketDashboard() {
             setLastUpdated(new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }));
         } catch (err) {
             console.error('Failed to load US Market data:', err);
-            if (!silent) setError('Failed to load market data.');
+            setError('Failed to load market data.');
         } finally {
-            if (!silent) setLoading(false);
+            setLoading(false);
         }
-    }, []);
-
-    const loadData = useCallback(() => fetchAllData(false), [fetchAllData]);
-    const silentRefresh = useCallback(() => fetchAllData(true), [fetchAllData]);
-
-    useEffect(() => { loadData(); }, [loadData]);
-    useAutoRefresh(silentRefresh, 60000);
+    };
 
     const getGateColor = (score: number) => {
         if (score >= 70) return 'text-green-500';
@@ -187,7 +182,7 @@ export default function USMarketDashboard() {
                                         cx="40" cy="40" r="35"
                                         stroke="currentColor" strokeWidth="6" fill="transparent"
                                         strokeDasharray="220"
-                                        strokeDashoffset={220 - (220 * (decisionSignal.score || 0) / 100)}
+                                        strokeDashoffset={220 - (220 * decisionSignal.score / 100)}
                                         className={`${getActionColor(decisionSignal.action)} transition-all duration-1000`}
                                     />
                                 </svg>
@@ -200,17 +195,17 @@ export default function USMarketDashboard() {
                         {/* Component Pills */}
                         <div className="flex-1 flex flex-wrap gap-2">
                             {[
-                                { label: 'Gate', value: `${decisionSignal.components?.market_gate?.score ?? '--'}`, contrib: decisionSignal.components?.market_gate?.contribution ?? 0 },
-                                { label: 'Regime', value: (decisionSignal.components?.regime?.regime ?? 'N/A').replace('_', ' '), contrib: decisionSignal.components?.regime?.contribution ?? 0 },
-                                { label: 'ML Pred', value: `${decisionSignal.components?.prediction?.spy_bullish?.toFixed(0) ?? '--'}%`, contrib: decisionSignal.components?.prediction?.contribution ?? 0 },
-                                { label: 'Risk', value: decisionSignal.components?.risk?.level ?? 'N/A', contrib: decisionSignal.components?.risk?.contribution ?? 0 },
-                                { label: 'Sector', value: decisionSignal.components?.sector_phase?.phase ?? 'N/A', contrib: decisionSignal.components?.sector_phase?.contribution ?? 0 },
+                                { label: 'Gate', value: `${decisionSignal.components.market_gate.score}`, contrib: decisionSignal.components.market_gate.contribution },
+                                { label: 'Regime', value: decisionSignal.components.regime.regime.replace('_', ' '), contrib: decisionSignal.components.regime.contribution },
+                                { label: 'ML Pred', value: `${decisionSignal.components.prediction.spy_bullish.toFixed(0)}%`, contrib: decisionSignal.components.prediction.contribution },
+                                { label: 'Risk', value: decisionSignal.components.risk.level, contrib: decisionSignal.components.risk.contribution },
+                                { label: 'Sector', value: decisionSignal.components.sector_phase.phase, contrib: decisionSignal.components.sector_phase.contribution },
                             ].map(comp => (
                                 <div key={comp.label} className="px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
                                     <div className="text-[10px] text-gray-500">{comp.label}</div>
                                     <div className="text-xs font-bold text-white">{comp.value}</div>
-                                    <div className={`text-[10px] font-bold ${(comp.contrib ?? 0) > 0 ? 'text-green-400' : (comp.contrib ?? 0) < 0 ? 'text-red-400' : 'text-gray-500'}`}>
-                                        {(comp.contrib ?? 0) > 0 ? '+' : ''}{(comp.contrib ?? 0).toFixed(1)}
+                                    <div className={`text-[10px] font-bold ${comp.contrib > 0 ? 'text-green-400' : comp.contrib < 0 ? 'text-red-400' : 'text-gray-500'}`}>
+                                        {comp.contrib > 0 ? '+' : ''}{comp.contrib.toFixed(1)}
                                     </div>
                                 </div>
                             ))}
@@ -226,9 +221,9 @@ export default function USMarketDashboard() {
                     </div>
 
                     {/* Warnings */}
-                    {(decisionSignal.warnings?.length ?? 0) > 0 && (
+                    {decisionSignal.warnings.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap gap-2">
-                            {(decisionSignal.warnings ?? []).map((w, i) => (
+                            {decisionSignal.warnings.map((w, i) => (
                                 <span key={i} className="text-xs text-yellow-400/80 bg-yellow-500/10 px-2 py-0.5 rounded">
                                     <i className="fas fa-exclamation-triangle mr-1"></i>{w}
                                 </span>
@@ -241,7 +236,7 @@ export default function USMarketDashboard() {
             {/* Market Gate + Indices */}
             <section className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                 {/* Gate Score */}
-                <div className="lg:col-span-1 p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10 relative overflow-hidden group">
+                <div className="lg:col-span-1 p-6 rounded-2xl bg-[#1c1c1e] border border-white/10 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-500">
                         <i className="fas fa-flag-usa text-4xl"></i>
                     </div>
@@ -283,7 +278,7 @@ export default function USMarketDashboard() {
                 </div>
 
                 {/* Market Indices Grid */}
-                <div className="lg:col-span-4 p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+                <div className="lg:col-span-4 p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-bold text-gray-400">Major Indices</h3>
                         <button onClick={loadData} disabled={loading} className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50">
@@ -301,9 +296,9 @@ export default function USMarketDashboard() {
                                 <div key={idx.name} className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-blue-500/30 transition-all">
                                     <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{idx.name}</div>
                                     <div className="text-lg font-black text-white mt-1">{idx.price}</div>
-                                    <div className={`text-xs font-bold ${(idx.change_pct ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        <i className={`fas fa-caret-${(idx.change_pct ?? 0) >= 0 ? 'up' : 'down'} mr-0.5`}></i>
-                                        {(idx.change_pct ?? 0) >= 0 ? '+' : ''}{(idx.change_pct ?? 0).toFixed(2)}%
+                                    <div className={`text-xs font-bold ${idx.change_pct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        <i className={`fas fa-caret-${idx.change_pct >= 0 ? 'up' : 'down'} mr-0.5`}></i>
+                                        {idx.change_pct >= 0 ? '+' : ''}{idx.change_pct?.toFixed(2)}%
                                     </div>
                                 </div>
                             ))
@@ -436,8 +431,8 @@ export default function USMarketDashboard() {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-sm font-black text-white">${stock.price?.toFixed(2) ?? '--'}</div>
-                                        <div className={`text-xs font-bold ${getChangeColor(stock.change_pct ?? 0)}`}>
-                                            {(stock.change_pct ?? 0) >= 0 ? '+' : ''}{(stock.change_pct ?? 0).toFixed(2)}%
+                                        <div className={`text-xs font-bold ${getChangeColor(stock.change_pct)}`}>
+                                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct?.toFixed(2)}%
                                         </div>
                                     </div>
                                 </div>
@@ -465,19 +460,19 @@ export default function USMarketDashboard() {
                                         <div className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors">{pick.ticker}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-sm font-black text-white">${(pick.current_price ?? 0).toFixed(2)}</div>
-                                        <div className={`text-xs font-bold ${(pick.target_upside ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {(pick.target_upside ?? 0) > 0 ? '+' : ''}{(pick.target_upside ?? 0).toFixed(1)}%
+                                        <div className="text-sm font-black text-white">${pick.current_price.toFixed(2)}</div>
+                                        <div className={`text-xs font-bold ${pick.target_upside >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                            {pick.target_upside > 0 ? '+' : ''}{pick.target_upside.toFixed(1)}%
                                         </div>
                                     </div>
                                 </div>
                                 <div className="text-xs text-gray-500 truncate mb-2">{pick.name}</div>
                                 <div className="flex gap-1 flex-wrap">
                                     <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-400 font-bold">
-                                        {(pick.final_score ?? 0).toFixed(1)}
+                                        {pick.final_score.toFixed(1)}
                                     </span>
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${(pick.ai_recommendation ?? '').includes('매수') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
-                                        {pick.ai_recommendation ?? '-'}
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${pick.ai_recommendation.includes('매수') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
+                                        {pick.ai_recommendation}
                                     </span>
                                 </div>
                             </div>
@@ -500,11 +495,11 @@ export default function USMarketDashboard() {
                             </span>
                         </div>
                         <div className="flex items-center gap-6 flex-wrap text-sm">
-                            <span className="text-emerald-400 font-black">+{backtestData.returns?.total_return?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">return</span></span>
-                            <span className="text-blue-400 font-black">+{backtestData.benchmarks?.SPY?.alpha?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">alpha vs SPY</span></span>
-                            <span className="text-purple-400 font-black">{backtestData.returns?.sharpe_ratio?.toFixed(1) ?? '--'} <span className="text-gray-500 font-normal text-xs">sharpe</span></span>
-                            <span className="text-yellow-400 font-black">{backtestData.returns?.win_rate?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">win rate</span></span>
-                            <span className="text-red-400 font-bold">{backtestData.returns?.max_drawdown?.toFixed(1) ?? '--'}% <span className="text-gray-500 font-normal text-xs">max DD</span></span>
+                            <span className="text-emerald-400 font-black">+{backtestData.returns.total_return.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">return</span></span>
+                            <span className="text-blue-400 font-black">+{backtestData.benchmarks.SPY?.alpha.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">alpha vs SPY</span></span>
+                            <span className="text-purple-400 font-black">{backtestData.returns.sharpe_ratio.toFixed(1)} <span className="text-gray-500 font-normal text-xs">sharpe</span></span>
+                            <span className="text-yellow-400 font-black">{backtestData.returns.win_rate.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">win rate</span></span>
+                            <span className="text-red-400 font-bold">{backtestData.returns.max_drawdown.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">max DD</span></span>
                         </div>
                     </div>
                 </Link>
@@ -566,7 +561,7 @@ export default function USMarketDashboard() {
                     <Link
                         key={link.href}
                         href={link.href}
-                        className={`p-4 md:p-5 rounded-2xl bg-[#1c1c1e] border border-white/10 hover:border-${link.color}-500/30 transition-all group`}
+                        className={`p-5 rounded-2xl bg-[#1c1c1e] border border-white/10 hover:border-${link.color}-500/30 transition-all group`}
                     >
                         <div className="flex items-center justify-between">
                             <div>

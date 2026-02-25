@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
-
-const StockDetailModal = dynamic(() => import('@/components/us/StockDetailModal'), { ssr: false });
+import { usAPI } from '@/lib/api';
+import StockDetailModal from '@/components/us/StockDetailModal';
 import SearchInput from '@/components/ui/SearchInput';
 
 interface VCPStock {
@@ -25,9 +24,17 @@ interface VCPStock {
     breakout: string;
     pivot_price: number;
     score: number;
+    // final_top10_report enriched fields
+    ai_recommendation?: string;
+    ai_bonus?: number;
+    target_upside?: number;
+    inst_pct?: number;
+    rsi?: number;
+    grade?: string;
+    rank?: number;
 }
 
-type SortKey = 'score' | 'vcp_score' | 'rs_rating' | 'fund_score' | 'price' | 'contractions' | 'ticker';
+type SortKey = 'score' | 'fund_score' | 'inst_pct' | 'rsi' | 'target_upside' | 'price' | 'ticker';
 
 export function VCPView() {
     const [loading, setLoading] = useState(true);
@@ -36,19 +43,18 @@ export function VCPView() {
     const [sortAsc, setSortAsc] = useState(false);
     const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
     const [search, setSearch] = useState('');
+    const [source, setSource] = useState('');
+    const [generatedAt, setGeneratedAt] = useState('');
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    useEffect(() => { loadData(); }, []);
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/super-performance');
-            if (res.ok) {
-                const data = await res.json();
-                setStocks(data.stocks || []);
-            }
+            const data = await usAPI.getSuperPerformance();
+            setStocks(data.stocks || []);
+            setSource(data.source || 'csv');
+            setGeneratedAt(data.generated_at || '');
         } catch (error) {
             console.error('Failed to load VCP:', error);
         } finally {
@@ -57,12 +63,8 @@ export function VCPView() {
     };
 
     const handleSort = (key: SortKey) => {
-        if (sortBy === key) {
-            setSortAsc(!sortAsc);
-        } else {
-            setSortBy(key);
-            setSortAsc(false);
-        }
+        if (sortBy === key) setSortAsc(!sortAsc);
+        else { setSortBy(key); setSortAsc(false); }
     };
 
     const filtered = stocks.filter(s => {
@@ -72,11 +74,9 @@ export function VCPView() {
     });
 
     const sortedStocks = [...filtered].sort((a, b) => {
-        const aVal = a[sortBy] ?? 0;
-        const bVal = b[sortBy] ?? 0;
-        if (typeof aVal === 'string') {
-            return sortAsc ? aVal.localeCompare(bVal as string) : (bVal as string).localeCompare(aVal);
-        }
+        const aVal = (a as unknown as Record<string, unknown>)[sortBy] ?? 0;
+        const bVal = (b as unknown as Record<string, unknown>)[sortBy] ?? 0;
+        if (typeof aVal === 'string') return sortAsc ? aVal.localeCompare(bVal as string) : (bVal as string).localeCompare(aVal);
         return sortAsc ? (aVal as number) - (bVal as number) : (bVal as number) - (aVal as number);
     });
 
@@ -95,11 +95,22 @@ export function VCPView() {
     );
 
     const getStageColor = (stage: string) => {
-        if (stage.includes('Pivot')) return 'bg-yellow-500/20 text-yellow-400';
-        if (stage.includes('Tightening')) return 'bg-emerald-500/20 text-emerald-400';
-        if (stage.includes('Breakout') || stage.includes('Momentum')) return 'bg-blue-500/20 text-blue-400';
-        return 'bg-gray-500/20 text-gray-400';
+        if (stage.includes('Strong Accumulation')) return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+        if (stage.includes('Accumulation')) return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+        if (stage.includes('Distribution')) return 'bg-red-500/20 text-red-400 border-red-500/30';
+        if (stage.includes('Pivot') || stage.includes('Tightening')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+        if (stage.includes('Neutral')) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        return 'bg-gray-500/15 text-gray-500 border-gray-500/20';
     };
+
+    const getRecColor = (rec: string) => {
+        if (rec.includes('적극') || rec.includes('Strong')) return 'text-emerald-400';
+        if (rec.includes('매수') || rec.includes('Buy')) return 'text-blue-400';
+        if (rec.includes('매도') || rec.includes('Sell')) return 'text-red-400';
+        return 'text-gray-400';
+    };
+
+    const isReportSource = source === 'final_top10_report';
 
     return (
         <div className="space-y-6">
@@ -107,14 +118,16 @@ export function VCPView() {
             <div>
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-xs text-emerald-400 font-medium mb-4">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    Minervini VCP
+                    {isReportSource ? 'Smart Money Picks' : 'Minervini VCP'}
                 </div>
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white leading-tight mb-2">
                             Super <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Performance</span>
                         </h2>
-                        <p className="text-gray-400">VCP 패턴 + Super Performance 종목</p>
+                        <p className="text-gray-400">
+                            {isReportSource ? 'AI 분석 기반 Top Picks' : 'VCP 패턴 + Super Performance 종목'}
+                        </p>
                     </div>
                     <button
                         onClick={loadData}
@@ -128,21 +141,31 @@ export function VCPView() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Total Stocks</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Total Picks</div>
                     <div className="text-2xl font-black text-white">{stocks.length}</div>
                 </div>
                 <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Breakout Ready</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">
+                        {isReportSource ? 'Strong Accum' : 'Breakout Ready'}
+                    </div>
                     <div className="text-2xl font-black text-emerald-400">
-                        {stocks.filter(s => s.breakout === 'Yes').length}
+                        {isReportSource
+                            ? stocks.filter(s => s.stage?.includes('Strong Accumulation')).length
+                            : stocks.filter(s => s.breakout === 'Yes').length}
                     </div>
                 </div>
                 <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
-                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Avg VCP Score</div>
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Avg Score</div>
                     <div className="text-2xl font-black text-teal-400">
-                        {stocks.length > 0 ? (stocks.reduce((a, b) => a + (b.vcp_score || 0), 0) / stocks.length).toFixed(0) : '--'}
+                        {stocks.length > 0 ? (stocks.reduce((a, b) => a + (b.score || 0), 0) / stocks.length).toFixed(1) : '--'}
+                    </div>
+                </div>
+                <div className="p-4 rounded-xl bg-[#1c1c1e] border border-white/10">
+                    <div className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Updated</div>
+                    <div className="text-sm font-bold text-gray-400 mt-1">
+                        {generatedAt ? new Date(generatedAt).toLocaleDateString('ko-KR') : '--'}
                     </div>
                 </div>
             </div>
@@ -158,8 +181,8 @@ export function VCPView() {
             {loading ? (
                 <div className="rounded-2xl bg-[#1c1c1e] border border-white/10 p-8">
                     <div className="space-y-3">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                            <div key={i} className="h-10 rounded bg-white/5 animate-pulse"></div>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <div key={i} className="h-12 rounded bg-white/5 animate-pulse"></div>
                         ))}
                     </div>
                 </div>
@@ -171,7 +194,100 @@ export function VCPView() {
                     <div className="text-gray-500 text-lg mb-2">No VCP patterns found</div>
                     <div className="text-xs text-gray-600">Run: python3 us_market/super_performance_scanner.py</div>
                 </div>
+            ) : isReportSource ? (
+                /* ── Smart Money Report Card Layout ── */
+                <div className="space-y-4">
+                    {sortedStocks.map((stock, idx) => (
+                        <div
+                            key={stock.ticker}
+                            onClick={() => setSelectedTicker(stock.ticker)}
+                            className="p-5 rounded-2xl bg-[#1c1c1e] border border-white/10 hover:border-emerald-500/30 transition-all cursor-pointer group"
+                        >
+                            <div className="flex items-start justify-between gap-4">
+                                {/* Left: Rank + Ticker Info */}
+                                <div className="flex items-start gap-4 flex-1 min-w-0">
+                                    <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                                        <span className="text-lg font-black text-emerald-400">#{stock.rank || idx + 1}</span>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <span className="text-lg font-black text-white group-hover:text-emerald-400 transition-colors">
+                                                {stock.ticker}
+                                            </span>
+                                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStageColor(stock.stage)}`}>
+                                                {stock.stage || 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div className="text-sm text-gray-400 truncate">{stock.name}</div>
+                                        {stock.ai_recommendation && (
+                                            <div className={`text-xs font-bold mt-1 ${getRecColor(stock.ai_recommendation)}`}>
+                                                AI: {stock.ai_recommendation}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right: Score + Metrics */}
+                                <div className="flex items-center gap-6 flex-shrink-0">
+                                    <div className="hidden md:grid grid-cols-4 gap-4 text-center">
+                                        <div>
+                                            <div className="text-[9px] text-gray-600 uppercase">Price</div>
+                                            <div className="text-sm font-bold text-white">${stock.price?.toFixed(2)}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[9px] text-gray-600 uppercase">Inst %</div>
+                                            <div className="text-sm font-bold text-blue-400">{stock.inst_pct?.toFixed(1)}%</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[9px] text-gray-600 uppercase">RSI</div>
+                                            <div className={`text-sm font-bold ${(stock.rsi || 0) > 70 ? 'text-red-400' : (stock.rsi || 0) > 50 ? 'text-emerald-400' : 'text-yellow-400'}`}>
+                                                {stock.rsi?.toFixed(1)}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[9px] text-gray-600 uppercase">Upside</div>
+                                            <div className={`text-sm font-bold ${(stock.target_upside || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                                {(stock.target_upside || 0) >= 0 ? '+' : ''}{stock.target_upside?.toFixed(1)}%
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Score Badge */}
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center">
+                                            <span className="text-xl font-black text-emerald-400">{stock.score?.toFixed(0)}</span>
+                                        </div>
+                                        <span className="text-[9px] text-gray-500 mt-1">SCORE</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Mobile metrics */}
+                            <div className="grid grid-cols-4 gap-3 mt-4 md:hidden">
+                                <div className="text-center">
+                                    <div className="text-[9px] text-gray-600">Price</div>
+                                    <div className="text-xs font-bold text-white">${stock.price?.toFixed(2)}</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-[9px] text-gray-600">Inst %</div>
+                                    <div className="text-xs font-bold text-blue-400">{stock.inst_pct?.toFixed(1)}%</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-[9px] text-gray-600">RSI</div>
+                                    <div className="text-xs font-bold text-gray-300">{stock.rsi?.toFixed(1)}</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-[9px] text-gray-600">Upside</div>
+                                    <div className={`text-xs font-bold ${(stock.target_upside || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        {(stock.target_upside || 0) >= 0 ? '+' : ''}{stock.target_upside?.toFixed(1)}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             ) : (
+                /* ── Original VCP Table Layout ── */
                 <div className="rounded-2xl bg-[#1c1c1e] border border-white/10 overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -182,17 +298,10 @@ export function VCPView() {
                                     <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-left">Name</th>
                                     <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-left">Sector</th>
                                     <ThButton column="price" label="Price" align="right" />
-                                    <ThButton column="vcp_score" label="VCP" align="right" />
-                                    <ThButton column="rs_rating" label="RS" align="right" />
                                     <ThButton column="fund_score" label="Fund" align="right" />
                                     <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-left">Setup</th>
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-right">Tightness</th>
-                                    <ThButton column="contractions" label="Contractions" align="right" />
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-right">Base</th>
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-right">EPS</th>
                                     <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-center">Vol Dry</th>
                                     <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-center">Breakout</th>
-                                    <th className="px-3 py-3 text-[10px] text-gray-500 uppercase tracking-wider font-bold text-right">Pivot</th>
                                     <ThButton column="score" label="Score" align="right" />
                                 </tr>
                             </thead>
@@ -212,18 +321,12 @@ export function VCPView() {
                                             </span>
                                         </td>
                                         <td className="px-3 py-3 text-sm font-bold text-white text-right">${stock.price?.toFixed(2)}</td>
-                                        <td className="px-3 py-3 text-sm font-black text-emerald-400 text-right">{stock.vcp_score}</td>
-                                        <td className="px-3 py-3 text-sm text-gray-300 text-right">{stock.rs_rating}</td>
                                         <td className="px-3 py-3 text-sm text-gray-400 text-right">{stock.fund_score}</td>
                                         <td className="px-3 py-3">
                                             <span className={`px-2 py-1 rounded-full text-[10px] font-bold whitespace-nowrap ${getStageColor(stock.stage)}`}>
                                                 {stock.stage}
                                             </span>
                                         </td>
-                                        <td className="px-3 py-3 text-xs text-gray-400 text-right">{stock.pivot_tightness}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-400 text-right">{stock.contractions}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-400 text-right">{stock.base_depth}</td>
-                                        <td className="px-3 py-3 text-xs text-gray-400 text-right">{stock.eps_growth}</td>
                                         <td className="px-3 py-3 text-center">
                                             {stock.vol_dry_up === 'Yes' ? (
                                                 <span className="text-emerald-400 text-xs font-bold">Yes</span>
@@ -238,7 +341,6 @@ export function VCPView() {
                                                 <span className="text-gray-600 text-xs">No</span>
                                             )}
                                         </td>
-                                        <td className="px-3 py-3 text-xs text-gray-400 text-right">${stock.pivot_price?.toFixed(2)}</td>
                                         <td className="px-3 py-3 text-sm font-black text-teal-400 text-right">{stock.score?.toFixed(1)}</td>
                                     </tr>
                                 ))}
@@ -248,12 +350,8 @@ export function VCPView() {
                 </div>
             )}
 
-            {/* Stock Detail Modal */}
             {selectedTicker && (
-                <StockDetailModal
-                    ticker={selectedTicker}
-                    onClose={() => setSelectedTicker(null)}
-                />
+                <StockDetailModal ticker={selectedTicker} onClose={() => setSelectedTicker(null)} />
             )}
         </div>
     );

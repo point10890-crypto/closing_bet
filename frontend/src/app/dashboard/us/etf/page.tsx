@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usAPI } from '@/lib/api';
 
 interface ETFFlow {
     ticker: string;
@@ -23,11 +24,8 @@ export default function ETFFlowsPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/us/etf-flows');
-            if (res.ok) {
-                const data = await res.json();
-                setFlows(data.flows || []);
-            }
+            const data = await usAPI.getEtfFlowAnalysis();
+            setFlows(data.flows || []);
         } catch (error) {
             console.error('Failed to load ETF:', error);
         } finally {
@@ -57,7 +55,7 @@ export default function ETFFlowsPage() {
                     Fund Flows
                 </div>
                 <h2 className="text-3xl font-bold tracking-tighter text-white mb-2">
-                    💰 ETF <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Flows</span>
+                    ETF <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Flows</span>
                 </h2>
                 <p className="text-gray-400">섹터 ETF 자금 유입/유출</p>
             </div>

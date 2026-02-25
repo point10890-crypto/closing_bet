@@ -1,63 +1,50 @@
 # app/routes/us_market.py
-"""US Market API Routes"""
+"""US 마켓 API 라우트"""
 
 import os
 import json
-import math
-import time
 import traceback
 from datetime import datetime
+import pandas as pd
+import yfinance as yf
 from flask import Blueprint, jsonify, request
+
+from app.utils.cache import get_sector
 
 us_bp = Blueprint('us', __name__)
 
-# ─── 경로 고정 (__file__ 기반 절대경로) ───
-_ROUTES_DIR = os.path.dirname(os.path.abspath(__file__))       # app/routes/
-_APP_DIR = os.path.dirname(_ROUTES_DIR)                         # app/
-_BASE_DIR = os.path.dirname(_APP_DIR)                           # /c/closing_bet
-US_DATA_DIR = os.path.join(_BASE_DIR, 'us_market', 'data')
-US_HISTORY_DIR = os.path.join(_BASE_DIR, 'us_market', 'history')
-PREVIEW_OUTPUT_DIR = os.path.join(_BASE_DIR, 'us_market_preview', 'output')
+# 절대경로 고정 — C:\closing_bet 기준
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_US_MARKET_DIR = os.path.join(_BASE_DIR, 'us_market')
+_OUTPUT_DIR = os.path.join(_US_MARKET_DIR, 'output')
+_DATA_DIR = os.path.join(_US_MARKET_DIR, 'data')
+_HISTORY_DIR = os.path.join(_US_MARKET_DIR, 'history')
+_PREVIEW_DIR = os.path.join(_BASE_DIR, 'us_market_preview', 'output')
 
 
-def _safe_float(val, default=0):
-    """Safely convert to float"""
-    if val is None:
+def safe_float(val, default=0):
+    """Safely convert to float, handling NaN and None"""
+    if val is None or (isinstance(val, float) and pd.isna(val)):
         return default
     try:
-        f = float(val)
-        return default if math.isnan(f) else f
+        return float(val)
     except (ValueError, TypeError):
         return default
 
 
-_preview_cache = {}  # {filename: (data, timestamp)}
-_CACHE_TTL = 30      # seconds — safe for scheduler update cadence (4h+)
-
-
-def _load_preview_json(filename):
-    """Load a JSON file from preview output directory with 30s TTL cache"""
-    now = time.time()
-    if filename in _preview_cache:
-        data, ts = _preview_cache[filename]
-        if now - ts < _CACHE_TTL:
-            return data
-
-    path = os.path.join(PREVIEW_OUTPUT_DIR, filename)
-    if os.path.exists(path):
-        with open(path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        _preview_cache[filename] = (data, now)
-        return data
-    return {}
+def safe_str(val, default=''):
+    """Safely convert to string, handling NaN and None"""
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return default
+    return str(val)
 
 
 @us_bp.route('/portfolio')
-def get_us_portfolio():
-    """US Market Indices - Real-time"""
+def get_us_portfolio_data():
+    """US Market Portfolio Data - Market Indices"""
     try:
-        import yfinance as yf
-
+        market_indices = []
+        
         indices_map = {
             '^DJI': 'Dow Jones',
             '^GSPC': 'S&P 500',
@@ -71,139 +58,165 @@ def get_us_portfolio():
             'DX-Y.NYB': 'Dollar Index',
             'KRW=X': 'USD/KRW'
         }
-
-        market_indices = []
+        
         for ticker, name in indices_map.items():
             try:
                 stock = yf.Ticker(ticker)
                 hist = stock.history(period='5d')
+                
                 if not hist.empty and len(hist) >= 2:
                     current_val = float(hist['Close'].iloc[-1])
                     prev_val = float(hist['Close'].iloc[-2])
                     change = current_val - prev_val
                     change_pct = (change / prev_val) * 100
+                    
                     market_indices.append({
                         'name': name,
-                        'ticker': ticker,
-                        'price': round(current_val, 2),
-                        'change': round(change, 2),
-                        'change_pct': round(change_pct, 2),
+                        'price': f"{current_val:,.2f}",
+                        'change': f"{change:+,.2f}",
+                        'change_pct': change_pct,
+                        'color': 'green' if change >= 0 else 'red'
                     })
             except Exception as e:
                 print(f"Error fetching {ticker}: {e}")
-
-        resp = jsonify({
+        
+        return jsonify({
             'market_indices': market_indices,
             'timestamp': datetime.now().isoformat()
         })
-        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        return resp
     except Exception as e:
         traceback.print_exc()
-        return jsonify({'error': str(e), 'market_indices': []}), 500
+        return jsonify({'error': str(e)}), 500
 
 
-@us_bp.route('/market-gate')
-def get_us_market_gate():
-    """US Market Gate - SPY based regime detection"""
+@us_bp.route('/smart-money')
+def get_us_smart_money():
+    """Smart Money Picks with dynamic sorting"""
     try:
-        import yfinance as yf
+        sort_by = request.args.get('sort_by', 'composite')
+        lang = request.args.get('lang', 'ko')
+        
+        csv_path = os.path.join(_OUTPUT_DIR, 'smart_money_picks_v2.csv')
+        if not os.path.exists(csv_path):
+            csv_path = os.path.join(_OUTPUT_DIR, 'smart_money_picks.csv')
 
-        spy = yf.Ticker('SPY')
-        hist = spy.history(period='200d')
+        if not os.path.exists(csv_path):
+            # Fallback: smart_money_current.json
+            json_path = os.path.join(_OUTPUT_DIR, 'smart_money_current.json')
+            if os.path.exists(json_path):
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    sm_data = json.load(f)
+                picks = sm_data.get('picks', [])
+                return jsonify({'picks': picks, 'count': len(picks),
+                                'updated_at': sm_data.get('analysis_timestamp', sm_data.get('analysis_date', ''))})
+            return jsonify({'picks': [], 'count': 0})
 
-        if len(hist) < 200:
-            return jsonify({'gate': 'YELLOW', 'score': 50, 'status': 'NEUTRAL'})
-
-        price = float(hist['Close'].iloc[-1])
-        ma50 = float(hist['Close'].rolling(50).mean().iloc[-1])
-        ma200 = float(hist['Close'].rolling(200).mean().iloc[-1])
-
-        # Calculate RSI
-        delta = hist['Close'].diff()
-        gain = delta.where(delta > 0, 0).rolling(14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-        rs = gain / loss
-        rsi = float(100 - (100 / (1 + rs)).iloc[-1])
-
-        # Determine gate
-        score = 50
-        gate = 'YELLOW'
-        status = 'NEUTRAL'
-        reasons = []
-
-        if price > ma200:
-            score += 15
-            reasons.append(f'SPY above 200MA (${price:.0f} > ${ma200:.0f})')
+        df = pd.read_csv(csv_path)
+        
+        # Sort based on criteria
+        if sort_by == 'swing' and 'swing_score' in df.columns:
+            df = df.sort_values(['swing_score', 'composite_score'], ascending=[False, False])
+        elif sort_by == 'trend' and 'trend_score' in df.columns:
+            df = df.sort_values(['trend_score', 'composite_score'], ascending=[False, False])
         else:
-            score -= 15
-            reasons.append(f'SPY below 200MA (${price:.0f} < ${ma200:.0f})')
-
-        if ma50 > ma200:
-            score += 10
-            reasons.append('50MA > 200MA (Golden Cross)')
-        else:
-            score -= 10
-            reasons.append('50MA < 200MA (Death Cross)')
-
-        if price > ma50:
-            score += 10
-            reasons.append('Price above 50MA')
-        else:
-            score -= 10
-
-        if rsi > 70:
-            score -= 5
-            reasons.append(f'RSI overbought ({rsi:.0f})')
-        elif rsi < 30:
-            score += 5
-            reasons.append(f'RSI oversold ({rsi:.0f})')
-
-        if score >= 70:
-            gate = 'GREEN'
-            status = 'RISK_ON'
-        elif score <= 35:
-            gate = 'RED'
-            status = 'RISK_OFF'
-
-        # Price changes
-        change_1d = ((price / float(hist['Close'].iloc[-2])) - 1) * 100 if len(hist) >= 2 else 0
-        change_5d = ((price / float(hist['Close'].iloc[-6])) - 1) * 100 if len(hist) >= 6 else 0
-
-        resp = jsonify({
-            'gate': gate,
-            'score': score,
-            'status': status,
-            'reasons': reasons,
-            'spy': {
-                'price': round(price, 2),
-                'ma50': round(ma50, 2),
-                'ma200': round(ma200, 2),
-                'rsi': round(rsi, 1),
-                'change_1d': round(change_1d, 2),
-                'change_5d': round(change_5d, 2),
-            }
+            df = df.sort_values('composite_score', ascending=False)
+        
+        top_picks_df = df.head(15)
+        
+        # Load AI Summaries
+        ai_summaries = {}
+        summary_path = os.path.join(_OUTPUT_DIR, 'ai_summaries.json')
+        if os.path.exists(summary_path):
+            with open(summary_path, 'r', encoding='utf-8') as f:
+                ai_summaries = json.load(f)
+        
+        # Fetch Realtime Prices
+        tickers = top_picks_df['ticker'].tolist()
+        current_prices = {}
+        
+        try:
+            if tickers:
+                data = yf.download(tickers, period='1d', interval='1m', progress=False, threads=True)
+                if hasattr(data, 'columns') and isinstance(data.columns, pd.MultiIndex):
+                    closes = data['Close'].iloc[-1]
+                    for t in tickers:
+                        if t in closes.index:
+                            val = closes[t]
+                            if pd.notna(val):
+                                current_prices[t] = round(float(val), 2)
+                elif not data.empty and 'Close' in data.columns:
+                    current_prices[tickers[0]] = round(float(data['Close'].iloc[-1]), 2)
+        except Exception as e:
+            print(f"Batch price fetch failed: {e}")
+        
+        # Build Response
+        picks = []
+        for _, row in top_picks_df.iterrows():
+            ticker = row['ticker']
+            price_at_rec = row.get('current_price', 0)
+            current_price = current_prices.get(ticker, price_at_rec)
+            
+            change_pct = 0
+            if price_at_rec and price_at_rec > 0:
+                change_pct = ((current_price - price_at_rec) / price_at_rec) * 100
+            
+            # Get AI summary
+            ai_data = ai_summaries.get(ticker, {})
+            summary = ai_data.get('summary_ko' if lang == 'ko' else 'summary_en', '')
+            
+            picks.append({
+                'ticker': ticker,
+                'name': row.get('name', ticker),
+                'sector': get_sector(ticker),
+                'price': current_price,
+                'price_at_rec': price_at_rec,
+                'change_pct': round(change_pct, 2),
+                'composite_score': row.get('composite_score', 0),
+                'swing_score': row.get('swing_score', 0),
+                'trend_score': row.get('trend_score', 0),
+                'ai_summary': summary,
+                'recommendation': row.get('recommendation', ''),
+                'grade': row.get('grade', '')
+            })
+        
+        return jsonify({
+            'picks': picks,
+            'count': len(picks),
+            'sort_by': sort_by,
+            'timestamp': datetime.now().isoformat()
         })
-        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        return resp
     except Exception as e:
         traceback.print_exc()
-        return jsonify({'error': str(e), 'gate': 'YELLOW', 'score': 50}), 500
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/etf-flows')
+def get_us_etf_flows():
+    """ETF 자금 흐름"""
+    try:
+        etf_path = os.path.join(_OUTPUT_DIR, 'etf_flow_analysis.json')
+        if os.path.exists(etf_path):
+            with open(etf_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'flows': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/stock-chart/<ticker>')
 def get_us_stock_chart(ticker):
-    """US Stock Chart Data"""
+    """US 주식 차트 데이터"""
     try:
-        import yfinance as yf
-
-        period = request.args.get('period', '6mo')
+        period = request.args.get('period', '1y')
+        interval = request.args.get('interval', '1d')
+        
         stock = yf.Ticker(ticker)
-        hist = stock.history(period=period)
-
+        hist = stock.history(period=period, interval=interval)
+        
         if hist.empty:
             return jsonify({'error': 'No data found'}), 404
-
+        
         chart_data = []
         for date, row in hist.iterrows():
             chart_data.append({
@@ -212,1019 +225,1543 @@ def get_us_stock_chart(ticker):
                 'high': round(row['High'], 2),
                 'low': round(row['Low'], 2),
                 'close': round(row['Close'], 2),
-                'volume': int(row['Volume']),
+                'volume': int(row['Volume'])
             })
-
-        return jsonify({'ticker': ticker, 'data': chart_data, 'period': period})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-# ─── US Market Data Endpoints (from us_market/ scripts) ───
-
-
-@us_bp.route('/smart-money')
-def get_us_smart_money():
-    """Smart Money Picks — frontend expects { picks: SmartMoneyStock[], count: number }"""
-    try:
-        # 1) Try PREVIEW_OUTPUT_DIR first (us_market_preview/output/)
-        current_file = os.path.join(PREVIEW_OUTPUT_DIR, 'smart_money_current.json')
-        # 2) Fallback to US_DATA_DIR (us_market/data/)
-        if not os.path.exists(current_file):
-            current_file = os.path.join(US_DATA_DIR, 'smart_money_current.json')
-
-        if os.path.exists(current_file):
-            with open(current_file, 'r', encoding='utf-8') as f:
-                snapshot = json.load(f)
-
-            picks = []
-            for pick in snapshot.get('picks', []):
-                price_at_rec = _safe_float(pick.get('price_at_analysis', 0))
-                picks.append({
-                    'ticker': pick.get('ticker', ''),
-                    'name': pick.get('name', ''),
-                    'sector': pick.get('sector', ''),
-                    'price': _safe_float(pick.get('price_at_analysis', 0)),
-                    'price_at_rec': round(price_at_rec, 2),
-                    'change_pct': _safe_float(pick.get('target_upside', 0)),
-                    'composite_score': _safe_float(pick.get('final_score', 0)),
-                    'swing_score': _safe_float(pick.get('quant_score', 0)),
-                    'trend_score': _safe_float(pick.get('ai_bonus', 0)),
-                    'grade': pick.get('sd_stage', 'N/A'),
-                    'recommendation': pick.get('ai_recommendation', ''),
-                    'ai_summary': pick.get('ai_summary', ''),
-                    'rank': pick.get('rank', 0),
-                    'inst_pct': _safe_float(pick.get('inst_pct', 0)),
-                    'rsi': _safe_float(pick.get('rsi', 0)),
-                })
-
-            return jsonify({
-                'picks': picks,
-                'count': len(picks),
-                'analysis_date': snapshot.get('analysis_date', ''),
-                'analysis_timestamp': snapshot.get('analysis_timestamp', ''),
-            })
-
-        # Fallback to CSV
-        import pandas as pd
-        csv_path = os.path.join(PREVIEW_OUTPUT_DIR, 'smart_money_picks_v2.csv')
-        if not os.path.exists(csv_path):
-            csv_path = os.path.join(US_DATA_DIR, 'smart_money_picks_v2.csv')
-        if not os.path.exists(csv_path):
-            return jsonify({'error': 'Smart money picks not found. Run screener first.'}), 404
-
-        df = pd.read_csv(csv_path)
-        picks = []
-        for _, row in df.head(20).iterrows():
-            picks.append({
-                'ticker': row.get('ticker', ''),
-                'name': row.get('name', row.get('ticker', '')),
-                'sector': row.get('sector', ''),
-                'price': _safe_float(row.get('current_price', 0)),
-                'price_at_rec': _safe_float(row.get('current_price', 0)),
-                'change_pct': 0,
-                'composite_score': _safe_float(row.get('composite_score', 0)),
-                'swing_score': 0,
-                'trend_score': 0,
-                'grade': row.get('grade', 'N/A'),
-                'recommendation': '',
-                'ai_summary': '',
-            })
-
-        return jsonify({'picks': picks, 'count': len(picks)})
-
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/smart-money/<ticker>/detail')
-def get_smart_money_detail(ticker):
-    """Smart Money individual stock detail"""
-    try:
-        current_file = os.path.join(PREVIEW_OUTPUT_DIR, 'smart_money_current.json')
-        if not os.path.exists(current_file):
-            current_file = os.path.join(US_DATA_DIR, 'smart_money_current.json')
-
-        if not os.path.exists(current_file):
-            return jsonify({'error': 'Smart money data not found'}), 404
-
-        with open(current_file, 'r', encoding='utf-8') as f:
-            snapshot = json.load(f)
-
-        pick = None
-        for p in snapshot.get('picks', []):
-            if p.get('ticker', '').upper() == ticker.upper():
-                pick = p
-                break
-
-        if not pick:
-            return jsonify({'error': f'Ticker {ticker} not found in smart money picks'}), 404
-
+        
         return jsonify({
-            'ticker': pick.get('ticker', ''),
-            'name': pick.get('name', ''),
-            'sector': pick.get('sector', ''),
-            'price': _safe_float(pick.get('price_at_analysis', 0)),
-            'change_pct': _safe_float(pick.get('target_upside', 0)),
-            'composite_score': _safe_float(pick.get('final_score', 0)),
-            'quant_score': _safe_float(pick.get('quant_score', 0)),
-            'ai_bonus': _safe_float(pick.get('ai_bonus', 0)),
-            'recommendation': pick.get('ai_recommendation', ''),
-            'ai_summary': pick.get('ai_summary', ''),
-            'sd_stage': pick.get('sd_stage', ''),
-            'inst_pct': _safe_float(pick.get('inst_pct', 0)),
-            'rsi': _safe_float(pick.get('rsi', 0)),
-            'rank': pick.get('rank', 0),
+            'ticker': ticker,
+            'data': chart_data,
+            'period': period
         })
-
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/etf-flows')
-def get_us_etf_flows():
-    """ETF Fund Flow Analysis"""
-    try:
-        import pandas as pd
-
-        csv_path = os.path.join(US_DATA_DIR, 'us_etf_flows.csv')
-        if not os.path.exists(csv_path):
-            return jsonify({'error': 'ETF flows not found. Run analyze_etf_flows.py first.'}), 404
-
-        df = pd.read_csv(csv_path)
-
-        broad_market = df[df['category'] == 'Broad Market']
-        broad_score = round(broad_market['flow_score'].mean(), 1) if not broad_market.empty else 50
-
-        top_inflows = df.nlargest(5, 'flow_score').to_dict(orient='records')
-        top_outflows = df.nsmallest(5, 'flow_score').to_dict(orient='records')
-
-        ai_analysis_text = ""
-        ai_path = os.path.join(US_DATA_DIR, 'etf_flow_analysis.json')
-        if os.path.exists(ai_path):
-            try:
-                with open(ai_path, 'r', encoding='utf-8') as f:
-                    ai_data = json.load(f)
-                    ai_analysis_text = ai_data.get('ai_analysis', '')
-            except:
-                pass
-
-        return jsonify({
-            'market_sentiment_score': broad_score,
-            'top_inflows': top_inflows,
-            'top_outflows': top_outflows,
-            'all_etfs': df.to_dict(orient='records'),
-            'ai_analysis': ai_analysis_text
-        })
-
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/macro-analysis')
-def get_us_macro_analysis():
-    """Macro analysis with live indicators + cached AI"""
-    try:
-        import yfinance as yf
-        import time as t
-
-        lang = request.args.get('lang', 'ko')
-
-        # us_market_preview/output/ 우선, 없으면 us_market/data/ 폴백
-        if lang == 'en':
-            analysis_path = os.path.join(PREVIEW_OUTPUT_DIR, 'macro_analysis_en.json')
-        else:
-            analysis_path = os.path.join(PREVIEW_OUTPUT_DIR, 'macro_analysis.json')
-
-        if not os.path.exists(analysis_path):
-            analysis_path = os.path.join(US_DATA_DIR, 'macro_analysis.json')
-
-        ai_analysis = "AI 분석 데이터가 없습니다. macro_analyzer.py를 실행하세요."
-        macro_indicators = {}
-
-        if os.path.exists(analysis_path):
-            with open(analysis_path, 'r', encoding='utf-8') as f:
-                cached = json.load(f)
-                ai_analysis = cached.get('ai_analysis', ai_analysis)
-                macro_indicators = cached.get('macro_indicators', {})
-
-        # Update key indicators with live data
-        live_tickers = {
-            'VIX': '^VIX', 'SPY': 'SPY', 'QQQ': 'QQQ',
-            'BTC': 'BTC-USD', 'GOLD': 'GC=F', 'USD/KRW': 'KRW=X'
-        }
-
-        for name, ticker in live_tickers.items():
-            try:
-                stock = yf.Ticker(ticker)
-                hist = stock.history(period='5d')
-                if not hist.empty and len(hist) >= 2:
-                    current = float(hist['Close'].iloc[-1])
-                    prev = float(hist['Close'].iloc[-2])
-                    change_pct = (current - prev) / prev * 100 if prev != 0 else 0
-                    macro_indicators[name] = {
-                        'value': round(current, 2),
-                        'current': round(current, 2),
-                        'change_1d': round(change_pct, 2)
-                    }
-                t.sleep(0.2)
-            except:
-                pass
-
-        return jsonify({
-            'macro_indicators': macro_indicators,
-            'ai_analysis': ai_analysis,
-            'timestamp': datetime.now().isoformat()
-        })
-
-    except Exception as e:
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/options-flow')
-def get_us_options_flow():
-    """Options flow data"""
-    try:
-        flow_path = os.path.join(US_DATA_DIR, 'options_flow.json')
-        if not os.path.exists(flow_path):
-            return jsonify({'error': 'Options flow data not found.'}), 404
-
-        with open(flow_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return jsonify(data)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/ai-summary/<ticker>')
-def get_us_ai_summary(ticker):
-    """AI-generated summary for a US stock"""
-    try:
-        lang = request.args.get('lang', 'ko')
-        summary_path = os.path.join(PREVIEW_OUTPUT_DIR, 'ai_summaries.json')
-        if not os.path.exists(summary_path):
-            summary_path = os.path.join(US_DATA_DIR, 'ai_summaries.json')
-
-        if not os.path.exists(summary_path):
-            return jsonify({'error': 'AI summaries not found.'}), 404
-
-        with open(summary_path, 'r', encoding='utf-8') as f:
-            summaries = json.load(f)
-
-        if ticker not in summaries:
-            return jsonify({'error': f'Summary not found for {ticker}'}), 404
-
-        summary_data = summaries[ticker]
-        if lang == 'en':
-            summary = summary_data.get('summary_en', summary_data.get('summary', ''))
-        else:
-            summary = summary_data.get('summary_ko', summary_data.get('summary', ''))
-
-        return jsonify({
-            'ticker': ticker, 'summary': summary, 'lang': lang,
-            'updated': summary_data.get('updated', '')
-        })
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/history-dates')
 def get_us_history_dates():
-    """Available historical analysis dates"""
+    """US 히스토리 날짜 목록"""
     try:
-        if not os.path.exists(US_HISTORY_DIR):
+        history_path = os.path.join(_HISTORY_DIR)
+        if not os.path.exists(history_path):
             return jsonify({'dates': []})
 
+        # Extract dates from picks_YYYY-MM-DD.json format
         dates = []
-        for f in os.listdir(US_HISTORY_DIR):
+        for f in os.listdir(history_path):
             if f.startswith('picks_') and f.endswith('.json'):
-                dates.append(f[6:-5])
+                date_str = f[6:-5]  # Remove 'picks_' and '.json'
+                dates.append(date_str)
 
-        dates.sort(reverse=True)
-        return jsonify({'dates': dates, 'count': len(dates)})
-
+        dates = sorted(dates, reverse=True)
+        return jsonify({'dates': dates[:30]})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/history/<date>')
 def get_us_history_by_date(date):
-    """Picks from a specific historical date with current performance"""
+    """특정 날짜 히스토리 (YYYY-MM-DD format)"""
     try:
-        import yfinance as yf
-        import math
+        # Support both formats: picks_YYYY-MM-DD.json
+        history_file = os.path.join(_HISTORY_DIR, f'picks_{date}.json')
+        if os.path.exists(history_file):
+            with open(history_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'error': 'Date not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-        history_file = os.path.join(US_HISTORY_DIR, f'picks_{date}.json')
+
+@us_bp.route('/history/<date>/performance')
+def get_us_history_performance(date):
+    """특정 날짜 추천종목의 현재 성과 (CSV 기반)"""
+    try:
+        import pandas as pd
+        import numpy as np
+
+        history_file = os.path.join(_HISTORY_DIR, f'picks_{date}.json')
         if not os.path.exists(history_file):
-            return jsonify({'error': f'No analysis found for {date}'}), 404
+            return jsonify({'error': 'Date not found'}), 404
 
         with open(history_file, 'r', encoding='utf-8') as f:
             snapshot = json.load(f)
 
-        tickers = [p['ticker'] for p in snapshot.get('picks', [])]
+        # Get current prices from CSV
+        csv_path = os.path.join(_DATA_DIR, 'us_daily_prices.csv')
         current_prices = {}
-        for ticker in tickers:
-            try:
-                stock = yf.Ticker(ticker)
-                hist = stock.history(period='5d')
-                if not hist.empty:
-                    current_prices[ticker] = round(float(hist['Close'].dropna().iloc[-1]), 2)
-            except:
-                pass
+        spy_return = 0.0
 
-        picks_with_perf = []
-        for pick in snapshot.get('picks', []):
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            latest_date = df['Date'].max()
+            latest_df = df[df['Date'] == latest_date]
+
+            tickers = [p['ticker'] for p in snapshot['picks']]
+            for ticker in tickers:
+                row = latest_df[latest_df['Ticker'] == ticker]
+                if not row.empty:
+                    current_prices[ticker] = float(row['Close'].iloc[0])
+
+            # Calculate SPY benchmark
+            spy_df = df[df['Ticker'] == 'SPY'].copy()
+            spy_df = spy_df[spy_df['Date'] >= date].sort_values('Date')
+            if len(spy_df) >= 2:
+                spy_start = spy_df['Close'].iloc[0]
+                spy_end = spy_df['Close'].iloc[-1]
+                spy_return = ((spy_end / spy_start) - 1) * 100
+
+        # Calculate performance
+        result = {
+            'analysis_date': snapshot['analysis_date'],
+            'picks': [],
+            'statistics': {}
+        }
+
+        changes = []
+        for pick in snapshot['picks']:
             ticker = pick['ticker']
-            price_at_rec = _safe_float(pick.get('price_at_analysis', 0))
-            current_price = current_prices.get(ticker, price_at_rec) or price_at_rec
-            change_pct = ((current_price / price_at_rec) - 1) * 100 if price_at_rec > 0 else 0
+            price_at_rec = pick.get('price_at_analysis', 0)
+            current_price = current_prices.get(ticker, price_at_rec)
 
-            picks_with_perf.append({
-                **pick,
-                'current_price': round(current_price, 2),
+            if price_at_rec > 0:
+                change_pct = ((current_price / price_at_rec) - 1) * 100
+            else:
+                change_pct = 0
+
+            changes.append(change_pct)
+
+            result['picks'].append({
+                'ticker': ticker,
+                'name': pick.get('name', ticker),
+                'rank': pick.get('rank', 0),
+                'final_score': pick.get('final_score', 0),
                 'price_at_rec': round(price_at_rec, 2),
-                'change_since_rec': round(_safe_float(change_pct), 2)
+                'current_price': round(current_price, 2),
+                'change_pct': round(change_pct, 2)
             })
 
-        changes = [p['change_since_rec'] for p in picks_with_perf if p['price_at_rec'] > 0]
-        avg_perf = round(sum(changes) / max(len(changes), 1), 2)
+        # Statistics
+        if changes:
+            avg_return = float(np.mean(changes))
+            win_count = len([c for c in changes if c > 0])
+
+            result['statistics'] = {
+                'avg_return': round(avg_return, 2),
+                'spy_return': round(spy_return, 2),
+                'alpha': round(avg_return - spy_return, 2),
+                'win_rate': round(win_count / len(changes) * 100, 1),
+                'win_count': win_count,
+                'loss_count': len(changes) - win_count,
+                'max_gain': round(max(changes), 2),
+                'max_loss': round(min(changes), 2)
+            }
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/history-summary')
+def get_us_history_summary():
+    """전체 히스토리 성과 요약"""
+    try:
+        import pandas as pd
+        import numpy as np
+
+        history_path = os.path.join(_HISTORY_DIR)
+        csv_path = os.path.join(_DATA_DIR, 'us_daily_prices.csv')
+
+        if not os.path.exists(history_path) or not os.path.exists(csv_path):
+            return jsonify({'error': 'Data not found'}), 404
+
+        # Load price data
+        df = pd.read_csv(csv_path)
+        latest_date = df['Date'].max()
+        latest_df = df[df['Date'] == latest_date]
+
+        # Process each history file
+        summaries = []
+        for f in os.listdir(history_path):
+            if f.startswith('picks_') and f.endswith('.json'):
+                date_str = f[6:-5]
+                history_file = os.path.join(history_path, f)
+
+                with open(history_file, 'r', encoding='utf-8') as hf:
+                    snapshot = json.load(hf)
+
+                # Calculate returns for this date's picks
+                changes = []
+                for pick in snapshot['picks']:
+                    ticker = pick['ticker']
+                    price_at_rec = pick.get('price_at_analysis', 0)
+                    row = latest_df[latest_df['Ticker'] == ticker]
+                    if not row.empty and price_at_rec > 0:
+                        current = float(row['Close'].iloc[0])
+                        change = ((current / price_at_rec) - 1) * 100
+                        changes.append(change)
+
+                if changes:
+                    # SPY benchmark
+                    spy_df = df[df['Ticker'] == 'SPY'].copy()
+                    spy_df = spy_df[spy_df['Date'] >= date_str].sort_values('Date')
+                    spy_return = 0.0
+                    if len(spy_df) >= 2:
+                        spy_return = ((spy_df['Close'].iloc[-1] / spy_df['Close'].iloc[0]) - 1) * 100
+
+                    avg_return = float(np.mean(changes))
+                    summaries.append({
+                        'date': date_str,
+                        'avg_return': round(avg_return, 2),
+                        'spy_return': round(spy_return, 2),
+                        'alpha': round(avg_return - spy_return, 2),
+                        'win_rate': round(len([c for c in changes if c > 0]) / len(changes) * 100, 1),
+                        'num_picks': len(changes)
+                    })
+
+        # Sort by date
+        summaries = sorted(summaries, key=lambda x: x['date'], reverse=True)
+
+        # Calculate overall stats
+        if summaries:
+            overall = {
+                'total_recommendations': sum(s['num_picks'] for s in summaries),
+                'avg_return_all': round(np.mean([s['avg_return'] for s in summaries]), 2),
+                'avg_alpha': round(np.mean([s['alpha'] for s in summaries]), 2),
+                'avg_win_rate': round(np.mean([s['win_rate'] for s in summaries]), 1),
+                'num_dates': len(summaries)
+            }
+        else:
+            overall = {}
 
         return jsonify({
-            'analysis_date': snapshot.get('analysis_date', date),
-            'top_picks': picks_with_perf,
-            'summary': {'total': len(picks_with_perf), 'avg_performance': avg_perf}
+            'overall': overall,
+            'by_date': summaries
         })
-
     except Exception as e:
-        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/cumulative-performance')
+def get_us_cumulative_performance():
+    """누적 성과 (Cumulative Performance) - all picks across all snapshots"""
+    try:
+        import numpy as np
+
+        history_path = os.path.join(_HISTORY_DIR)
+        csv_path = os.path.join(_DATA_DIR, 'us_daily_prices.csv')
+
+        if not os.path.exists(history_path) or not os.path.exists(csv_path):
+            return jsonify({'error': 'Data not found'}), 404
+
+        # Load price data - get latest price per ticker
+        df = pd.read_csv(csv_path)
+        latest_date = df['Date'].max()
+        latest_df = df[df['Date'] == latest_date]
+
+        # Get all snapshot dates first to determine SPY fetch range
+        snap_files = sorted([f for f in os.listdir(history_path)
+                             if f.startswith('picks_') and f.endswith('.json')])
+        if not snap_files:
+            return jsonify({'error': 'No history snapshots found'}), 404
+
+        earliest_date = snap_files[0][6:-5]  # picks_YYYY-MM-DD.json
+
+        # Fetch SPY via yfinance for benchmark
+        spy_hist = yf.Ticker('SPY').history(start=earliest_date, auto_adjust=True)
+        spy_prices = {}
+        if not spy_hist.empty:
+            for idx, row in spy_hist.iterrows():
+                spy_prices[idx.strftime('%Y-%m-%d')] = float(row['Close'])
+        spy_latest = spy_prices.get(max(spy_prices)) if spy_prices else None
+
+        all_picks = []
+        by_date = []
+
+        for f in snap_files:
+            date_str = f[6:-5]
+            with open(os.path.join(history_path, f), 'r', encoding='utf-8') as hf:
+                snapshot = json.load(hf)
+
+            date_picks = []
+            for pick in snapshot.get('picks', []):
+                ticker = pick.get('ticker', '')
+                entry_price = pick.get('price_at_analysis', 0)
+                row = latest_df[latest_df['Ticker'] == ticker]
+                if row.empty or entry_price <= 0:
+                    continue
+                current_price = safe_float(row['Close'].iloc[0])
+                return_pct = ((current_price / entry_price) - 1) * 100
+
+                all_picks.append({
+                    'ticker': ticker,
+                    'name': pick.get('name', ticker),
+                    'rec_date': date_str,
+                    'entry_price': round(entry_price, 2),
+                    'current_price': round(current_price, 2),
+                    'return_pct': round(return_pct, 2),
+                    'final_score': safe_float(pick.get('final_score', 0)),
+                    'recommendation': pick.get('ai_recommendation', ''),
+                })
+                date_picks.append(return_pct)
+
+            if not date_picks:
+                continue
+
+            # SPY benchmark: find nearest SPY close on or after snapshot date
+            spy_return = 0.0
+            if spy_prices and spy_latest is not None:
+                spy_dates_after = [d for d in sorted(spy_prices) if d >= date_str]
+                if spy_dates_after:
+                    spy_entry = spy_prices[spy_dates_after[0]]
+                    spy_return = ((spy_latest / spy_entry) - 1) * 100
+
+            avg_ret = float(np.mean(date_picks))
+            win_count = len([r for r in date_picks if r > 0])
+            by_date.append({
+                'date': date_str,
+                'avg_return': round(avg_ret, 2),
+                'spy_return': round(spy_return, 2),
+                'alpha': round(avg_ret - spy_return, 2),
+                'win_rate': round(win_count / len(date_picks) * 100, 1),
+                'num_picks': len(date_picks),
+            })
+
+        # Chart data (sorted chronologically)
+        chart_data = sorted(
+            [{'date': d['date'], 'avg_return': d['avg_return'], 'spy_return': d['spy_return']} for d in by_date],
+            key=lambda x: x['date']
+        )
+
+        # Sort by_date reverse chronological
+        by_date.sort(key=lambda x: x['date'], reverse=True)
+
+        # Summary
+        if all_picks:
+            returns = [p['return_pct'] for p in all_picks]
+            tickers = list({p['ticker'] for p in all_picks})
+            alphas = [d['alpha'] for d in by_date]
+            summary = {
+                'total_picks': len(all_picks),
+                'unique_tickers': len(tickers),
+                'win_rate': round(len([r for r in returns if r > 0]) / len(returns) * 100, 1),
+                'avg_return': round(float(np.mean(returns)), 2),
+                'avg_alpha': round(float(np.mean(alphas)), 2) if alphas else 0,
+                'max_gain': round(max(returns), 2),
+                'max_loss': round(min(returns), 2),
+                'best_ticker': max(all_picks, key=lambda p: p['return_pct'])['ticker'],
+                'worst_ticker': min(all_picks, key=lambda p: p['return_pct'])['ticker'],
+                'num_snapshots': len(by_date),
+            }
+        else:
+            summary = {}
+
+        return jsonify({
+            'summary': summary,
+            'chart_data': chart_data,
+            'picks': all_picks,
+            'by_date': by_date,
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/macro-analysis')
+def get_us_macro_analysis():
+    """US Macro Analysis"""
+    try:
+        lang = request.args.get('lang', 'ko')
+        
+        # Try language-specific file first
+        if lang == 'en':
+            analysis_path = os.path.join(_OUTPUT_DIR, 'macro_analysis_en.json')
+            if not os.path.exists(analysis_path):
+                analysis_path = os.path.join(_OUTPUT_DIR, 'macro_analysis.json')
+        else:
+            analysis_path = os.path.join(_OUTPUT_DIR, 'macro_analysis.json')
+        
+        if os.path.exists(analysis_path):
+            with open(analysis_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'analysis': None})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/heatmap-data')
+def get_us_sector_heatmap():
+    """섹터 히트맵"""
+    try:
+        heatmap_path = os.path.join(_OUTPUT_DIR, 'sector_heatmap.json')
+        if os.path.exists(heatmap_path):
+            with open(heatmap_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            # sector_groups → series 변환 (프론트엔드 SectorSeries[] 호환)
+            if 'sector_groups' in data and 'series' not in data:
+                series = []
+                for sector_name, stocks in data['sector_groups'].items():
+                    items = []
+                    for s in stocks:
+                        items.append({
+                            'x': s.get('ticker', s.get('symbol', '')),
+                            'y': s.get('weight', s.get('market_cap', 0)),
+                            'price': s.get('price', 0),
+                            'change': s.get('change_pct', s.get('change', 0)),
+                            'color': ''
+                        })
+                    series.append({'name': sector_name, 'data': items})
+                data['series'] = series
+
+            return jsonify(data)
+        return jsonify({'sectors': [], 'series': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/options-flow')
+def get_us_options_flow():
+    """옵션 플로우"""
+    try:
+        flow_path = os.path.join(_OUTPUT_DIR, 'options_flow.json')
+        if os.path.exists(flow_path):
+            with open(flow_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'flows': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/sec-filings')
+def get_us_sec_filings():
+    """SEC 파일링"""
+    try:
+        filings_path = os.path.join(_OUTPUT_DIR, 'sec_filings.json')
+        if os.path.exists(filings_path):
+            with open(filings_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'filings': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/earnings-transcripts')
+def get_us_earnings_transcripts():
+    """어닝 트랜스크립트"""
+    try:
+        transcripts_path = os.path.join(_OUTPUT_DIR, 'earnings_transcripts.json')
+        if os.path.exists(transcripts_path):
+            with open(transcripts_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'transcripts': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/ai-summary/<ticker>')
+def get_us_ai_summary(ticker):
+    """AI 종목 요약"""
+    try:
+        lang = request.args.get('lang', 'ko')
+        
+        summary_path = os.path.join(_OUTPUT_DIR, 'ai_summaries.json')
+        if os.path.exists(summary_path):
+            with open(summary_path, 'r', encoding='utf-8') as f:
+                summaries = json.load(f)
+            
+            if ticker in summaries:
+                data = summaries[ticker]
+                summary = data.get('summary_ko' if lang == 'ko' else 'summary_en', '')
+                return jsonify({
+                    'ticker': ticker,
+                    'summary': summary,
+                    'generated_at': data.get('generated_at', '')
+                })
+        
+        return jsonify({'ticker': ticker, 'summary': None})
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/calendar')
 def get_us_calendar():
-    """Weekly Economic Calendar"""
+    """경제 캘린더 (v2 - structured output from economic_calendar.py)"""
     try:
-        calendar_path = os.path.join(US_DATA_DIR, 'weekly_calendar.json')
+        calendar_path = os.path.join(_OUTPUT_DIR, 'weekly_calendar.json')
         if not os.path.exists(calendar_path):
-            return jsonify({'events': [], 'message': 'Calendar data not available'}), 404
+            return jsonify({'events': []})
 
         with open(calendar_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        return jsonify(data)
 
+        return jsonify({'events': data.get('events', [])})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-# ─── US Market Night Preview Endpoints ───
-
-
-@us_bp.route('/preview/market-data')
-def get_preview_market_data():
-    """Preview: Market overview data (indices, bonds, currencies, commodities, Fear&Greed)"""
+@us_bp.route('/technical-indicators/<ticker>')
+def get_technical_indicators(ticker):
+    """기술적 지표"""
     try:
-        data = _load_preview_json('market_data.json')
-        if not data:
-            return jsonify({'error': 'Market data not available. Run market_data.py first.'}), 404
-        return jsonify(data)
+        from app.utils.helpers import calculate_rsi
+        
+        stock = yf.Ticker(ticker)
+        hist = stock.history(period='1y')
+        
+        if hist.empty:
+            return jsonify({'error': 'No data found'}), 404
+        
+        # Calculate indicators
+        hist['MA20'] = hist['Close'].rolling(20).mean()
+        hist['MA50'] = hist['Close'].rolling(50).mean()
+        hist['MA200'] = hist['Close'].rolling(200).mean()
+        hist['RSI'] = calculate_rsi(hist['Close'])
+        
+        last = hist.iloc[-1]
+        
+        return jsonify({
+            'ticker': ticker,
+            'price': round(last['Close'], 2),
+            'ma20': round(last['MA20'], 2) if not pd.isna(last['MA20']) else None,
+            'ma50': round(last['MA50'], 2) if not pd.isna(last['MA50']) else None,
+            'ma200': round(last['MA200'], 2) if not pd.isna(last['MA200']) else None,
+            'rsi': round(last['RSI'], 2) if not pd.isna(last['RSI']) else None,
+            'volume': int(last['Volume'])
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-@us_bp.route('/preview/top-picks')
-def get_preview_top_picks():
-    """Preview: Smart money top 10 stock picks"""
+@us_bp.route('/super-performance')
+def us_super_performance():
+    """슈퍼 퍼포먼스 종목 — CSV 우선, final_top10_report.json 폴백"""
     try:
-        data = _load_preview_json('top_picks.json')
-        if not data:
-            return jsonify({'error': 'Top picks not available. Run screener.py first.'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # 1) CSV 소스 (기존)
+        csv_path = os.path.join(_OUTPUT_DIR, 'super_performance_picks.csv')
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            stocks = []
+            for _, row in df.iterrows():
+                stocks.append({
+                    'ticker': str(row.get('ticker', '')),
+                    'name': str(row.get('name', '')),
+                    'sector': str(row.get('sector', '')),
+                    'price': safe_float(row.get('price')),
+                    'change_pct': 0,
+                    'vcp_score': safe_float(row.get('vcp_score')),
+                    'rs_rating': safe_float(row.get('rs_rating')),
+                    'fund_score': safe_float(row.get('fund_score')),
+                    'stage': str(row.get('setup_phase', '')),
+                    'volume_ratio': 0,
+                    'pivot_tightness': str(row.get('pivot_tightness', '')),
+                    'vol_dry_up': str(row.get('vol_dry_up', '')),
+                    'contractions': int(safe_float(row.get('contractions'))),
+                    'base_depth': str(row.get('base_depth', '')),
+                    'eps_growth': str(row.get('eps_growth', '')),
+                    'breakout': str(row.get('breakout', '')),
+                    'pivot_price': safe_float(row.get('pivot_price')),
+                    'score': safe_float(row.get('score')),
+                })
+            return jsonify({'stocks': stocks})
 
-
-@us_bp.route('/preview/prediction')
-def get_preview_prediction():
-    """Preview: ML direction prediction for SPY"""
-    try:
-        data = _load_preview_json('prediction.json')
-        if not data:
-            return jsonify({'error': 'Prediction not available. Run predictor.py first.'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/preview/briefing')
-def get_preview_briefing():
-    """Preview: AI market briefing"""
-    try:
-        data = _load_preview_json('briefing.json')
-        if not data:
-            return jsonify({'error': 'Briefing not available. Run briefing.py first.'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/preview/sector-heatmap')
-def get_preview_sector_heatmap():
-    """Preview: Sector ETF heatmap"""
-    try:
-        data = _load_preview_json('sector_heatmap.json')
-        if not data:
-            return jsonify({'error': 'Sector heatmap not available. Run sector_heatmap.py first.'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-# ─── US Market Full Endpoints (Frontend pages) ───
-# These serve JSON from us_market_preview/output/ for each dashboard page
-
-@us_bp.route('/market-briefing')
-def get_market_briefing():
-    """Full market briefing (combines briefing + market_data + smart_money)"""
-    try:
-        briefing = _load_preview_json('briefing.json')
-        if not briefing:
-            return jsonify({'error': 'Briefing not available'}), 404
-
-        # 1) Structure ai_analysis from top-level content/citations
-        if 'ai_analysis' not in briefing and 'content' in briefing:
-            briefing['ai_analysis'] = {
-                'content': briefing.pop('content', ''),
-                'citations': briefing.pop('citations', []),
-            }
-
-        # 2) Merge market_data if briefing doesn't have it
-        if 'market_data' not in briefing:
-            md = _load_preview_json('market_data.json')
-            if md:
-                briefing['market_data'] = md.get('market_data', md)
-                briefing.setdefault('fear_greed', md.get('fear_greed'))
-
-        # 3) Build vix from market_data.volatility if missing
-        if not briefing.get('vix'):
-            vol = briefing.get('market_data', {}).get('volatility', {}).get('^VIX', {})
-            if vol:
-                vix_val = vol.get('price', 0)
-                if vix_val >= 30:
-                    level, color = 'High', '#F44336'
-                elif vix_val >= 20:
-                    level, color = 'Elevated', '#FFC107'
-                else:
-                    level, color = 'Low', '#4CAF50'
-                briefing['vix'] = {
-                    'value': vix_val,
-                    'change': vol.get('change', 0),
-                    'level': level,
-                    'color': color,
-                }
-
-        # 4) Fix fear_greed color if missing
-        fg = briefing.get('fear_greed') or {}
-        if fg and not fg.get('color'):
-            score = fg.get('score', 50)
-            if score <= 25:
-                fg['color'] = '#F44336'
-            elif score <= 45:
-                fg['color'] = '#FF5722'
-            elif score <= 55:
-                fg['color'] = '#FFC107'
-            elif score <= 75:
-                fg['color'] = '#4CAF50'
-            else:
-                fg['color'] = '#00C853'
-            briefing['fear_greed'] = fg
-
-        # 5) Merge smart_money from top_picks.json
-        if 'smart_money' not in briefing:
-            sm = _load_preview_json('top_picks.json')
-            if sm:
-                briefing['smart_money'] = {'top_picks': sm}
-        # Fix smart_money.top_picks structure: rename top_picks→picks, map fields
-        sm = briefing.get('smart_money', {})
-        tp = sm.get('top_picks', {})
-        if isinstance(tp, dict):
-            raw_picks = tp.get('picks') or tp.get('top_picks', [])
-            tp['picks'] = [
-                {
-                    'rank': p.get('rank', i + 1),
+        # 2) JSON 폴백 — final_top10_report.json (Smart Money Top Picks)
+        json_path = os.path.join(_OUTPUT_DIR, 'final_top10_report.json')
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                report = json.load(f)
+            picks = report.get('top_picks', [])
+            stocks = []
+            for p in picks:
+                stocks.append({
                     'ticker': p.get('ticker', ''),
                     'name': p.get('name', ''),
-                    'final_score': p.get('final_score', p.get('composite_score', 0)),
-                    'ai_recommendation': p.get('ai_recommendation', p.get('signal', '')),
-                    'target_upside': p.get('target_upside', 0),
-                    'sd_stage': p.get('sd_stage', p.get('grade', '')),
-                }
-                for i, p in enumerate(raw_picks)
-            ]
-            tp.pop('top_picks', None)
+                    'sector': '',
+                    'price': safe_float(p.get('current_price')),
+                    'change_pct': 0,
+                    'vcp_score': 0,
+                    'rs_rating': 0,
+                    'fund_score': safe_float(p.get('quant_score')),
+                    'stage': p.get('sd_stage', ''),
+                    'volume_ratio': 0,
+                    'pivot_tightness': '',
+                    'vol_dry_up': '',
+                    'contractions': 0,
+                    'base_depth': '',
+                    'eps_growth': '',
+                    'breakout': '',
+                    'pivot_price': 0,
+                    'score': safe_float(p.get('final_score')),
+                    'ai_recommendation': p.get('ai_recommendation', ''),
+                    'ai_bonus': safe_float(p.get('ai_bonus')),
+                    'target_upside': safe_float(p.get('target_upside')),
+                    'inst_pct': safe_float(p.get('inst_pct')),
+                    'rsi': safe_float(p.get('rsi')),
+                    'grade': p.get('grade', ''),
+                    'rank': p.get('rank', 0),
+                })
+            return jsonify({'stocks': stocks, 'source': 'final_top10_report',
+                            'generated_at': report.get('generated_at', ''),
+                            'total_analyzed': report.get('total_analyzed', 0)})
 
-        # 6) Merge sector_rotation for tab content
-        if 'sector_rotation' not in briefing:
-            sr = _load_preview_json('sector_rotation.json')
-            if sr:
-                briefing['sector_rotation'] = sr
+        return jsonify({'stocks': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-        briefing.setdefault('timestamp', datetime.now().isoformat())
-        return jsonify(briefing)
+
+@us_bp.route('/portfolio-performance')
+def us_portfolio_performance():
+    """포트폴리오 성과"""
+    try:
+        perf_path = os.path.join(_DATA_DIR, 'portfolio_performance.json')
+        if os.path.exists(perf_path):
+            with open(perf_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'performance': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/market-gate')
+def us_market_gate():
+    """US Market Gate 상태 - Enhanced with RSI, MACD, Volume"""
+    try:
+        try:
+            from us_market.market_gate import run_us_market_gate
+            result = run_us_market_gate()
+            
+            # Convert dataclass to dict
+            sectors_data = []
+            for s in result.sectors[:5]:  # Top 5 sectors
+                sectors_data.append({
+                    'name': s.name,
+                    'ticker': s.ticker,
+                    'score': s.score,
+                    'signal': s.signal,
+                    'change_1d': round(s.change_1d, 2),
+                    'rsi': round(s.rsi, 1),
+                    'rs_vs_spy': round(s.rs_vs_spy, 2)
+                })
+            
+            return jsonify({
+                'gate': result.gate,  # GREEN/YELLOW/RED
+                'score': result.score,
+                'status': 'RISK_ON' if result.score >= 70 else ('RISK_OFF' if result.score < 40 else 'NEUTRAL'),
+                'reasons': result.reasons,
+                'sectors': sectors_data,
+                'metrics': result.metrics
+            })
+        except ImportError as e:
+            # Fallback to simple logic
+            print(f"Enhanced market_gate not available: {e}")
+            spy = yf.Ticker('SPY')
+            hist = spy.history(period='200d')
+
+            if len(hist) < 200:
+                return jsonify({'status': 'NEUTRAL', 'score': 50, 'gate': 'YELLOW', 'metrics': {'rsi': None, 'vix': None, 'spy_price': None}})
+
+            price = float(hist['Close'].iloc[-1])
+            ma200 = float(hist['Close'].rolling(200).mean().iloc[-1])
+            ma50 = float(hist['Close'].rolling(50).mean().iloc[-1])
+
+            # Calculate RSI for fallback
+            delta = hist['Close'].diff()
+            gain = delta.where(delta > 0, 0).rolling(14).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
+            rs = gain / loss.replace(0, 0.0001)
+            rsi = float((100 - (100 / (1 + rs))).iloc[-1])
+
+            # Get VIX
+            try:
+                vix_data = yf.Ticker('^VIX').history(period='5d')
+                vix = float(vix_data['Close'].iloc[-1]) if not vix_data.empty else None
+            except Exception:
+                vix = None
+
+            status = "NEUTRAL"
+            score = 50
+            gate = "YELLOW"
+
+            if price > ma200 and ma50 > ma200:
+                status = "RISK_ON"
+                score = 80
+                gate = "GREEN"
+            elif price < ma200 and ma50 < ma200:
+                status = "RISK_OFF"
+                score = 20
+                gate = "RED"
+
+            return jsonify({
+                'gate': gate,
+                'status': status,
+                'score': score,
+                'price': price,
+                'ma200': ma200,
+                'symbol': 'SPY',
+                'reasons': [f'SPY: ${price:.2f} vs 200MA: ${ma200:.2f}'],
+                'metrics': {'rsi': round(rsi, 1), 'vix': round(vix, 1) if vix else None, 'spy_price': price}
+            })
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'gate': 'YELLOW', 'score': 50, 'metrics': {'rsi': None, 'vix': None, 'spy_price': None}}), 500
+@us_bp.route('/data-status')
+def get_us_update_status():
+    """US Market Data Update Status"""
+    try:
+        status_data = {
+            'timestamp': datetime.now().isoformat(),
+            'files': [],
+            'log': ''
+        }
+
+        # 1. Check Data Files
+        base_dir = _US_MARKET_DIR
+        files_to_check = [
+            {'name': 'US Daily Prices', 'path': os.path.join(base_dir, 'data', 'us_daily_prices.csv')},
+            {'name': 'Smart Money Picks', 'path': os.path.join(base_dir, 'output', 'smart_money_picks_v2.csv')},
+            {'name': 'Macro Analysis (AI)', 'path': os.path.join(base_dir, 'output', 'macro_analysis.json')},
+            {'name': 'AI Summaries', 'path': os.path.join(base_dir, 'output', 'ai_summaries.json')},
+            {'name': 'Sector Heatmap', 'path': os.path.join(base_dir, 'output', 'sector_heatmap.json')},
+            {'name': 'Options Flow', 'path': os.path.join(base_dir, 'output', 'options_flow.json')},
+            {'name': 'Update Log', 'path': os.path.join(base_dir, 'output', 'update_log.txt')}
+        ]
+        
+        for f in files_to_check:
+            path = f['path']
+            if os.path.exists(path):
+                stats = os.stat(path)
+                mtime = datetime.fromtimestamp(stats.st_mtime)
+                size_mb = stats.st_size / (1024 * 1024)
+                
+                status_data['files'].append({
+                    'name': f['name'],
+                    'path': os.path.basename(f['path']),
+                    'last_updated': mtime.strftime('%Y-%m-%d %H:%M:%S'),
+                    'size': f"{size_mb:.2f} MB",
+                    'status': 'OK'
+                })
+            else:
+                status_data['files'].append({
+                    'name': f['name'],
+                    'last_updated': '-',
+                    'size': '-',
+                    'status': 'MISSING'
+                })
+                
+        # 2. Read Update Log
+        log_path = os.path.join(base_dir, 'output', 'update_log.txt')
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8', errors='ignore') as f:
+                # Read last 100 lines
+                lines = f.readlines()
+                status_data['log'] = ''.join(lines[-100:])
+        else:
+            status_data['log'] = 'Log file not found.'
+
+        return jsonify(status_data)
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/news-analysis')
+def get_us_news_analysis():
+    """Perplexity 뉴스 분석 결과 — ai_summaries.json으로 보강"""
+    try:
+        news_path = os.path.join(_OUTPUT_DIR, 'news_analysis.json')
+        data = []
+        if os.path.exists(news_path):
+            with open(news_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+        # ai_summaries.json에서 뉴스 데이터 보강
+        summaries_path = os.path.join(_OUTPUT_DIR, 'ai_summaries.json')
+        if os.path.exists(summaries_path):
+            with open(summaries_path, 'r', encoding='utf-8') as f:
+                summaries = json.load(f)
+
+            for ticker, summary in summaries.items():
+                if not isinstance(summary, dict):
+                    continue
+                # 기존 데이터 보강
+                for item in data:
+                    if item.get('ticker') == ticker:
+                        if item.get('news_score', 0) == 0 and summary.get('news_score', 0) > 0:
+                            item['news_score'] = summary.get('news_score', 0)
+                            item['reason'] = summary.get('summary', item.get('reason', ''))
+                            item['sentiment'] = summary.get('sentiment', item.get('sentiment', 'neutral'))
+                            if summary.get('catalysts'):
+                                item['catalysts'] = summary.get('catalysts', [])
+                        break
+
+        return jsonify({'analysis': data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/institutional')
+def get_us_institutional():
+    """13F 기관 보유 분석"""
+    try:
+        csv_path = os.path.join(_OUTPUT_DIR, 'us_13f_holdings.csv')
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            holdings = df.to_dict('records')
+            return jsonify({'holdings': holdings})
+        return jsonify({'holdings': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/insider-trading')
+def get_us_insider_trading():
+    """내부자 거래 현황"""
+    try:
+        json_path = os.path.join(_OUTPUT_DIR, 'insider_trading.json')
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify({'transactions': data.get('transactions', [])})
+        return jsonify({'transactions': []})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/sector-rotation')
+def get_us_sector_rotation():
+    """섹터 로테이션 분석"""
+    try:
+        rotation_path = os.path.join(_OUTPUT_DIR, 'sector_rotation.json')
+        if os.path.exists(rotation_path):
+            with open(rotation_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'rotation_signals': {}, 'performance_matrix': {}})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/risk-alerts')
+def get_us_risk_alerts():
+    """리스크 알림"""
+    try:
+        alerts_path = os.path.join(_OUTPUT_DIR, 'risk_alerts.json')
+        if os.path.exists(alerts_path):
+            with open(alerts_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'alerts': [], 'portfolio_summary': {}})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/earnings-impact')
+def get_us_earnings_impact():
+    """어닝 임팩트 분석 — earnings_impact + earnings_analysis + earnings_transcripts 병합"""
+    try:
+        # 1) earnings_impact.json — sector_profiles
+        data = {'sector_profiles': {}, 'upcoming_earnings': [], 'details': {}}
+        impact_path = os.path.join(_OUTPUT_DIR, 'earnings_impact.json')
+        if os.path.exists(impact_path):
+            with open(impact_path, 'r', encoding='utf-8') as f:
+                impact = json.load(f)
+            data['sector_profiles'] = impact.get('sector_profiles', {})
+            data['timestamp'] = impact.get('timestamp', '')
+
+        # 2) earnings_analysis.json — upcoming_earnings + details (per-ticker)
+        analysis_path = os.path.join(_OUTPUT_DIR, 'earnings_analysis.json')
+        if not os.path.exists(analysis_path):
+            analysis_path = os.path.join(_PREVIEW_DIR, 'earnings_analysis.json')
+        if os.path.exists(analysis_path):
+            with open(analysis_path, 'r', encoding='utf-8') as f:
+                analysis = json.load(f)
+            # upcoming_earnings from analysis (has actual entries)
+            upcoming = analysis.get('upcoming_earnings', [])
+            details = analysis.get('details', {})
+            data['details'] = details
+
+            # Enrich upcoming with detail info
+            from datetime import datetime, date
+            today = date.today()
+            enriched = []
+            for item in upcoming:
+                ticker = item.get('ticker', '')
+                detail = details.get(ticker, {})
+                earn_date = item.get('date', detail.get('next_earnings_date', ''))
+                # Recalculate days_left from today
+                days_left = item.get('days_left', 0)
+                try:
+                    ed = datetime.strptime(earn_date[:10], '%Y-%m-%d').date()
+                    days_left = max(0, (ed - today).days)
+                except Exception:
+                    pass
+                enriched.append({
+                    'ticker': ticker,
+                    'date': earn_date,
+                    'days_left': days_left,
+                    'revenue_growth': detail.get('revenue_growth', 0),
+                    'avg_surprise_pct': detail.get('avg_surprise_pct', 0),
+                    'surprises': detail.get('surprises', []),
+                })
+
+            # Also add tickers from details that have earnings within 30 days
+            seen = {e['ticker'] for e in enriched}
+            for ticker, detail in details.items():
+                if ticker in seen:
+                    continue
+                earn_date = detail.get('next_earnings_date', '')
+                if not earn_date:
+                    continue
+                try:
+                    ed = datetime.strptime(earn_date[:10], '%Y-%m-%d').date()
+                    days_left = (ed - today).days
+                    if 0 <= days_left <= 30:
+                        enriched.append({
+                            'ticker': ticker,
+                            'date': earn_date,
+                            'days_left': days_left,
+                            'revenue_growth': detail.get('revenue_growth', 0),
+                            'avg_surprise_pct': detail.get('avg_surprise_pct', 0),
+                            'surprises': detail.get('surprises', []),
+                        })
+                except Exception:
+                    pass
+
+            # Sort by days_left
+            enriched.sort(key=lambda x: x.get('days_left', 999))
+            data['upcoming_earnings'] = enriched
+
+        # 3) earnings_transcripts.json — transcript metadata
+        transcripts_path = os.path.join(_OUTPUT_DIR, 'earnings_transcripts.json')
+        if os.path.exists(transcripts_path):
+            with open(transcripts_path, 'r', encoding='utf-8') as f:
+                transcripts = json.load(f)
+            data['transcript_metadata'] = transcripts.get('metadata', {})
+
+        return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/market-regime')
-def get_market_regime():
-    """Market regime analysis"""
+def get_us_market_regime():
+    """마켓 레짐 감지 결과 + adaptive config"""
     try:
-        data = _load_preview_json('regime_config.json')
+        config_path = os.path.join(_OUTPUT_DIR, 'regime_config.json')
+        if os.path.exists(config_path):
+            with open(config_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'regime': 'neutral', 'confidence': 0, 'signals': {}})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/index-prediction')
+def get_us_index_prediction():
+    """지수 방향 예측"""
+    try:
+        prediction_path = os.path.join(_OUTPUT_DIR, 'index_prediction.json')
+        if os.path.exists(prediction_path):
+            with open(prediction_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'predictions': {}, 'model_info': {}})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@us_bp.route('/market-briefing')
+def get_us_market_briefing():
+    """Perplexity 기반 시황 분석 — briefing.json + market_briefing.json 병합"""
+    try:
+        json_path = os.path.join(_OUTPUT_DIR, 'market_briefing.json')
+        data = {}
+        if os.path.exists(json_path):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+        # ai_analysis.content가 비어있으면 briefing.json에서 보충
+        ai = data.get('ai_analysis', {})
+        if not ai.get('content'):
+            briefing_path = os.path.join(_OUTPUT_DIR, 'briefing.json')
+            if not os.path.exists(briefing_path):
+                briefing_path = os.path.join(_PREVIEW_DIR, 'briefing.json')
+            if os.path.exists(briefing_path):
+                with open(briefing_path, 'r', encoding='utf-8') as f:
+                    briefing = json.load(f)
+                data['ai_analysis'] = {
+                    'content': briefing.get('content', ''),
+                    'citations': briefing.get('citations', [])
+                }
+
+        # vix 데이터 보충 (market_data.json)
+        if not data.get('vix', {}).get('value'):
+            md_path = os.path.join(_OUTPUT_DIR, 'market_data.json')
+            if not os.path.exists(md_path):
+                md_path = os.path.join(_PREVIEW_DIR, 'market_data.json')
+            if os.path.exists(md_path):
+                with open(md_path, 'r', encoding='utf-8') as f:
+                    md = json.load(f)
+                vol = md.get('volatility', {})
+                vix_data = vol.get('^VIX', {})
+                val = vix_data.get('current', 0)
+                change = vix_data.get('change_pct', 0)
+                level = 'Low' if val < 15 else ('High' if val > 25 else 'Neutral')
+                color = '#4CAF50' if val < 15 else ('#F44336' if val > 25 else '#FFC107')
+                data['vix'] = {'value': val, 'change': change, 'level': level, 'color': color}
+
+        # fear_greed color 보충
+        fg = data.get('fear_greed', {})
+        if fg and 'color' not in fg:
+            score = fg.get('score', 50)
+            fg['color'] = 'green' if score >= 60 else ('red' if score <= 40 else 'yellow')
+            data['fear_greed'] = fg
+
+        # smart_money.top_picks 키 매핑
+        sm = data.get('smart_money', {})
+        if sm and 'top_picks' not in sm:
+            tp_path = os.path.join(_OUTPUT_DIR, 'top_picks.json')
+            if not os.path.exists(tp_path):
+                tp_path = os.path.join(_PREVIEW_DIR, 'top_picks.json')
+            if os.path.exists(tp_path):
+                with open(tp_path, 'r', encoding='utf-8') as f:
+                    tp = json.load(f)
+                picks = tp.get('top_picks', tp.get('picks', []))
+                for p in picks:
+                    if 'composite_score' in p and 'final_score' not in p:
+                        p['final_score'] = p.pop('composite_score')
+                    if 'signal' in p and 'ai_recommendation' not in p:
+                        p['ai_recommendation'] = p.pop('signal')
+                sm['top_picks'] = {'picks': picks}
+                data['smart_money'] = sm
+
         if not data:
-            return jsonify({'error': 'Market regime data not available'}), 404
+            return jsonify({'ai_analysis': {'content': '', 'citations': []}, 'vix': {}, 'fear_greed': {}})
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/backtest')
-def get_backtest():
-    """Backtest results"""
+def get_us_backtest():
+    """백테스트 결과"""
     try:
-        data = _load_preview_json('backtest_results.json')
-        if not data:
-            return jsonify({'error': 'Backtest results not available'}), 404
-        return jsonify(data)
+        backtest_path = os.path.join(_OUTPUT_DIR, 'backtest_results.json')
+        if os.path.exists(backtest_path):
+            with open(backtest_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'returns': {}, 'benchmarks': {}})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/decision-signal')
-def get_decision_signal():
-    """Decision signal — 5개 데이터 소스를 종합하여 투자 신호 생성
-
-    Components:
-      market_gate (±15), regime (±15), prediction (±10), risk (±10), sector (±10)
-    Base score: 50 → final 0~100
-    """
-    try:
-        gate_data = _load_preview_json('market_data.json') or {}
-        pred_data = _load_preview_json('prediction.json') or {}
-        regime_data = _load_preview_json('regime_config.json') or {}
-        risk_data = _load_preview_json('risk_alerts.json') or {}
-        sector_data = _load_preview_json('sector_rotation.json') or {}
-        top_picks = _load_preview_json('final_top10_report.json') or _load_preview_json('top_picks.json') or {}
-
-        # --- 1. Market Gate (±15) ---
-        gate_score_raw = 0
-        gate_val = '--'
-        # gate_data from market_data.json contains fear_greed, indices etc.
-        # Try direct gate endpoint data
-        try:
-            import requests as _req
-            _gate_resp = _req.get('http://localhost:5001/api/us/market-gate', timeout=3).json()
-            gate_val = str(_gate_resp.get('score', '--'))
-            _gs = _gate_resp.get('score', 50)
-            gate_score_raw = (_gs - 50) / 50 * 15  # 0~100 → ±15
-        except Exception:
-            pass
-
-        # --- 2. Regime (±15) ---
-        regime_label = regime_data.get('regime', 'neutral')
-        regime_score_raw = 0
-        regime_map = {'risk_on': 15, 'neutral': 0, 'risk_off': -10, 'crisis': -15}
-        regime_score_raw = regime_map.get(regime_label, 0)
-
-        # --- 3. ML Prediction (±10) ---
-        spy_pred = {}
-        if 'predictions' in pred_data:
-            spy_pred = pred_data['predictions'].get('spy', pred_data['predictions'].get('SPY', {}))
-        elif 'spy' in pred_data:
-            spy_pred = pred_data['spy']
-        bullish_prob = spy_pred.get('bullish_probability', 50)
-        pred_score_raw = (bullish_prob - 50) / 50 * 10  # 0~100 → ±10
-
-        # --- 4. Risk (±10) ---
-        risk_level = 'N/A'
-        risk_score_raw = 0
-        if risk_data:
-            risk_level = risk_data.get('portfolio_summary', {}).get('risk_level', 'N/A')
-            risk_map = {'low': 10, 'medium': 0, 'high': -7, 'critical': -10}
-            risk_score_raw = risk_map.get(risk_level.lower(), 0)
-
-        # --- 5. Sector Phase (±10) ---
-        sector_phase = 'N/A'
-        sector_score_raw = 0
-        if sector_data:
-            rotation = sector_data.get('rotation_signals', {})
-            sector_phase = rotation.get('current_phase', 'N/A')
-            phase_map = {'expansion': 10, 'recovery': 7, 'peak': 0, 'slowdown': -5, 'contraction': -10}
-            sector_score_raw = phase_map.get(sector_phase.lower(), 0)
-
-        # --- Final Score ---
-        final_score = max(0, min(100, round(50 + gate_score_raw + regime_score_raw + pred_score_raw + risk_score_raw + sector_score_raw)))
-
-        # --- Action ---
-        if final_score >= 75:
-            action = 'STRONG_BUY'
-        elif final_score >= 60:
-            action = 'BUY'
-        elif final_score >= 40:
-            action = 'NEUTRAL'
-        elif final_score >= 25:
-            action = 'CAUTIOUS'
-        else:
-            action = 'DEFENSIVE'
-
-        # --- Timing ---
-        if action in ('STRONG_BUY', 'BUY'):
-            timing = 'NOW'
-        elif action == 'NEUTRAL':
-            timing = 'WAIT'
-        else:
-            timing = 'HOLD'
-
-        # --- Warnings ---
-        warnings = []
-        if regime_label == 'risk_off':
-            warnings.append('시장 레짐이 Risk-Off 상태입니다')
-        if risk_level.lower() in ('high', 'critical'):
-            warnings.append(f'포트폴리오 리스크 레벨: {risk_level}')
-        if bullish_prob < 40:
-            warnings.append(f'ML 모델 하락 확률 {100 - bullish_prob:.0f}%')
-        alerts = risk_data.get('alerts', [])
-        for a in alerts[:3]:
-            if a.get('severity') in ('high', 'critical'):
-                warnings.append(a.get('message', ''))
-
-        # --- Top Picks ---
-        top_pick_list = []
-        raw_picks = top_picks.get('top_picks', [])[:5]
-        for p in raw_picks:
-            top_pick_list.append({
-                'ticker': p.get('ticker', ''),
-                'name': p.get('name', ''),
-                'final_score': p.get('final_score', 0),
-                'grade': p.get('grade', ''),
-                'ai_recommendation': p.get('ai_recommendation', ''),
-                'target_upside': p.get('target_upside', 0),
-            })
-
-        result = {
-            'action': action,
-            'score': final_score,
-            'components': {
-                'market_gate': {'score': float(gate_val) if gate_val != '--' else 0, 'contribution': round(gate_score_raw, 1)},
-                'regime': {'regime': regime_label, 'contribution': round(regime_score_raw, 1)},
-                'prediction': {'spy_bullish': round(bullish_prob, 1), 'contribution': round(pred_score_raw, 1)},
-                'risk': {'level': risk_level, 'contribution': round(risk_score_raw, 1)},
-                'sector_phase': {'phase': sector_phase, 'contribution': round(sector_score_raw, 1)},
-            },
-            'top_picks': top_pick_list,
-            'timing': timing,
-            'warnings': [w for w in warnings if w],
-            'timestamp': datetime.now().isoformat(),
-        }
-        return jsonify(result)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/top-picks-report')
-def get_top_picks_report():
-    """Top 10 stock picks full report"""
+def get_us_top_picks_report():
+    """최종 Top 10 AI 리포트"""
     try:
-        data = _load_preview_json('final_top10_report.json')
-        if not data:
-            data = _load_preview_json('top_picks.json')
-        if not data:
-            return jsonify({'error': 'Top picks report not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/cumulative-performance')
-def get_cumulative_performance():
-    """Cumulative performance data"""
-    try:
-        data = _load_preview_json('performance_report.json')
-        if not data:
-            return jsonify({'error': 'Performance data not available'}), 404
-        return jsonify(data)
+        report_path = os.path.join(_OUTPUT_DIR, 'final_top10_report.json')
+        if os.path.exists(report_path):
+            with open(report_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return jsonify(data)
+        return jsonify({'top_picks': [], 'generated_at': '', 'total_analyzed': 0})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
 @us_bp.route('/track-record')
-def get_track_record():
-    """Track record — historical performance of recommendations (same data as cumulative-performance)"""
+def get_us_track_record():
+    """Smart Money Top Picks 트랙 레코드"""
     try:
-        data = _load_preview_json('performance_report.json')
-        if not data:
-            return jsonify({'error': 'Track record data not available. Run performance_tracker.py first.'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/insider-trading')
-def get_insider_trading():
-    """Insider trading data"""
-    try:
-        data = _load_preview_json('insider_trading.json')
-        if not data:
-            return jsonify({'error': 'Insider trading data not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/options-flow-analysis')
-def get_options_flow_analysis():
-    """Options flow analysis"""
-    try:
-        data = _load_preview_json('options_flow.json')
-        if not data:
-            return jsonify({'error': 'Options flow analysis not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/news-analysis')
-def get_news_analysis():
-    """News sentiment analysis"""
-    try:
-        data = _load_preview_json('news_analysis.json')
-        if not data:
-            return jsonify({'error': 'News analysis not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/etf-flow-analysis')
-def get_etf_flow_analysis():
-    """ETF flow analysis"""
-    try:
-        data = _load_preview_json('etf_flow_analysis.json')
-        if not data:
-            return jsonify({'error': 'ETF flow analysis not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/13f-holdings')
-def get_13f_holdings():
-    """13F institutional holdings"""
-    try:
-        # Try JSON first, fall back to CSV
-        data = _load_preview_json('sec_filings.json')
-        if data:
+        report_path = os.path.join(_OUTPUT_DIR, 'performance_report.json')
+        if os.path.exists(report_path):
+            with open(report_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             return jsonify(data)
-        # CSV fallback
-        csv_path = os.path.join(PREVIEW_OUTPUT_DIR, 'us_13f_holdings.csv')
-        if os.path.exists(csv_path):
-            import csv
-            holdings = []
-            with open(csv_path, 'r', encoding='utf-8') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    holdings.append(row)
-            return jsonify({'holdings': holdings, 'count': len(holdings)})
-        return jsonify({'error': '13F holdings data not available'}), 404
+        return jsonify({'summary': {}, 'snapshots': [], 'picks': [], 'by_grade': {}, 'by_sector': {}})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-@us_bp.route('/earnings-analysis')
-def get_earnings_analysis():
-    """Earnings analysis"""
+@us_bp.route('/decision-signal')
+def get_us_decision_signal():
+    """통합 투자 신호 — 레짐, 예측, 게이트, 리스크, 섹터 로테이션 종합"""
     try:
-        data = _load_preview_json('earnings_analysis.json')
-        if not data:
-            return jsonify({'error': 'Earnings analysis not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        score = 50  # Base score
+        components = {}
 
+        # 1. Market Gate
+        gate_score = 50
+        try:
+            from us_market.market_gate import run_us_market_gate
+            gate_result = run_us_market_gate()
+            gate_score = gate_result.score
+        except Exception:
+            pass
+        gate_contribution = round((gate_score - 50) / 50 * 15, 1)
+        score += gate_contribution
+        components['market_gate'] = {'score': gate_score, 'contribution': gate_contribution}
 
-@us_bp.route('/portfolio-risk')
-def get_portfolio_risk():
-    """Portfolio risk analysis"""
-    try:
-        data = _load_preview_json('portfolio_risk.json')
-        if not data:
-            return jsonify({'error': 'Portfolio risk data not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # 2. Regime
+        regime_str = 'neutral'
+        regime_contribution = 0
+        regime_path = os.path.join(_OUTPUT_DIR, 'regime_config.json')
+        try:
+            if os.path.exists(regime_path):
+                with open(regime_path, 'r') as f:
+                    regime_data = json.load(f)
+                regime_str = regime_data.get('regime', 'neutral')
+                regime_map = {'risk_on': 15, 'neutral': 0, 'risk_off': -15, 'crisis': -25}
+                regime_contribution = regime_map.get(regime_str, 0)
+                score += regime_contribution
+        except Exception:
+            pass
+        components['regime'] = {'regime': regime_str, 'contribution': regime_contribution}
 
+        # 3. Index Prediction (SPY bullish probability)
+        spy_bullish = 50.0
+        pred_contribution = 0
+        pred_path = os.path.join(_OUTPUT_DIR, 'index_prediction.json')
+        try:
+            if os.path.exists(pred_path):
+                with open(pred_path, 'r') as f:
+                    pred_data = json.load(f)
+                spy_pred = pred_data.get('predictions', {}).get('SPY', {})
+                spy_bullish = spy_pred.get('bullish_probability', 50)
+                if spy_bullish >= 60:
+                    pred_contribution = 10
+                elif spy_bullish <= 40:
+                    pred_contribution = -10
+                score += pred_contribution
+        except Exception:
+            pass
+        components['prediction'] = {'spy_bullish': round(spy_bullish, 1), 'contribution': pred_contribution}
 
-@us_bp.route('/prediction-history')
-def get_prediction_history():
-    """Prediction history"""
-    try:
-        data = _load_preview_json('prediction_history.json')
-        if not data:
-            return jsonify({'error': 'Prediction history not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        # 4. Risk Level
+        risk_level = 'Moderate'
+        risk_contribution = 0
+        risk_path = os.path.join(_OUTPUT_DIR, 'risk_alerts.json')
+        warnings = []
+        try:
+            if os.path.exists(risk_path):
+                with open(risk_path, 'r') as f:
+                    risk_data = json.load(f)
+                risk_level = risk_data.get('portfolio_summary', {}).get('risk_level', 'Moderate')
+                risk_map = {'Low': 5, 'Moderate': 0, 'High': -10, 'Critical': -20}
+                risk_contribution = risk_map.get(risk_level, 0)
+                score += risk_contribution
+                for alert in risk_data.get('alerts', []):
+                    if alert.get('severity') in ('critical', 'warning'):
+                        warnings.append(alert.get('message', ''))
+        except Exception:
+            pass
+        components['risk'] = {'level': risk_level, 'contribution': risk_contribution}
 
+        # 5. Sector Phase
+        phase = 'Unknown'
+        phase_contribution = 0
+        rotation_path = os.path.join(_OUTPUT_DIR, 'sector_rotation.json')
+        try:
+            if os.path.exists(rotation_path):
+                with open(rotation_path, 'r') as f:
+                    rotation_data = json.load(f)
+                phase = rotation_data.get('rotation_signals', {}).get('current_phase', 'Unknown')
+                phase_map = {'Early Cycle': 10, 'Mid Cycle': 5, 'Late Cycle': -5, 'Recession': -15}
+                phase_contribution = phase_map.get(phase, 0)
+                score += phase_contribution
+        except Exception:
+            pass
+        components['sector_phase'] = {'phase': phase, 'contribution': phase_contribution}
 
-@us_bp.route('/data-status')
-def get_data_status():
-    """Check data file freshness"""
-    try:
-        files = []
-        if os.path.isdir(PREVIEW_OUTPUT_DIR):
-            for fname in sorted(os.listdir(PREVIEW_OUTPUT_DIR)):
-                fpath = os.path.join(PREVIEW_OUTPUT_DIR, fname)
-                if os.path.isfile(fpath):
-                    stat = os.stat(fpath)
-                    files.append({
-                        'name': fname,
-                        'size': stat.st_size,
-                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+        # Clamp score
+        score = max(0, min(100, round(score)))
+
+        # Map to action
+        if score >= 75:
+            action = 'STRONG_BUY'
+        elif score >= 60:
+            action = 'BUY'
+        elif score >= 40:
+            action = 'NEUTRAL'
+        elif score >= 25:
+            action = 'CAUTIOUS'
+        else:
+            action = 'DEFENSIVE'
+
+        # Timing signal
+        timing = 'NOW' if gate_score >= 70 else ('WAIT' if gate_score < 40 else 'SELECTIVE')
+
+        # Top 5 picks from final report
+        top_picks = []
+        report_path = os.path.join(_OUTPUT_DIR, 'final_top10_report.json')
+        try:
+            if os.path.exists(report_path):
+                with open(report_path, 'r') as f:
+                    report = json.load(f)
+                for pick in report.get('top_picks', [])[:5]:
+                    top_picks.append({
+                        'ticker': pick.get('ticker', ''),
+                        'name': pick.get('name', ''),
+                        'final_score': pick.get('final_score', 0),
+                        'grade': pick.get('grade', ''),
+                        'ai_recommendation': pick.get('ai_recommendation', ''),
+                        'target_upside': pick.get('target_upside', 0),
                     })
-        return jsonify({'files': files, 'count': len(files), 'directory': PREVIEW_OUTPUT_DIR})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/sector-rotation')
-def get_sector_rotation():
-    """Sector rotation analysis"""
-    try:
-        data = _load_preview_json('sector_rotation.json')
-        if not data:
-            return jsonify({'error': 'Sector rotation data not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/risk-alerts')
-def get_risk_alerts():
-    """Risk alerts"""
-    try:
-        data = _load_preview_json('risk_alerts.json')
-        if not data:
-            return jsonify({'error': 'Risk alerts not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/earnings-impact')
-def get_earnings_impact():
-    """Earnings impact analysis — merges earnings_impact + earnings_analysis"""
-    try:
-        data = _load_preview_json('earnings_impact.json') or {}
-        analysis = _load_preview_json('earnings_analysis.json') or {}
-
-        # Ensure sector_profiles exists
-        data.setdefault('sector_profiles', {})
-
-        # Enrich upcoming_earnings from earnings_analysis
-        existing_ue = data.get('upcoming_earnings', [])
-        if not existing_ue and analysis.get('upcoming_earnings'):
-            details = analysis.get('details', {})
-            # Map sector from top_picks or heatmap data for enrichment
-            top_picks = _load_preview_json('top_picks.json') or {}
-            ticker_sectors = {}
-            for p in top_picks.get('top_picks', []):
-                ticker_sectors[p.get('ticker', '')] = p.get('sector', 'N/A')
-
-            enriched = []
-            for ue in analysis['upcoming_earnings']:
-                ticker = ue.get('ticker', '')
-                det = details.get(ticker, {})
-                avg_surprise = det.get('avg_surprise_pct', 0)
-                revenue_growth = det.get('revenue_growth', 0)
-
-                # Derive signal and recommendation from surprise history
-                if avg_surprise > 5:
-                    signal, conf = 'Strong Beat Expected', 0.8
-                    rec_ko, rec_en = '실적 서프라이즈 기대 — 매수 대기', 'Beat expected — consider buying'
-                elif avg_surprise > 0:
-                    signal, conf = 'Likely Beat', 0.6
-                    rec_ko, rec_en = '양호한 실적 예상 — 관망 또는 소량 매수', 'Positive outlook — hold or light buy'
-                elif avg_surprise == 0:
-                    signal, conf = 'Neutral', 0.5
-                    rec_ko, rec_en = '실적 데이터 부족 — 관망', 'Insufficient data — hold'
-                else:
-                    signal, conf = 'Caution', 0.4
-                    rec_ko, rec_en = '실적 미스 이력 — 보수적 접근', 'Miss history — be cautious'
-
-                enriched.append({
-                    'ticker': ticker,
-                    'sector': ticker_sectors.get(ticker, 'N/A'),
-                    'earnings_date': ue.get('date', det.get('next_earnings_date', '')),
-                    'days_until': ue.get('days_left', 0),
-                    'signal': signal,
-                    'confidence': conf,
-                    'implied_move_pct': None,
-                    'historical_avg_move': abs(avg_surprise),
-                    'recommendation_ko': rec_ko,
-                    'recommendation_en': rec_en,
-                })
-            data['upcoming_earnings'] = enriched
-
-        # Also add upcoming from details with next_earnings_date
-        if not data.get('upcoming_earnings'):
-            details = analysis.get('details', {})
-            from datetime import datetime as dt
-            today = dt.now().date()
-            upcoming = []
-            for ticker, det in details.items():
-                ned = det.get('next_earnings_date')
-                if not ned:
-                    continue
-                try:
-                    edate = dt.strptime(ned, '%Y-%m-%d').date()
-                    days = (edate - today).days
-                    if 0 <= days <= 30:
-                        upcoming.append({
-                            'ticker': ticker,
-                            'sector': 'N/A',
-                            'earnings_date': ned,
-                            'days_until': days,
-                            'signal': 'Upcoming',
-                            'confidence': 0.5,
-                            'implied_move_pct': None,
-                            'historical_avg_move': abs(det.get('avg_surprise_pct', 0)),
-                            'recommendation_ko': '실적 발표 예정 — 주시',
-                            'recommendation_en': 'Earnings upcoming — monitor',
-                        })
-                except (ValueError, TypeError):
-                    continue
-            upcoming.sort(key=lambda x: x['days_until'])
-            data['upcoming_earnings'] = upcoming[:10]
-
-        data.setdefault('timestamp', datetime.now().isoformat())
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/index-prediction')
-def get_index_prediction():
-    """Index prediction (ML model)"""
-    try:
-        data = _load_preview_json('index_prediction.json')
-        if not data:
-            data = _load_preview_json('prediction.json')
-        if not data:
-            return jsonify({'error': 'Index prediction not available'}), 404
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@us_bp.route('/heatmap-data')
-def get_heatmap_data():
-    """S&P 500 heatmap data — transforms sector_groups into series format for frontend"""
-    try:
-        data = _load_preview_json('sector_heatmap.json')
-        if not data:
-            return jsonify({'error': 'Heatmap data not available'}), 404
-
-        # Transform sector_groups → series: SectorSeries[]
-        sector_groups = data.get('sector_groups', {})
-        series = []
-        for sector_name, stocks in sector_groups.items():
-            items = [
-                {
-                    'x': s.get('ticker', ''),
-                    'y': abs(s.get('change', 0)) * 10 + 10,  # size weight
-                    'price': s.get('price', 0),
-                    'change': s.get('change', 0),
-                    'color': '',
-                }
-                for s in stocks
-            ]
-            # Sort by absolute change descending (biggest movers first)
-            items.sort(key=lambda i: abs(i['change']), reverse=True)
-            series.append({'name': sector_name, 'data': items})
-
-        # Sort sectors by stock count descending
-        series.sort(key=lambda s: len(s['data']), reverse=True)
+        except Exception:
+            pass
 
         return jsonify({
-            'series': series,
-            'data_date': data.get('timestamp', datetime.now().isoformat())[:10],
-            'market_breadth': data.get('market_breadth'),
+            'action': action,
+            'score': score,
+            'components': components,
+            'top_picks': top_picks,
+            'timing': timing,
+            'warnings': warnings[:5],
         })
     except Exception as e:
+        traceback.print_exc()
+        return jsonify({'error': str(e), 'action': 'NEUTRAL', 'score': 50}), 500
+
+
+@us_bp.route('/smart-money/<ticker>/detail')
+def get_smart_money_detail(ticker):
+    """Smart Money 종목 상세 정보 - 차트, 기술적 분석, AI 분석 통합"""
+    try:
+        import numpy as np
+        from app.utils.helpers import calculate_rsi
+
+        lang = request.args.get('lang', 'ko')
+        result = {
+            'ticker': ticker.upper(),
+            'name': '',
+            'sector': get_sector(ticker),
+            'price': 0,
+            'change_pct': 0,
+            'chart': [],
+            'technicals': {},
+            'smart_money': {},
+            'ai_analysis': {},
+            'why_buy': []
+        }
+
+        # 1. Load Smart Money CSV data
+        csv_path = os.path.join(_OUTPUT_DIR, 'smart_money_picks_v2.csv')
+        if os.path.exists(csv_path):
+            df = pd.read_csv(csv_path)
+            row = df[df['ticker'] == ticker.upper()]
+            if not row.empty:
+                r = row.iloc[0]
+                result['name'] = safe_str(r.get('name'), ticker)
+                result['smart_money'] = {
+                    'composite_score': safe_float(r.get('composite_score')),
+                    'swing_score': safe_float(r.get('swing_score')),
+                    'trend_score': safe_float(r.get('trend_score')),
+                    'grade': safe_str(r.get('grade')),
+                    'strategy_type': safe_str(r.get('strategy_type')),
+                    'setup_type': safe_str(r.get('setup_type')),
+                    'sd_stage': safe_str(r.get('sd_stage')),
+                    'sd_score': safe_float(r.get('sd_score')),
+                    'inst_score': safe_float(r.get('inst_score')),
+                    'inst_pct': safe_float(r.get('inst_pct')),
+                    'insider': safe_str(r.get('insider')),
+                    'tech_score': safe_float(r.get('tech_score')),
+                    'fund_score': safe_float(r.get('fund_score')),
+                    'pe': safe_float(r.get('pe')) if not pd.isna(r.get('pe')) else None,
+                    'revenue_growth': safe_float(r.get('revenue_growth')) if not pd.isna(r.get('revenue_growth')) else None,
+                    'target_upside': safe_float(r.get('target_upside')),
+                    'rs_score': safe_float(r.get('rs_score')),
+                    'rs_vs_spy_20d': safe_float(r.get('rs_vs_spy_20d')),
+                    'recommendation': safe_str(r.get('recommendation')),
+                    'next_earnings': safe_str(r.get('next_earnings')),
+                    'days_to_earnings': int(float(r.get('days_to_earnings'))) if r.get('days_to_earnings') is not None and not pd.isna(r.get('days_to_earnings')) else None
+                }
+
+        # 1b. Fallback: Load from super_performance_picks.csv if not in smart money
+        if not result['smart_money']:
+            vcp_path = os.path.join(_OUTPUT_DIR, 'super_performance_picks.csv')
+            if os.path.exists(vcp_path):
+                vcp_df = pd.read_csv(vcp_path)
+                vcp_row = vcp_df[vcp_df['ticker'] == ticker.upper()]
+                if not vcp_row.empty:
+                    v = vcp_row.iloc[0]
+                    result['name'] = safe_str(v.get('name'), ticker)
+                    result['sector'] = safe_str(v.get('sector'), result.get('sector', ''))
+
+                    # Parse eps_growth "99%" -> 99.0
+                    rev_growth = None
+                    eps_raw = v.get('eps_growth')
+                    if eps_raw is not None and not pd.isna(eps_raw):
+                        try:
+                            rev_growth = float(str(eps_raw).replace('%', ''))
+                        except (ValueError, TypeError):
+                            pass
+
+                    rs_rating = safe_float(v.get('rs_rating'))
+                    result['smart_money'] = {
+                        'composite_score': safe_float(v.get('score')),
+                        'swing_score': safe_float(v.get('vcp_score')),
+                        'trend_score': None,
+                        'grade': None,
+                        'strategy_type': 'VCP',
+                        'setup_type': 'Breakout' if str(v.get('breakout', '')).strip().lower() == 'yes' else 'Building',
+                        'sd_stage': safe_str(v.get('setup_phase')),
+                        'sd_score': None,
+                        'inst_score': None,
+                        'inst_pct': None,
+                        'insider': None,
+                        'tech_score': None,
+                        'fund_score': safe_float(v.get('fund_score')),
+                        'pe': None,
+                        'revenue_growth': rev_growth,
+                        'target_upside': None,
+                        'rs_score': rs_rating,
+                        'rs_vs_spy_20d': rs_rating,
+                        'recommendation': None,
+                        'next_earnings': None,
+                        'days_to_earnings': None
+                    }
+                    # Store VCP-specific fields for Why Buy generation
+                    result['_vcp'] = {
+                        'vcp_score': safe_float(v.get('vcp_score')),
+                        'rs_rating': rs_rating,
+                        'breakout': str(v.get('breakout', '')).strip(),
+                        'vol_dry_up': str(v.get('vol_dry_up', '')).strip(),
+                        'contractions': safe_float(v.get('contractions')),
+                        'pivot_tightness': safe_str(v.get('pivot_tightness')),
+                        'base_depth': safe_str(v.get('base_depth')),
+                        'pivot_price': safe_float(v.get('pivot_price')),
+                    }
+
+        # 2. Get Chart Data (6 months daily)
+        try:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period='6mo', interval='1d')
+
+            if not hist.empty:
+                # Current price & change
+                result['price'] = round(float(hist['Close'].iloc[-1]), 2)
+                if len(hist) >= 2:
+                    prev = float(hist['Close'].iloc[-2])
+                    result['change_pct'] = round(((result['price'] - prev) / prev) * 100, 2)
+
+                # Calculate technical indicators
+                hist['MA20'] = hist['Close'].rolling(20).mean()
+                hist['MA50'] = hist['Close'].rolling(50).mean()
+                hist['MA200'] = hist['Close'].rolling(200).mean()
+                hist['RSI'] = calculate_rsi(hist['Close'])
+
+                # MACD
+                ema12 = hist['Close'].ewm(span=12, adjust=False).mean()
+                ema26 = hist['Close'].ewm(span=26, adjust=False).mean()
+                hist['MACD'] = ema12 - ema26
+                hist['MACD_Signal'] = hist['MACD'].ewm(span=9, adjust=False).mean()
+                hist['MACD_Hist'] = hist['MACD'] - hist['MACD_Signal']
+
+                # Bollinger Bands
+                hist['BB_Mid'] = hist['Close'].rolling(20).mean()
+                bb_std = hist['Close'].rolling(20).std()
+                hist['BB_Upper'] = hist['BB_Mid'] + (bb_std * 2)
+                hist['BB_Lower'] = hist['BB_Mid'] - (bb_std * 2)
+
+                # Build chart data
+                for date, row in hist.iterrows():
+                    # Skip rows with NaN in essential OHLC data
+                    if pd.isna(row['Open']) or pd.isna(row['Close']):
+                        continue
+                    result['chart'].append({
+                        'date': date.strftime('%Y-%m-%d'),
+                        'open': round(float(row['Open']), 2),
+                        'high': round(float(row['High']), 2),
+                        'low': round(float(row['Low']), 2),
+                        'close': round(float(row['Close']), 2),
+                        'volume': int(row['Volume']) if not pd.isna(row['Volume']) else 0,
+                        'ma20': round(float(row['MA20']), 2) if not pd.isna(row['MA20']) else None,
+                        'ma50': round(float(row['MA50']), 2) if not pd.isna(row['MA50']) else None,
+                        'rsi': round(float(row['RSI']), 2) if not pd.isna(row['RSI']) else None,
+                        'macd': round(float(row['MACD']), 4) if not pd.isna(row['MACD']) else None,
+                        'macd_signal': round(float(row['MACD_Signal']), 4) if not pd.isna(row['MACD_Signal']) else None,
+                        'macd_hist': round(float(row['MACD_Hist']), 4) if not pd.isna(row['MACD_Hist']) else None
+                    })
+
+                # Latest technicals
+                last = hist.iloc[-1]
+                avg_vol = hist['Volume'].tail(20).mean()
+                result['technicals'] = {
+                    'price': result['price'],
+                    'ma20': round(float(last['MA20']), 2) if not pd.isna(last['MA20']) else None,
+                    'ma50': round(float(last['MA50']), 2) if not pd.isna(last['MA50']) else None,
+                    'ma200': round(float(last['MA200']), 2) if not pd.isna(last['MA200']) else None,
+                    'rsi': round(float(last['RSI']), 2) if not pd.isna(last['RSI']) else None,
+                    'macd': round(float(last['MACD']), 4) if not pd.isna(last['MACD']) else None,
+                    'macd_signal': round(float(last['MACD_Signal']), 4) if not pd.isna(last['MACD_Signal']) else None,
+                    'macd_hist': round(float(last['MACD_Hist']), 4) if not pd.isna(last['MACD_Hist']) else None,
+                    'bb_upper': round(float(last['BB_Upper']), 2) if not pd.isna(last['BB_Upper']) else None,
+                    'bb_lower': round(float(last['BB_Lower']), 2) if not pd.isna(last['BB_Lower']) else None,
+                    'volume': int(last['Volume']) if not pd.isna(last['Volume']) else 0,
+                    'avg_volume_20d': int(avg_vol) if not pd.isna(avg_vol) else 0
+                }
+        except Exception as e:
+            print(f"Chart data error for {ticker}: {e}")
+
+        # 3. AI Summary
+        summary_path = os.path.join(_OUTPUT_DIR, 'ai_summaries.json')
+        if os.path.exists(summary_path):
+            with open(summary_path, 'r', encoding='utf-8') as f:
+                summaries = json.load(f)
+            if ticker.upper() in summaries:
+                ai_data = summaries[ticker.upper()]
+                result['ai_analysis'] = {
+                    'summary': ai_data.get('summary_ko' if lang == 'ko' else 'summary_en', ''),
+                    'generated_at': ai_data.get('generated_at', '')
+                }
+
+        # 4. Generate "Why Buy" reasons
+        sm = result['smart_money']
+        tech = result['technicals']
+        why_buy = []
+
+        # Score-based reasons
+        if (sm.get('composite_score') or 0) >= 70:
+            why_buy.append({
+                'type': 'score',
+                'icon': 'chart-line',
+                'title': '높은 종합 점수',
+                'desc': f"Composite Score {sm['composite_score']:.1f}점으로 상위 종목"
+            })
+
+        if sm.get('sd_stage') in ['Accumulation', 'Strong Accumulation']:
+            why_buy.append({
+                'type': 'accumulation',
+                'icon': 'building-columns',
+                'title': '기관 매집 단계',
+                'desc': f"Supply/Demand Stage: {sm['sd_stage']} - 스마트머니 유입 신호"
+            })
+
+        if (sm.get('inst_pct') or 0) >= 5:
+            why_buy.append({
+                'type': 'institutional',
+                'icon': 'landmark',
+                'title': '기관 보유 증가',
+                'desc': f"최근 분기 기관 보유 비중 {sm['inst_pct']:.1f}% 증가"
+            })
+
+        if (sm.get('target_upside') or 0) >= 10:
+            why_buy.append({
+                'type': 'target',
+                'icon': 'bullseye',
+                'title': '애널리스트 목표가 상향 여력',
+                'desc': f"컨센서스 목표가 대비 {sm['target_upside']:.1f}% 상승 여력"
+            })
+
+        if (sm.get('rs_vs_spy_20d') or 0) >= 5:
+            why_buy.append({
+                'type': 'momentum',
+                'icon': 'rocket',
+                'title': '시장 대비 강한 모멘텀',
+                'desc': f"최근 20일 SPY 대비 {sm['rs_vs_spy_20d']:.1f}% 아웃퍼폼"
+            })
+
+        # Technical reasons
+        if tech.get('rsi') and 30 <= tech['rsi'] <= 70:
+            if tech['rsi'] <= 50:
+                why_buy.append({
+                    'type': 'technical',
+                    'icon': 'arrow-trend-up',
+                    'title': '과매도 해소 구간',
+                    'desc': f"RSI {tech['rsi']:.1f} - 반등 타이밍 포착"
+                })
+
+        if tech.get('ma20') and tech.get('ma50') and tech.get('price'):
+            if tech['price'] > tech['ma20'] > tech['ma50']:
+                why_buy.append({
+                    'type': 'technical',
+                    'icon': 'chart-area',
+                    'title': '이평선 정배열',
+                    'desc': f"현재가 > MA20 > MA50 - 상승 추세 확인"
+                })
+
+        if tech.get('macd') and tech.get('macd_signal'):
+            if tech['macd'] > tech['macd_signal'] and tech.get('macd_hist', 0) > 0:
+                why_buy.append({
+                    'type': 'technical',
+                    'icon': 'wave-square',
+                    'title': 'MACD 골든크로스',
+                    'desc': 'MACD가 시그널선 상향 돌파 - 매수 신호'
+                })
+
+        if sm.get('insider') and 'buy' in str(sm.get('insider', '')).lower():
+            why_buy.append({
+                'type': 'insider',
+                'icon': 'user-tie',
+                'title': '내부자 매수',
+                'desc': '최근 내부자(임원)의 자사주 매수 발생'
+            })
+
+        days_to_earnings = sm.get('days_to_earnings')
+        if days_to_earnings is not None and not pd.isna(days_to_earnings):
+            try:
+                days = int(days_to_earnings)
+                if 7 <= days <= 30:
+                    why_buy.append({
+                        'type': 'earnings',
+                        'icon': 'calendar-check',
+                        'title': '실적 발표 임박',
+                        'desc': f"{days}일 후 실적 발표 - 기대감 선반영 가능"
+                    })
+            except (ValueError, TypeError):
+                pass
+
+        # VCP-specific reasons
+        vcp = result.get('_vcp')
+        if vcp:
+            if (vcp.get('vcp_score') or 0) >= 50:
+                why_buy.append({
+                    'type': 'vcp',
+                    'icon': 'compress',
+                    'title': 'VCP 패턴 강도',
+                    'desc': f"VCP 패턴 강도 {vcp['vcp_score']:.0f}점 - 변동성 수축 패턴 확인"
+                })
+            if str(vcp.get('breakout', '')).lower() == 'yes':
+                why_buy.append({
+                    'type': 'vcp',
+                    'icon': 'arrow-up-right-dots',
+                    'title': '브레이크아웃 확인',
+                    'desc': '브레이크아웃 확인 - 피봇 포인트 돌파'
+                })
+            if (vcp.get('rs_rating') or 0) >= 80:
+                why_buy.append({
+                    'type': 'momentum',
+                    'icon': 'ranking-star',
+                    'title': '강한 상대강도',
+                    'desc': f"시장 대비 상대강도 {vcp['rs_rating']:.0f}등급 - 리더 종목"
+                })
+            if str(vcp.get('vol_dry_up', '')).lower() == 'yes':
+                why_buy.append({
+                    'type': 'vcp',
+                    'icon': 'droplet-slash',
+                    'title': '거래량 수축',
+                    'desc': '거래량 수축 확인 - 매도 압력 소진'
+                })
+            if (vcp.get('contractions') or 0) >= 3:
+                why_buy.append({
+                    'type': 'vcp',
+                    'icon': 'layer-group',
+                    'title': '다중 수축 패턴',
+                    'desc': f"다중 수축 패턴({int(vcp['contractions'])}회) - 변동성 감소 확인"
+                })
+            # Remove internal _vcp before returning
+            del result['_vcp']
+
+        result['why_buy'] = why_buy[:6]  # Max 6 reasons
+
+        return jsonify(result)
+
+    except Exception as e:
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500

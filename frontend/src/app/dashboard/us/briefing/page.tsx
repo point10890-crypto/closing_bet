@@ -443,7 +443,7 @@ export default function BriefingPage() {
                     </div>
 
                     {/* Content Panel */}
-                    <div className="p-4 md:p-5 rounded-2xl bg-[#1c1c1e] border border-white/5 min-h-[400px] relative">
+                    <div className="p-5 rounded-2xl bg-[#1c1c1e] border border-white/5 min-h-[400px] relative">
                         {/* Watermark/Background decoration */}
                         <div className="absolute top-6 right-6 opacity-[0.03] pointer-events-none">
                             <i className={`fas ${activeTab === 'analysis' ? 'fa-microchip' : 'fa-chart-pie'} text-8xl`}></i>
@@ -501,7 +501,7 @@ export default function BriefingPage() {
                 {/* Right Column: Smart Money & Performance */}
                 <div className="lg:col-span-4 space-y-4 lg:pt-[44px]">
                     {/* Smart Money Picks */}
-                    <div className="p-4 md:p-5 rounded-2xl bg-gradient-to-br from-amber-500/5 to-[#1c1c1e] border border-amber-500/10 shadow-lg relative overflow-hidden">
+                    <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/5 to-[#1c1c1e] border border-amber-500/10 shadow-lg relative overflow-hidden">
                         <div className="flex items-center justify-between mb-4 relative z-10">
                             <h3 className="text-sm font-bold text-white flex items-center gap-2">
                                 <span className="w-6 h-6 rounded bg-amber-500/10 flex items-center justify-center text-amber-500">
@@ -556,7 +556,7 @@ export default function BriefingPage() {
                             </div>
 
                             <div className="space-y-2">
-                                {smart_money.performance.recent_dates?.map((d: { date: string; avg_return: number; win_rate: number }) => (
+                                {smart_money.performance.recent_dates?.map((d: { date: string; avg_return: number }) => (
                                     <div key={d.date} className="flex justify-between items-center text-xs p-2 rounded-lg bg-white/5 border border-transparent hover:border-white/10 transition-all">
                                         <span className="text-gray-400 font-mono">{d.date}</span>
                                         <div className="flex items-center gap-1.5">

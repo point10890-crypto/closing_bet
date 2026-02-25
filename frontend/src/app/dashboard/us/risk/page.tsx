@@ -168,15 +168,15 @@ export default function RiskDashboard() {
                             {drawdowns.map((d) => (
                                 <tr key={d.ticker} className="border-b border-white/5 hover:bg-white/5">
                                     <td className="py-2 px-3 font-bold text-white">{d.ticker}</td>
-                                    <td className="py-2 px-3 text-right text-gray-300">${(d.current_price ?? 0).toFixed(2)}</td>
-                                    <td className="py-2 px-3 text-right text-gray-500">${(d.peak_price ?? 0).toFixed(2)}</td>
-                                    <td className={`py-2 px-3 text-right font-bold ${getDDColor(d.current_dd ?? 0)}`}>
-                                        {(d.current_dd ?? 0).toFixed(2)}%
+                                    <td className="py-2 px-3 text-right text-gray-300">${d.current_price.toFixed(2)}</td>
+                                    <td className="py-2 px-3 text-right text-gray-500">${d.peak_price.toFixed(2)}</td>
+                                    <td className={`py-2 px-3 text-right font-bold ${getDDColor(d.current_dd)}`}>
+                                        {d.current_dd.toFixed(2)}%
                                     </td>
-                                    <td className={`py-2 px-3 text-right font-bold ${getDDColor(d.max_dd ?? 0)}`}>
-                                        {(d.max_dd ?? 0).toFixed(2)}%
+                                    <td className={`py-2 px-3 text-right font-bold ${getDDColor(d.max_dd)}`}>
+                                        {d.max_dd.toFixed(2)}%
                                     </td>
-                                    <td className="py-2 px-3 text-right text-gray-400">{d.from_peak_days ?? 0}d</td>
+                                    <td className="py-2 px-3 text-right text-gray-400">{d.from_peak_days}d</td>
                                     <td className="py-2 px-3 text-right">
                                         <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                                             <div
@@ -230,7 +230,7 @@ export default function RiskDashboard() {
                                     <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
                                         <div className="h-full bg-teal-500 rounded-full" style={{ width: `${d.weight_pct}%` }} />
                                     </div>
-                                    <span className="text-xs text-gray-500 w-16 text-right">{(d.weight_pct ?? 0).toFixed(1)}%</span>
+                                    <span className="text-xs text-gray-500 w-16 text-right">{d.weight_pct.toFixed(1)}%</span>
                                     <span className="text-xs text-gray-600 w-8 text-right">{d.count}</span>
                                 </div>
                             );
@@ -265,7 +265,7 @@ export default function RiskDashboard() {
                         <i className="fas fa-flask text-emerald-500"></i>
                         Backtest Results
                         <span className="text-[10px] text-gray-600 font-normal">
-                            {backtestData.period?.start ?? '--'} ~ {backtestData.period?.end ?? '--'} ({backtestData.period?.trading_days ?? 0} days)
+                            {backtestData.period.start} ~ {backtestData.period.end} ({backtestData.period.trading_days} days)
                         </span>
                     </h3>
 
@@ -273,19 +273,19 @@ export default function RiskDashboard() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
                             <div className="text-xs text-gray-500 mb-1">Total Return</div>
-                            <div className="text-2xl font-black text-emerald-400">+{backtestData.returns?.total_return?.toFixed(1) ?? '--'}%</div>
+                            <div className="text-2xl font-black text-emerald-400">+{backtestData.returns.total_return.toFixed(1)}%</div>
                         </div>
                         <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
                             <div className="text-xs text-gray-500 mb-1">Alpha vs SPY</div>
-                            <div className="text-2xl font-black text-blue-400">+{backtestData.benchmarks?.SPY?.alpha?.toFixed(1) ?? '--'}%</div>
+                            <div className="text-2xl font-black text-blue-400">+{backtestData.benchmarks.SPY?.alpha.toFixed(1)}%</div>
                         </div>
                         <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10">
                             <div className="text-xs text-gray-500 mb-1">Sharpe Ratio</div>
-                            <div className="text-2xl font-black text-purple-400">{backtestData.returns?.sharpe_ratio?.toFixed(1) ?? '--'}</div>
+                            <div className="text-2xl font-black text-purple-400">{backtestData.returns.sharpe_ratio.toFixed(1)}</div>
                         </div>
                         <div className="p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/10">
                             <div className="text-xs text-gray-500 mb-1">Win Rate</div>
-                            <div className="text-2xl font-black text-yellow-400">{backtestData.returns?.win_rate?.toFixed(1) ?? '--'}%</div>
+                            <div className="text-2xl font-black text-yellow-400">{backtestData.returns.win_rate.toFixed(1)}%</div>
                         </div>
                     </div>
 
@@ -293,30 +293,30 @@ export default function RiskDashboard() {
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                         <div className="p-3 rounded-lg bg-white/5">
                             <div className="text-[10px] text-gray-500">Annualized</div>
-                            <div className="text-sm font-bold text-emerald-400">+{backtestData.returns?.annualized_return?.toFixed(1) ?? '--'}%</div>
+                            <div className="text-sm font-bold text-emerald-400">+{backtestData.returns.annualized_return.toFixed(1)}%</div>
                         </div>
                         <div className="p-3 rounded-lg bg-white/5">
                             <div className="text-[10px] text-gray-500">Volatility</div>
-                            <div className="text-sm font-bold text-gray-300">{backtestData.returns?.volatility?.toFixed(1) ?? '--'}%</div>
+                            <div className="text-sm font-bold text-gray-300">{backtestData.returns.volatility.toFixed(1)}%</div>
                         </div>
                         <div className="p-3 rounded-lg bg-white/5">
                             <div className="text-[10px] text-gray-500">Max Drawdown</div>
-                            <div className="text-sm font-bold text-red-400">{backtestData.returns?.max_drawdown?.toFixed(2) ?? '--'}%</div>
+                            <div className="text-sm font-bold text-red-400">{backtestData.returns.max_drawdown.toFixed(2)}%</div>
                         </div>
                         <div className="p-3 rounded-lg bg-white/5">
                             <div className="text-[10px] text-gray-500">Best Day</div>
-                            <div className="text-sm font-bold text-green-400">+{backtestData.returns?.best_day?.toFixed(2) ?? '--'}%</div>
+                            <div className="text-sm font-bold text-green-400">+{backtestData.returns.best_day.toFixed(2)}%</div>
                         </div>
                         <div className="p-3 rounded-lg bg-white/5">
                             <div className="text-[10px] text-gray-500">Worst Day</div>
-                            <div className="text-sm font-bold text-red-400">{backtestData.returns?.worst_day?.toFixed(2) ?? '--'}%</div>
+                            <div className="text-sm font-bold text-red-400">{backtestData.returns.worst_day.toFixed(2)}%</div>
                         </div>
                     </div>
 
                     {/* Portfolio */}
                     <div className="mt-4 flex flex-wrap gap-2">
                         <span className="text-xs text-gray-500">Portfolio:</span>
-                        {(backtestData.portfolio?.stocks ?? []).map(ticker => (
+                        {backtestData.portfolio.stocks.map(ticker => (
                             <span key={ticker} className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs text-gray-400 font-mono">
                                 {ticker}
                             </span>
