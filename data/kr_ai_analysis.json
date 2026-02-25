@@ -1,364 +1,288 @@
 {
-  "market_indices": {
-    "kospi": {
-      "value": 5676.42,
-      "change_pct": 3.08
-    },
-    "kosdaq": {
-      "value": 1163.45,
-      "change_pct": 5.19
-    }
-  },
+  "market_indices": {},
   "signals": [
     {
-      "ticker": "028050",
-      "name": "",
-      "score": 88.25600000000004,
-      "contraction_ratio": 0.57,
-      "foreign_5d": 216318,
-      "inst_5d": 348869,
-      "entry_price": 33900.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 35000,
-      "return_pct": 3.24,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 78,
-        "reason": "VCP Score 88.26과 수축비율 0.57로 기술적 돌파/추세 지속 신호가 강하고, 외국인·기관 5일 순매수도 동반되어(수급 보조) 뉴스 공백에도 매수 우위로 판단됩니다.",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 88.25600000000004, 외국인 순매수 216,318주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "059090",
+      "name": "미코",
+      "score": 88.5,
+      "contraction_ratio": 0.491,
+      "foreign_5d": 110748,
+      "inst_5d": 44724,
+      "entry_price": 17330.0,
+      "current_price": 17330.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "028670",
-      "name": "",
-      "score": 88.25600000000004,
-      "contraction_ratio": 0.684,
-      "foreign_5d": 534259,
-      "inst_5d": 1305463,
-      "entry_price": 5080.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 5520,
-      "return_pct": 8.66,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 67,
-        "reason": "VCP 점수(88)와 수급(외국인·기관 순매수) 모두 양호해 추세는 긍정적이나, 검증된 신규 호재 뉴스가 없어 +8.7% 구간에서는 추가 매수보다 보유 관망이 유리합니다.",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 88.25600000000004, 외국인 순매수 534,259주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "205100",
+      "name": "엑셈",
+      "score": 88.5,
+      "contraction_ratio": 0.746,
+      "foreign_5d": 614433,
+      "inst_5d": 63202,
+      "entry_price": 2100.0,
+      "current_price": 2100.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "290650",
-      "name": "",
-      "score": 88.25600000000004,
-      "contraction_ratio": 0.381,
-      "foreign_5d": 332564,
-      "inst_5d": 12767,
-      "entry_price": 95900.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 118700,
-      "return_pct": 23.77,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 72,
-        "reason": "VCP 점수(88)와 수급(외국인 순매수)로 기술적 추세는 양호하나, 뉴스 모멘텀이 부재하고 이미 +23.8% 급등해 추가 매수보단 추세 유지 확인하며 분할익절/관망이 유리",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 88.25600000000004, 외국인 순매수 332,564주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "036540",
+      "name": "SFA반도체",
+      "score": 88.5,
+      "contraction_ratio": 0.51,
+      "foreign_5d": 1431814,
+      "inst_5d": 468664,
+      "entry_price": 7490.0,
+      "current_price": 7490.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "048410",
-      "name": "",
-      "score": 88.25600000000004,
-      "contraction_ratio": 0.534,
-      "foreign_5d": 314947,
-      "inst_5d": 85186,
-      "entry_price": 12030.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 13750,
-      "return_pct": 14.3,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 72,
-        "reason": "VCP Score 88.3 및 수축비율 0.534로 기술적 흐름은 우수하고 외국인·기관 순매수도 긍정적이나, 검증된 최신 뉴스 모멘텀이 부재해 추가 상승 확신이 제한되어 수익(+14.3%) 일부를 지키며 관망이 유리",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 88.25600000000004, 외국인 순매수 314,947주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "036620",
+      "name": "감성코퍼레이션",
+      "score": 88.5,
+      "contraction_ratio": 0.758,
+      "foreign_5d": 98762,
+      "inst_5d": -80817,
+      "entry_price": 6960.0,
+      "current_price": 6960.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "041190",
-      "name": "",
-      "score": 86.8,
-      "contraction_ratio": 0.692,
-      "foreign_5d": 438799,
-      "inst_5d": -51105,
-      "entry_price": 8320.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 8330,
-      "return_pct": 0.12,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 72,
-        "reason": "VCP Score 86.8로 기술적 패턴이 우수하고 수축비율도 양호하며 외국인 순매수 유입이 확인되는 반면, 악재성 뉴스가 없어 진입가 부근에서 매수 관점 유지",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 86.8, 외국인 순매수 438,799주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "086520",
+      "name": "에코프로",
+      "score": 88.5,
+      "contraction_ratio": 0.402,
+      "foreign_5d": 320819,
+      "inst_5d": 451201,
+      "entry_price": 172200.0,
+      "current_price": 172200.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "032350",
-      "name": "",
-      "score": 86.0,
-      "contraction_ratio": 0.798,
-      "foreign_5d": 399306,
-      "inst_5d": 95403,
-      "entry_price": 24800.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 24750,
-      "return_pct": -0.2,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 72,
-        "reason": "VCP Score 86과 수축비율 0.798로 기술적 패턴이 우수하고, 외국인·기관 5일 순매수로 수급도 뒷받침되며(뉴스 모멘텀 부재는 중립), 진입가 대비 -0.2%로 리스크가 제한적이라 매수 관점 유지",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 86.0, 외국인 순매수 399,306주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "403870",
+      "name": "HPSP",
+      "score": 87.8,
+      "contraction_ratio": 0.395,
+      "foreign_5d": 878660,
+      "inst_5d": -795825,
+      "entry_price": 46250.0,
+      "current_price": 46250.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "006730",
-      "name": "",
-      "score": 86.0,
-      "contraction_ratio": 0.675,
-      "foreign_5d": 419427,
-      "inst_5d": -84975,
-      "entry_price": 17270.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 17230,
-      "return_pct": -0.23,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 62,
-        "reason": "VCP Score 86과 낮은 수축비율로 기술적 흐름은 양호하나, 최근 뉴스 모멘텀이 부재하고 기관 수급이 순매도라 확신 있는 매수보다는 진입가 부근에서 관망이 합리적입니다.",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 86.0, 외국인 순매수 419,427주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "222080",
+      "name": "씨아이에스",
+      "score": 83.4,
+      "contraction_ratio": 0.548,
+      "foreign_5d": 294722,
+      "inst_5d": 110934,
+      "entry_price": 13530.0,
+      "current_price": 13530.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "039200",
-      "name": "",
-      "score": 85.7,
-      "contraction_ratio": 0.437,
-      "foreign_5d": 70347,
-      "inst_5d": -7160,
-      "entry_price": 56800.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 56700,
-      "return_pct": -0.18,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 62,
-        "reason": "VCP Score 85.7과 낮은 수축비율(0.437)로 기술적 흐름은 양호하나, 최근 뉴스 모멘텀이 없고 기관 순매도가 이어져 확신 매수보단 56,800원 부근 지지 확인 후 대응이 유리합니다.",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 85.7, 외국인 순매수 70,347주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "032500",
+      "name": "케이엠더블유",
+      "score": 80.9,
+      "contraction_ratio": 0.67,
+      "foreign_5d": 73247,
+      "inst_5d": 38028,
+      "entry_price": 20700.0,
+      "current_price": 20700.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
     },
     {
-      "ticker": "058820",
-      "name": "",
-      "score": 84.8,
-      "contraction_ratio": 0.373,
-      "foreign_5d": 625911,
-      "inst_5d": 40859,
-      "entry_price": 2060.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 2120,
-      "return_pct": 2.91,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 72,
-        "reason": "VCP Score 84.8과 낮은 수축비율(0.373)로 기술적 돌파/추세 지속 가능성이 높고, 외국인·기관 5일 순매수로 수급도 우호적이며(뉴스 공백으로 모멘텀은 중립) 현재 +2.9% 구간은 추세 추종 관점의 매수 유지가 유리",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 84.8, 외국인 순매수 625,911주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "042700",
+      "name": "한미반도체",
+      "score": 80.1,
+      "contraction_ratio": 0.797,
+      "foreign_5d": 332673,
+      "inst_5d": -238615,
+      "entry_price": 201000.0,
+      "current_price": 201000.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
     },
     {
-      "ticker": "083650",
-      "name": "",
-      "score": 84.3,
-      "contraction_ratio": 0.453,
-      "foreign_5d": 51088,
-      "inst_5d": 38090,
-      "entry_price": 75300.0,
-      "fundamentals": {
-        "per": "N/A",
-        "pbr": "N/A",
-        "roe": "N/A",
-        "eps": "N/A",
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "marcap": "N/A"
-      },
-      "current_price": 83100,
-      "return_pct": 10.36,
-      "news": [],
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 72,
-        "reason": "VCP Score 84.3과 수축비율 0.453로 기술적 흐름은 우수하고 외국인/기관 순매수도 긍정적이나, 최근 검증된 뉴스 모멘텀이 없어 +10% 수익 구간에서는 추격매수보다 관망이 유리합니다.",
-        "source": "openai"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 60,
-        "reason": "VCP Score 84.3, 외국인 순매수 51,088주 - 기술적 관점 긍정",
-        "source": "fallback"
-      },
-      "analysis_source": "openai"
+      "ticker": "013310",
+      "name": "아진산업",
+      "score": 78.1,
+      "contraction_ratio": 0.432,
+      "foreign_5d": 213269,
+      "inst_5d": -139,
+      "entry_price": 3560.0,
+      "current_price": 3560.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "123410",
+      "name": "코리아에프티",
+      "score": 77.5,
+      "contraction_ratio": 0.78,
+      "foreign_5d": 522027,
+      "inst_5d": 166276,
+      "entry_price": 8690.0,
+      "current_price": 8690.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "068760",
+      "name": "셀트리온제약",
+      "score": 77.5,
+      "contraction_ratio": 0.575,
+      "foreign_5d": 88576,
+      "inst_5d": 94101,
+      "entry_price": 75800.0,
+      "current_price": 75800.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "003670",
+      "name": "포스코퓨처엠",
+      "score": 77.5,
+      "contraction_ratio": 0.524,
+      "foreign_5d": 120993,
+      "inst_5d": -46486,
+      "entry_price": 235000.0,
+      "current_price": 235000.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "336260",
+      "name": "두산퓨얼셀",
+      "score": 77.3,
+      "contraction_ratio": 0.735,
+      "foreign_5d": 263900,
+      "inst_5d": 273255,
+      "entry_price": 36600.0,
+      "current_price": 36600.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "047400",
+      "name": "유니온머티리얼",
+      "score": 77.0,
+      "contraction_ratio": 0.52,
+      "foreign_5d": 233300,
+      "inst_5d": -1042,
+      "entry_price": 1553.0,
+      "current_price": 1553.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "008350",
+      "name": "남선알미늄",
+      "score": 76.4,
+      "contraction_ratio": 0.723,
+      "foreign_5d": 320705,
+      "inst_5d": -15623,
+      "entry_price": 1290.0,
+      "current_price": 1290.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "018470",
+      "name": "조일알미늄",
+      "score": 76.3,
+      "contraction_ratio": 0.491,
+      "foreign_5d": 356318,
+      "inst_5d": -29095,
+      "entry_price": 1291.0,
+      "current_price": 1291.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "006220",
+      "name": "제주은행",
+      "score": 76.2,
+      "contraction_ratio": 0.421,
+      "foreign_5d": 103292,
+      "inst_5d": -25516,
+      "entry_price": 15780.0,
+      "current_price": 15780.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "010170",
+      "name": "대한광통신",
+      "score": 76.2,
+      "contraction_ratio": 0.702,
+      "foreign_5d": 2101590,
+      "inst_5d": 283580,
+      "entry_price": 3585.0,
+      "current_price": 3585.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "372910",
+      "name": "한컴라이프케어",
+      "score": 76.0,
+      "contraction_ratio": 0.4,
+      "foreign_5d": 105586,
+      "inst_5d": 2527,
+      "entry_price": 2855.0,
+      "current_price": 2855.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSPI",
+      "status": "OPEN"
     }
   ],
-  "api_status": {
-    "gemini": "active",
-    "openai": "active",
-    "errors": {
-      "gemini": 10,
-      "openai": 0
-    }
-  },
-  "generated_at": "2026-02-19T15:20:03.114745",
-  "signal_date": "2026-02-19"
+  "api_status": "ok",
+  "generated_at": "2026-02-24T18:14:31.161893",
+  "signal_date": "2026-02-24"
 }

@@ -51,14 +51,14 @@ def create_app(config=None):
     from app.routes import register_blueprints
     register_blueprints(app)
 
-    # ── 실시간 API 캐시 방지 (모바일/ngrok 동시 갱신 보장) ──
+    # ── API Cache-Control 정책 ──
     @app.after_request
-    def add_no_cache_headers(response):
-        """API 응답에 Cache-Control 헤더 추가 — 모바일·ngrok 캐시 방지"""
+    def add_cache_headers(response):
+        """JSON API: 기본 30초 브라우저 캐시 허용, 실시간 엔드포인트는 개별 no-cache 설정"""
         if response.content_type and 'application/json' in response.content_type:
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-            response.headers['Pragma'] = 'no-cache'
-            response.headers['Expires'] = '0'
+            # 엔드포인트별 no-cache는 개별 라우트에서 설정 (portfolio, market-gate 등)
+            if not response.headers.get('Cache-Control'):
+                response.headers['Cache-Control'] = 'public, max-age=30'
         return response
 
     # Health check endpoint

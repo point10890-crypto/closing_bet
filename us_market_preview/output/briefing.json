@@ -1,15 +1,13 @@
 {
-  "timestamp": "2026-02-19T09:00:53.410155",
-  "content": "# 미국 주식 시장 분석\n\n제공하신 SPY 데이터는 2월 17일 장 마감 시점의 정보로 보입니다. 당시 미국 증시는 **기술주와 금융주의 반등에 힘입어 소폭 상승**으로 마감했습니다.[2][3]\n\n## 주요 시장 동향\n\n**장중 변동성 이후 반등**: S&P 500은 장 초반 최대 1.5%까지 하락했으나 손실폭을 만회하며 0.1% 상승한 6,843.22로 마감했습니다.[2][3] 다우지수는 0.07%, 나스닥은 0.14% 상승했습니다.[2]\n\n**기술주 주도 회복**: 엔비디아와 애플 같은 대형 기술주들의 급등이 마이크로소프트와 오라클의 하락세를 상쇄했으며, 기술주 전체가 0.5% 상승으로 마감했습니다.[3]\n\n**금융주 지지**: 골드만삭스와 JP모건 체이스 등 주요 은행들의 성장이 다우지수의 초반 0.7% 하락세를 반전시키는 데 기여했습니다.[3]\n\n## 시장 배경\n\n지난주(2월 2주차)에는 **순환매 현상**이 두드러졌는데, 투자자들이 기술주 비중을 줄이고 경기 민감주와 가치주로 눈을 돌렸습니다.[1] ISM 제조업 구매관리자지수(PMI)가 57.1로 반등하며 2022년 2월 이후 최고치를 기록했고, 이는 경제가 순환적 확장 국면에 진입하고 있음을 시사합니다.[1]\n\n## 향후 주목 포인트\n\n투자자들은 연준이 선호하는 인플레이션 지표인 **개인소비지출(PCE) 보고서**에 주목하고 있으며, 이는 해당주 후반에 발표될 예정입니다.[3] 지난주 예상보다 낮은 인플레이션 수치가 발표되면서 연준의 2026년 6월 금리 인하 확률이 63%까지 높아졌습니다.[3]\n\n**VIX 19.62**는 시장 변동성이 중간 수준으로 안정화되고 있음을 나타냅니다.",
+  "timestamp": "2026-02-25T09:37:46.133388",
+  "content": "# 미국 주식 시장 분석\n\n**S&P 500이 0.77% 상승하며 반등했으며, VIX 19.55는 시장 변동성이 완화되는 추세를 보여줍니다.**\n\n## 시장 반등의 배경\n\n어제(2월 23일) 관세 불확실성과 AI 우려로 급락했던 미국 증시가 회복세를 보였습니다.[1] 다우존스지수는 0.76% 상승한 49,174.50으로 마감했으며, S&P 500도 0.77% 올랐습니다.[2] 이는 **AI가 대체가 아닌 보완 기술**이라는 인식이 확산되면서 AI 공포심이 완화된 결과입니다.[5]\n\n## 긍정 신호\n\n**기술주의 강한 수요**가 지속되고 있습니다. AMD는 메타와의 전략적 파트너십을 대폭 확대한다고 발표했으며, AI 수요가 \"미쳤다(INSANE)\"는 표현을 쓸 정도로 강하다고 언급했습니다.[7] 이는 AI 산업의 기본적 수요가 여전히 견고함을 시사합니다.\n\n## 주의할 점\n\n**거시적 불확실성은 여전합니다.** 트럼프 행정부의 관세 정책이 2월 24일부터 시행되면서 시장 변동성이 확대될 전망입니다.[1] 금과 은 같은 안전자산이 상승하고 있는 것은 투자자들이 여전히 방어적 포지션을 유지하고 있음을 보여줍니다.[6]\n\n## 투자 전략\n\n단기적으로는 현금과 금 비중을 유지하며 관망하되, 중장기적으로는 정책 불확실성 해소 시점에 기술·제조 섹터 저점 매수를 고려할 필요가 있습니다.[1]",
   "citations": [
-    "https://www.funetf.co.kr/investInfo/investLibrary/premium/27560",
-    "https://contents.premium.naver.com/onedollardive/corporation/contents/260218163653467if",
-    "https://www.vietnam.vn/ko/chung-khoan-my-tang-nhe-nho-su-phuc-hoi-cua-co-phieu-cong-nghe-va-tai-chinh",
-    "https://www.youtube.com/watch?v=UF-5LeBpejE",
-    "https://www.chosun.com/economy/startup_story/2026/02/05/UZB5ECC6U5GQJP46DF6RWBJGDU/",
-    "https://www.youtube.com/watch?v=9Q4SaP_7IY4",
-    "https://www.choicestock.co.kr/stock/research_view/7238?bu=%2Fstock%2Fnote",
-    "https://kr.investing.com/news/stock-market-news/article-1830269",
-    "https://contents.premium.naver.com/assetx2/assetsx2/contents/260218233512191xv"
+    "https://contents.premium.naver.com/onedollardive/corporation/contents/260224090124201pz",
+    "https://kr.investing.com/news/stock-market-news/article-1838300",
+    "https://www.tikr.com/ko/blog/stepstone-stock-down-32-ytd-in-2026-heres-whats-driving-the-move",
+    "https://www.mk.co.kr/news/stock/11971072",
+    "https://www.youtube.com/watch?v=NjSFEPnR2t4",
+    "https://www.chosun.com/economy/money/2026/02/25/KVDLMBU2G5BJJJFTGBWYRZ6QWQ/",
+    "https://contents.premium.naver.com/miju10/miju10m"
   ]
 }

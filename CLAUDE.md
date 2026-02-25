@@ -1,5 +1,5 @@
 # KR Market Package - Claude Code 자율 운영 가이드
-# v2.4.0 (Final Clean Structure + All Dead Code Archived)
+# v2.5.0 (US Dashboard Endpoints + Structural Optimization + TTL Cache)
 
 ## 1. 환경 설정 (절대 고정 - 변경 금지)
 
@@ -33,9 +33,22 @@ netstat -ano | grep 5001 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F 
 netstat -ano | grep 4000 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F //PID {} 2>/dev/null
 ```
 
+### 프론트엔드 환경변수 (`frontend/.env.local`)
+```
+NEXTAUTH_URL=http://localhost:4000
+NEXTAUTH_SECRET=marketflow-nextauth-secret-change-in-production
+AUTH_TRUST_HOST=true
+BACKEND_URL=http://localhost:5001
+NEXT_PUBLIC_API_URL=http://localhost:4000
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
+```
+
+> **중요**: `NEXT_PUBLIC_API_URL`이 설정되면 클라이언트가 `/api/*` → Next.js rewrite → Flask로 요청.
+> 비어있으면 `/api/data/*` 정적 스냅샷 모드 (Vercel 배포용).
+
 ---
 
-## 2. 프로젝트 아키텍처 (최적화 완료)
+## 2. 프로젝트 아키텍처 (v2.5.0 최적화 완료)
 
 ### 디렉토리 구조
 ```
@@ -48,6 +61,7 @@ netstat -ano | grep 4000 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F 
 ├── all_institutional_trend_data.py  # 기관 수급 데이터 수집 (scheduler 호출)
 ├── signal_tracker.py         # VCP 시그널 추적 (scheduler 호출)
 ├── update_us.py              # US 마켓 데이터 파이프라인 (scheduler 호출)
+├── sync-vercel.sh            # Vercel 배포 데이터 동기화 (FLASK_PORT=5001)
 ├── .env                      # API 키 관리
 │
 ├── engine/                   # === 종가베팅 V2 핵심 엔진 ===
@@ -61,10 +75,10 @@ netstat -ano | grep 4000 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F 
 │   └── generator.py          # 시그널 생성 메인 엔진 (run_screener)
 │
 ├── app/                      # Flask Blueprint 앱
-│   ├── __init__.py           # create_app() 팩토리
+│   ├── __init__.py           # create_app() 팩토리 + Cache-Control 정책
 │   ├── routes/
 │   │   ├── kr_market.py      # KR API (/api/kr/*) — DATA_DIR 고정경로
-│   │   ├── us_market.py      # US API (/api/us/*)
+│   │   ├── us_market.py      # US API (/api/us/*) — TTL 캐시 + 엔드포인트 최적화
 │   │   ├── stock_analyzer.py # ProPicks API (/api/stock-analyzer/*)
 │   │   ├── main.py           # 메인 라우트
 │   │   └── auth.py           # 인증 API
@@ -72,16 +86,34 @@ netstat -ano | grep 4000 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F 
 │       ├── cache.py          # 파일 캐시 유틸
 │       └── scheduler.py      # 앱 내 가격갱신 스케줄러 (V2 연동, 고정경로)
 │
+├── us_market_preview/output/ # US 마켓 데이터 (활성 데이터 소스)
+│   ├── briefing.json         # AI Macro Briefing
+│   ├── market_data.json      # VIX, Fear&Greed 등
+│   ├── prediction.json       # AI 예측
+│   ├── sector_heatmap.json   # 섹터 히트맵 데이터
+│   ├── top_picks.json        # Smart Money Top Picks
+│   ├── ai_summaries.json     # 종목별 AI 요약
+│   ├── earnings_impact.json  # 어닝 임팩트 (sector_profiles)
+│   ├── earnings_analysis.json # 어닝 분석 (upcoming_earnings 상세)
+│   └── sector_rotation.json  # 섹터 로테이션 데이터
+│
 ├── app.py                    # Stock Analyzer 단독 웹앱 (포트 5000)
 ├── stock_info.py             # 일괄 스크래핑 스크립트
 ├── stock_data.xlsx           # 종목 목록 2,500건
 ├── templates/index.html      # 단독 웹 UI
 │
 ├── frontend/                 # Next.js 14 대시보드
+│   ├── .env.local            # 환경변수 (포트 4000/5001)
 │   └── src/
+│       ├── lib/api.ts        # API 유틸 (USE_DATA_PREFIX 로직)
 │       ├── app/dashboard/
-│       │   ├── kr/closing-bet/page.tsx      # 종가베팅 대시보드
-│       │   └── stock-analyzer/page.tsx      # ProPicks 분석 전용 페이지
+│       │   ├── us/
+│       │   │   ├── page.tsx           # US 대시보드 메인
+│       │   │   ├── briefing/page.tsx  # AI Macro Briefing
+│       │   │   ├── heatmap/page.tsx   # Sector Heatmap
+│       │   │   └── earnings/page.tsx  # Earnings Impact
+│       │   ├── kr/closing-bet/page.tsx    # 종가베팅 대시보드
+│       │   └── stock-analyzer/page.tsx    # ProPicks 분석 전용 페이지
 │       └── components/layout/
 │           ├── Header.tsx         # ⌘K 단축키 + CommandPalette
 │           ├── Sidebar.tsx        # 사이드바 (ProPicks 포함)
@@ -105,10 +137,20 @@ netstat -ano | grep 4000 | awk '{print $5}' | sort -u | xargs -I{} taskkill //F 
     └── prompts.py
 ```
 
+### 삭제된 파일 (v2.5.0 구조 최적화)
+| 파일/디렉토리 | 이유 |
+|-------------|------|
+| `login_output.txt` | 빈 파일, 참조 없음 |
+| `test_analyze.py` | 포트 5003 호출하는 구버전 테스트 |
+| `run_flask.py` | flask_app.py로 대체됨 |
+| `start-frontend.sh` | 포트 5000 사용 (현재 4000) |
+| `kr_market_package/` | 123MB 복사본 (자체 .venv 포함) |
+
 ### 경로 고정 원칙 (모든 파일에 적용 완료)
 | 파일 | 경로 방식 | 기준점 |
 |------|----------|--------|
 | `kr_market.py` | `DATA_DIR = _BASE_DIR + '/data'` | `__file__` 기반 절대경로 |
+| `us_market.py` | `PREVIEW_OUTPUT_DIR = _BASE_DIR + '/us_market_preview/output'` | `__file__` 기반 절대경로 |
 | `app/utils/scheduler.py` | `BASE_DIR` / `DATA_DIR` | `__file__` 기반 절대경로 |
 | `scheduler.py` | `Config.BASE_DIR` / `Config.DATA_DIR` | `__file__` 기반 + env 오버라이드 |
 | `engine/generator.py` | `os.path.dirname(os.path.abspath(__file__))` | 엔진 패키지 기준 |
@@ -167,6 +209,7 @@ run_screener(capital=50_000_000)
 
 ## 4. 데이터 흐름 (End-to-End)
 
+### KR 마켓 데이터 흐름
 ```
 [Engine] run_screener()
     ↓ 저장
@@ -178,6 +221,28 @@ run_screener(capital=50_000_000)
     ↓ 렌더링
 [Dashboard] http://localhost:4000/dashboard/kr/closing-bet
 ```
+
+### US 마켓 데이터 흐름
+```
+[Scheduler] update_us.py → us_market_preview/output/*.json
+    ↓ 읽기 (30s TTL 캐시)
+[Flask] /api/us/* (us_market.py → _load_preview_json())
+    ↓ 데이터 변환 (프론트엔드 인터페이스 매핑)
+[Next.js] /api/* → rewrite → Flask (NEXT_PUBLIC_API_URL 설정 시)
+    ↓ 렌더링
+[Dashboard] http://localhost:4000/dashboard/us/*
+```
+
+### US 엔드포인트 ↔ 프론트엔드 매핑
+| Flask 엔드포인트 | JSON 소스 | 프론트엔드 페이지 | 데이터 변환 |
+|----------------|----------|-----------------|-----------|
+| `/api/us/market-briefing` | briefing.json + market_data.json + top_picks.json + sector_rotation.json | `/dashboard/us/briefing` | ai_analysis 구조화, VIX/Fear&Greed 추출, smart_money.picks 매핑 |
+| `/api/us/heatmap-data` | sector_heatmap.json | `/dashboard/us/heatmap` | sector_groups → series: SectorSeries[] 변환 |
+| `/api/us/earnings-impact` | earnings_impact.json + earnings_analysis.json | `/dashboard/us/earnings` | sector_profiles 유지, upcoming_earnings 병합/보강 |
+| `/api/us/preview/prediction` | prediction.json | `/dashboard/us` | 직접 전달 |
+| `/api/us/preview/sector-heatmap` | sector_heatmap.json | `/dashboard/us` | 직접 전달 |
+| `/api/us/ai-summary/<ticker>` | ai_summaries.json (PREVIEW_OUTPUT_DIR 우선 → US_DATA_DIR 폴백) | `/dashboard/us` | 직접 전달 |
+| `/api/us/decision-signal` | 7개 파일 병합 (localhost:5001) | `/dashboard/us` | 종합 신호 생성 |
 
 ### Signal.to_dict() 필드 (백엔드 → 프론트엔드 동기화 완료)
 ```python
@@ -202,7 +267,7 @@ run_screener(capital=50_000_000)
 
 | 키 | 용도 | 필수 |
 |----|------|------|
-| `GEMINI_API_KEY` | Gemini 2.5 Flash 분석 + 스크리닝 | O (핵심) |
+| `GEMINI_API_KEY` | Gemini 2.5 Flash 분석 + 스크리닝 + AI Macro | O (핵심) |
 | `OPENAI_API_KEY` | GPT-4o 스크리닝 | O (Multi-AI) |
 | `PERPLEXITY_API_KEY` | 실시간 뉴스 검색 | 선택 (만료 가능) |
 | `ANTHROPIC_API_KEY` | Claude 분석 (현재 비활성) | 선택 |
@@ -216,9 +281,22 @@ run_screener(capital=50_000_000)
 
 ### 핵심 파일
 - `frontend/src/app/dashboard/kr/closing-bet/page.tsx` — 종가베팅 대시보드 메인
+- `frontend/src/app/dashboard/us/briefing/page.tsx` — AI Macro Briefing
+- `frontend/src/app/dashboard/us/heatmap/page.tsx` — Sector Heatmap
+- `frontend/src/app/dashboard/us/earnings/page.tsx` — Earnings Impact
+- `frontend/src/lib/api.ts` — API 유틸리티 (USE_DATA_PREFIX 로직)
+
+### API 라우팅 로직 (api.ts)
+```typescript
+// NEXT_PUBLIC_API_URL 설정 시 → 직접 /api/* 호출 (Flask 프록시)
+// NEXT_PUBLIC_API_URL 비어있으면 → /api/data/* 정적 스냅샷 (Vercel)
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const USE_DATA_PREFIX = !API_BASE;
+```
 
 ### TypeScript 인터페이스 (백엔드 완전 동기화)
 ```typescript
+// KR Market
 ScoreDetail  { news, volume, chart, candle, consolidation, supply, disclosure, llm_reason, total }
 AIPick       { stock_code, stock_name, rank, confidence, reason, risk, source?, gemini_rank?, openai_rank? }
 AIPicks      { picks[], models?, consensus_count?, consensus_method? }
@@ -231,26 +309,115 @@ Signal       { stock_code, stock_name, market, sector?, grade, score, checklist,
                foreign_5d, inst_5d, news_items?, themes? }
 ScreenerResult { date, total_candidates, filtered_count, signals[], by_grade?, by_market?,
                  processing_time_ms?, updated_at, claude_picks? }
+
+// US Market
+BriefingData { ai_analysis: {content, citations}, vix: {value, change, level, color},
+               fear_greed: {score, label, color}, smart_money: {top_picks: {picks[]}},
+               sector_rotation, market_breadth }
+EarningsImpactData { sector_profiles: {[sector]: SectorProfile}, upcoming_earnings[] }
+SectorSeries { name: string, data: HeatmapItem[] }  // heatmap-data
 ```
 
-### 버전: v2.4.0 (Stock Analyzer Dashboard Integration)
+### 버전: v2.5.0 (US Dashboard + Structural Optimization)
 
 ---
 
-## 7. 알려진 이슈 & 해결법
+## 7. US Market 엔드포인트 데이터 변환 상세
 
-| 이슈 | 원인 | 해결 |
-|------|------|------|
-| `UnicodeEncodeError: cp949` | Windows 기본 인코딩 | `PYTHONIOENCODING=utf-8` 환경변수 |
-| Perplexity 401 Unauthorized | API 키 만료 | LLM 폴백 체인이 Gemini로 자동 전환 |
-| Anthropic API 사용불가 | API 크레딧 소진 | Multi-AI Consensus (Gemini+GPT-4o) 로 대체 |
-| DART corp_code 첫 실행 느림 | ZIP 다운로드 | 7일 캐시 (`data/dart_corp_codes.json`) |
-| 프론트엔드 체크리스트 미표시 | 중첩 vs 플랫 구조 불일치 | `to_dict()` 반드시 플랫 구조 |
-| 경로 충돌 `'data/...'` | 상대경로 사용 | 모든 파일 `DATA_DIR` 절대경로 고정 완료 |
+### `/market-briefing` 데이터 변환
+Flask가 여러 JSON 파일을 병합하여 프론트엔드 `BriefingData` 인터페이스에 맞게 변환:
+```python
+# briefing.json → ai_analysis 구조화
+ai_analysis = { 'content': briefing.get('content'), 'citations': briefing.get('citations', []) }
+
+# market_data.json → vix 추출
+volatility = market_data.get('volatility', {})
+vix_data = volatility.get('^VIX', {})
+vix = { 'value': vix_data.get('current'), 'change': vix_data.get('change_pct'), 'level': ..., 'color': ... }
+
+# fear_greed → color 추가
+score = fear_greed.get('score', 50)
+fear_greed['color'] = 'green' if score >= 60 else 'red' if score <= 40 else 'yellow'
+
+# top_picks.json → smart_money.picks 매핑
+'top_picks' → 'picks' (키 이름 변경)
+'composite_score' → 'final_score', 'signal' → 'ai_recommendation'
+```
+
+### `/heatmap-data` 데이터 변환
+```python
+# sector_heatmap.json의 sector_groups dict → series 배열
+for sector_name, stocks in sector_groups.items():
+    items = [{'x': ticker, 'y': weight, 'price': price, 'change': change, 'color': ''}]
+    series.append({'name': sector_name, 'data': items})
+```
+
+### `/earnings-impact` 데이터 병합
+```python
+# earnings_impact.json: sector_profiles (2개 이상)
+# earnings_analysis.json: details[] → upcoming_earnings 보강
+# 두 파일을 병합하여 sector_profiles + enriched upcoming_earnings 반환
+```
 
 ---
 
-## 8. 스킬 명령어 (자동 실행)
+## 8. 성능 최적화 (v2.5.0)
+
+### _load_preview_json() TTL 캐시
+```python
+_preview_cache = {}  # {filename: (data, timestamp)}
+_CACHE_TTL = 30      # seconds — US 데이터는 스케줄러 4h+ 간격 갱신
+
+def _load_preview_json(filename):
+    now = time.time()
+    if filename in _preview_cache:
+        data, ts = _preview_cache[filename]
+        if now - ts < _CACHE_TTL:
+            return data          # 캐시 적중 → 디스크 I/O 스킵
+    # ... 파일 읽기 후 캐시 저장
+```
+- **효과**: 페이지 로드당 40+ 디스크 I/O → 캐시 적중 시 0 I/O
+- `/decision-signal` 단독으로 7개 파일 로드 → 30초 내 재요청 시 즉시 응답
+
+### Cache-Control 정책 (`app/__init__.py`)
+```python
+@app.after_request
+def add_cache_headers(response):
+    if 'application/json' in response.content_type:
+        if not response.headers.get('Cache-Control'):
+            response.headers['Cache-Control'] = 'public, max-age=30'  # 기본 30초
+    return response
+```
+- **정적 JSON 엔드포인트**: `max-age=30` (브라우저 캐시 30초)
+- **실시간 엔드포인트** (portfolio, market-gate): 개별 `no-cache, no-store` 설정
+
+---
+
+## 9. 알려진 이슈 & 해결법
+
+| 이슈 | 원인 | 해결 | 버전 |
+|------|------|------|------|
+| `UnicodeEncodeError: cp949` | Windows 기본 인코딩 | `PYTHONIOENCODING=utf-8` 환경변수 | v2.0 |
+| Perplexity 401 Unauthorized | API 키 만료 | LLM 폴백 체인이 Gemini로 자동 전환 | v2.0 |
+| Anthropic API 사용불가 | API 크레딧 소진 | Multi-AI Consensus (Gemini+GPT-4o) 로 대체 | v2.2 |
+| DART corp_code 첫 실행 느림 | ZIP 다운로드 | 7일 캐시 (`data/dart_corp_codes.json`) | v2.3 |
+| 프론트엔드 체크리스트 미표시 | 중첩 vs 플랫 구조 불일치 | `to_dict()` 반드시 플랫 구조 | v2.3 |
+| 경로 충돌 `'data/...'` | 상대경로 사용 | 모든 파일 `DATA_DIR` 절대경로 고정 완료 | v2.4 |
+| Briefing "AI analysis not available" | Flask가 content/citations를 top-level로 반환 | `ai_analysis: {content, citations}` 구조화 | v2.5 |
+| Briefing VIX/Fear&Greed null | market_data.volatility에서 미추출 | VIX 객체 빌드 + fear_greed.color 매핑 | v2.5 |
+| Briefing "No picks available" | top_picks 키 이름/구조 불일치 | `top_picks→picks`, `composite_score→final_score` 매핑 | v2.5 |
+| Heatmap "No data available" | sector_groups dict → series 배열 불일치 | `sector_groups→series: SectorSeries[]` 변환 | v2.5 |
+| Earnings empty upcoming_earnings | earnings_impact.json에 빈 배열 | earnings_analysis.json 병합 보강 | v2.5 |
+| `/decision-signal` 3초 타임아웃 | 존재하지 않는 포트 5002 호출 | `localhost:5001`로 수정 | v2.5 |
+| `/ai-summary/<ticker>` 항상 404 | US_DATA_DIR에서만 검색 (파일 없음) | PREVIEW_OUTPUT_DIR 우선 → US_DATA_DIR 폴백 | v2.5 |
+| 페이지 로드 지연 (40+ 디스크 I/O) | JSON 캐싱 없음 | 30초 TTL 인메모리 캐시 | v2.5 |
+| 브라우저 매번 재요청 | 모든 JSON에 no-cache 적용 | 정적→`max-age=30`, 실시간만 no-cache | v2.5 |
+| dead `/sector-heatmap` 라우트 | 11개 yfinance 호출, 프론트엔드 미사용 | 라우트 삭제 + api.ts getSectorHeatmap 제거 | v2.5 |
+| `sync-vercel.sh` 잘못된 포트 | `FLASK_PORT=5002` | `FLASK_PORT=5001`로 수정 | v2.5 |
+
+---
+
+## 10. 스킬 명령어 (자동 실행)
 
 ### 스킬 1: 종가베팅 V2 엔진 실행
 ```bash
@@ -326,7 +493,7 @@ cd "$PROJECT" && PYTHONIOENCODING=utf-8 "$PYTHON" -c "
 import json
 with open('data/jongga_v2_latest.json', 'r', encoding='utf-8') as f:
     d = json.load(f)
-print(f'Date: {d[\"date\"]}  Signals: {d.get(\"filtered_count\", len(d.get(\"signals\",[])))}'  )
+print(f'Date: {d[\"date\"]}  Signals: {d.get(\"filtered_count\", len(d.get(\"signals\",[])))}')
 print(f'By Grade: {d.get(\"by_grade\", {})}')
 for s in d['signals']:
     sc = s['score']
@@ -353,9 +520,38 @@ else:
 "
 ```
 
+### 스킬 7: US 엔드포인트 검증
+```bash
+PROJECT="/c/closing_bet"
+echo "=== US Endpoint Check ==="
+curl -s http://localhost:5001/api/us/market-briefing | python3 -c "
+import sys,json; d=json.load(sys.stdin)
+print(f'  briefing: ai_analysis={\"content\" in d.get(\"ai_analysis\",{})}')
+print(f'  vix: {d.get(\"vix\",{}).get(\"value\",\"N/A\")}')
+print(f'  fear_greed: {d.get(\"fear_greed\",{}).get(\"score\",\"N/A\")}')
+print(f'  picks: {len(d.get(\"smart_money\",{}).get(\"top_picks\",{}).get(\"picks\",[]))}')
+" 2>/dev/null || echo "  briefing: FAILED"
+
+curl -s http://localhost:5001/api/us/heatmap-data | python3 -c "
+import sys,json; d=json.load(sys.stdin)
+print(f'  heatmap: {len(d.get(\"series\",[]))} sectors')
+" 2>/dev/null || echo "  heatmap: FAILED"
+
+curl -s http://localhost:5001/api/us/earnings-impact | python3 -c "
+import sys,json; d=json.load(sys.stdin)
+print(f'  earnings: {len(d.get(\"sector_profiles\",{}))} profiles, {len(d.get(\"upcoming_earnings\",[]))} upcoming')
+" 2>/dev/null || echo "  earnings: FAILED"
+
+curl -s http://localhost:5001/api/us/decision-signal | python3 -c "
+import sys,json; d=json.load(sys.stdin)
+print(f'  decision-signal: {d.get(\"signal\",\"N/A\")} (confidence: {d.get(\"confidence\",\"N/A\")})')
+" 2>/dev/null || echo "  decision-signal: FAILED"
+echo "=== Done ==="
+```
+
 ---
 
-## 9. 개발 패턴 & 규칙
+## 11. 개발 패턴 & 규칙
 
 ### 코드 수정 시 체크리스트
 1. **engine/ 수정** → 스킬 4 (전체 검증) → 스킬 1 (엔진 실행)
@@ -363,6 +559,14 @@ else:
 3. **models.py 수정** → `to_dict()` 플랫 구조 유지 → 프론트엔드 TS 인터페이스 동기화
 4. **llm_analyzer.py 수정** → `analyze_news(dart_text)` 시그니처 동기화
 5. **.env 수정** → 스킬 2 (서버 재시작)
+6. **us_market.py 수정** → 스킬 7 (US 엔드포인트 검증) → 프론트엔드 확인
+7. **us_market_preview/output/ JSON 구조 변경** → Flask 변환 로직 동기화 필수
+
+### US 엔드포인트 수정 시 주의사항
+- **PREVIEW_OUTPUT_DIR**: `us_market_preview/output/` — 활성 데이터 소스
+- **US_DATA_DIR**: `us_market/data/` — 폴백 전용 (스테일 가능)
+- 프론트엔드 TS 인터페이스와 Flask 변환 로직 동기화 필수
+- `_load_preview_json()` 캐시 TTL 30초 — 즉시 반영 필요 시 `_preview_cache.clear()` 호출
 
 ### 비동기 패턴
 - 엔진 전체 `async/await` 기반
@@ -382,7 +586,7 @@ else:
 
 ---
 
-## 10. 스케줄러 실행 (고정 경로)
+## 12. 스케줄러 실행 (고정 경로)
 
 ### 메인 스케줄러 (scheduler.py)
 ```bash
@@ -415,7 +619,7 @@ Config.LOG_DIR      = /c/closing_bet/logs
 
 ---
 
-## 11. Stock Analyzer / ProPicks (Investing.com 스크래핑)
+## 13. Stock Analyzer / ProPicks (Investing.com 스크래핑)
 
 ### 개요
 Investing.com ProPicks 분석 결과(적극 매수/매수/중립/매도/적극 매도)를 종목별로 스크래핑하는 도구.
@@ -438,33 +642,12 @@ Investing.com ProPicks 분석 결과(적극 매수/매수/중립/매도/적극 �
 | `stock_data.xlsx` | 종목 목록 (순번, 종목명, URL) 2,500건 |
 | `templates/index.html` | 단독 웹 UI |
 
-### 대시보드 사용 흐름
-```
-1. 사이드바 → ProPicks 클릭
-   또는 ⌘K → 종목 검색 → 선택
-       ↓
-2. /dashboard/stock-analyzer?name=X&url=Y&id=Z
-       ↓ (URL 파라미터 → 자동 분석 시작)
-3. POST /api/stock-analyzer/analyze → Selenium 스크래핑
-       ↓
-4. 결과 표시 (컬러 배지) + 조회 기록 테이블 누적
-       ↓
-5. POST /api/stock-analyzer/export → Excel 다운로드
-```
-
 ### API 엔드포인트
 | Method | Path | 설명 |
 |--------|------|------|
 | GET | `/api/stock-analyzer/search?q=삼성` | 종목 검색 (최대 20건) |
 | POST | `/api/stock-analyzer/analyze` | 단건 스크래핑 (`{url, name}`) |
 | POST | `/api/stock-analyzer/export` | 조회 기록 Excel 변환 (`{records}`) |
-
-### 결과 컬러 매핑
-| ProPicks 결과 | 배지 색상 |
-|---------------|----------|
-| 적극 매수 / 매수 | 빨강 (red) |
-| 중립 | 노랑 (yellow) |
-| 매도 / 적극 매도 | 파랑 (blue) |
 
 ### 독립 실행
 ```bash
@@ -475,12 +658,34 @@ cd "$PROJECT" && "$PYTHON" app.py
 cd "$PROJECT" && "$PYTHON" -u stock_info.py
 ```
 
-### 핵심 로직
-- **XPath**: `//*[@id='pro-score-mobile']/div/div[2]/div[3]/div/div/div[1]/div`
-- **스크래핑 방식**: Selenium headless Chrome (모바일 UA), 단건 요청마다 새 드라이버 생성→종료
-- **Cloudflare 주의**: 연속 대량 요청 시 차단됨. 단건 호출은 정상 동작
+---
 
-### 의존성
-```
-pandas, selenium, webdriver-manager, flask, openpyxl
-```
+## 14. 변경 이력
+
+### v2.5.0 (2025-02-25) — US Dashboard Endpoints + Structural Optimization
+**엔드포인트 구현/수정:**
+- `/market-briefing`: ai_analysis 구조화, VIX/Fear&Greed 추출, smart_money.picks 매핑
+- `/heatmap-data`: sector_groups → series: SectorSeries[] 변환
+- `/earnings-impact`: earnings_analysis.json 병합으로 upcoming_earnings 보강
+- `/ai-summary/<ticker>`: PREVIEW_OUTPUT_DIR 우선 → US_DATA_DIR 폴백
+- `/decision-signal`: 포트 5002→5001 수정
+
+**구조 최적화:**
+- 불필요 파일 삭제: login_output.txt, test_analyze.py, run_flask.py, start-frontend.sh
+- kr_market_package/ 삭제 (123MB 중복)
+- dead `/sector-heatmap` 라우트 삭제 (11개 yfinance 호출, 프론트엔드 미사용)
+- api.ts에서 getSectorHeatmap 제거
+
+**성능 개선:**
+- `_load_preview_json()` 30초 TTL 인메모리 캐시 추가
+- Cache-Control 정책: 정적 JSON → `max-age=30`, 실시간만 `no-cache`
+- sync-vercel.sh 포트 5002→5001 수정
+
+**환경 수정:**
+- `.env.local`: `NEXT_PUBLIC_API_URL=http://localhost:4000` 추가
+- api.ts 포트 코멘트 5002→5001 수정
+
+### v2.4.0 — Stock Analyzer Dashboard Integration
+### v2.3.0 — DART + Multi-AI Consensus
+### v2.2.0 — Signal 모델 완성
+### v2.0.0 — 종가베팅 V2 엔진

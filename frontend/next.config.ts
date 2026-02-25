@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
-// Local: BACKEND_URL=http://localhost:5002 → rewrites proxy to Flask
+// Local: BACKEND_URL=http://localhost:5001 → rewrites proxy to Flask
 // Vercel: BACKEND_URL not set → rewrites redirect /api/* → /api/data/* (static snapshots)
 const BACKEND_URL = process.env.BACKEND_URL || '';
 
 // API path prefixes that map to Flask endpoints
+// NOTE: 'auth' is excluded — next-auth handles /api/auth/* via its own route handler
 const API_PREFIXES = [
   'kr', 'us', 'crypto', 'econ', 'dividend',
-  'admin', 'auth', 'stripe', 'stock-analyzer',
+  'admin', 'stripe', 'stock-analyzer',
   'scheduler', 'system', 'portfolio', 'stock',
 ];
 

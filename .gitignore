@@ -67,6 +67,13 @@ backups/
 closing-bet-api/
 korean market/
 us-market-pro/
+kr_market_package/
+
+# Stale temp/test files (prevent re-creation)
+login_output.txt
+test_analyze.py
+run_flask.py
+start-frontend.sh
 
 # Output data (generated)
 us_market_preview/output/
@@ -83,5 +90,6 @@ crypto-analytics/crypto_market/vcp_backtest/cache/
 .claude/
 *.bak
 *.pid
+*.lock
 nul
 *.db

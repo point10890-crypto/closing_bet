@@ -1,832 +1,765 @@
 {
-  "timestamp": "2026-02-19T08:53:57.322812",
-  "data_date": "2026-02-18",
-  "period": "5d",
-  "series": [
+  "timestamp": "2026-02-25T09:37:01.973636",
+  "sectors": [
     {
-      "name": "Technology",
-      "data": [
-        {
-          "x": "NVDA",
-          "y": 30055617543.0,
-          "price": 187.98,
-          "change": 1.63,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "MSFT",
-          "y": 9196349386.0,
-          "price": 399.6,
-          "change": 0.69,
-          "color": "#81C784"
-        },
-        {
-          "x": "AAPL",
-          "y": 8881741739.0,
-          "price": 264.35,
-          "change": 0.18,
-          "color": "#81C784"
-        },
-        {
-          "x": "AMD",
-          "y": 7018574248.0,
-          "price": 200.12,
-          "change": -1.46,
-          "color": "#F44336"
-        },
-        {
-          "x": "AVGO",
-          "y": 4508418661.0,
-          "price": 333.51,
-          "change": 0.29,
-          "color": "#81C784"
-        },
-        {
-          "x": "INTC",
-          "y": 2864382445.0,
-          "price": 45.46,
-          "change": -1.56,
-          "color": "#F44336"
-        },
-        {
-          "x": "ORCL",
-          "y": 2306155491.0,
-          "price": 156.17,
-          "change": 1.43,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "CRM",
-          "y": 1641507260.0,
-          "price": 187.79,
-          "change": 1.9,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "CSCO",
-          "y": 1519077825.0,
-          "price": 78.18,
-          "change": 1.73,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "ADBE",
-          "y": 1323105664.0,
-          "price": 263.17,
-          "change": 1.04,
-          "color": "#4CAF50"
-        }
-      ]
+      "ticker": "XLY",
+      "price": 116.74,
+      "change": 1.52,
+      "name": "Consumer Disc."
     },
     {
-      "name": "Consumer Disc.",
-      "data": [
-        {
-          "x": "TSLA",
-          "y": 18728830504.0,
-          "price": 411.32,
-          "change": 0.17,
-          "color": "#81C784"
-        },
-        {
-          "x": "AMZN",
-          "y": 10181288109.0,
-          "price": 204.79,
-          "change": 1.81,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "BKNG",
-          "y": 2796181755.0,
-          "price": 4269.99,
-          "change": 3.14,
-          "color": "#00C853"
-        },
-        {
-          "x": "MCD",
-          "y": 1200271892.0,
-          "price": 327.89,
-          "change": 0.08,
-          "color": "#81C784"
-        },
-        {
-          "x": "NKE",
-          "y": 734130274.0,
-          "price": 65.55,
-          "change": 1.13,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "HD",
-          "y": 728141080.0,
-          "price": 383.52,
-          "change": 0.13,
-          "color": "#81C784"
-        },
-        {
-          "x": "SBUX",
-          "y": 579041006.0,
-          "price": 95.76,
-          "change": 0.39,
-          "color": "#81C784"
-        },
-        {
-          "x": "CMG",
-          "y": 469286570.0,
-          "price": 38.72,
-          "change": 2.22,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "TJX",
-          "y": 462847058.0,
-          "price": 157.23,
-          "change": 0.17,
-          "color": "#81C784"
-        },
-        {
-          "x": "LOW",
-          "y": 347425045.0,
-          "price": 282.13,
-          "change": 0.34,
-          "color": "#81C784"
-        }
-      ]
+      "ticker": "XLK",
+      "price": 140.32,
+      "change": 1.3,
+      "name": "Technology"
     },
     {
-      "name": "Comm. Services",
-      "data": [
-        {
-          "x": "META",
-          "y": 9369064907.0,
-          "price": 643.22,
-          "change": 0.61,
-          "color": "#81C784"
-        },
-        {
-          "x": "GOOGL",
-          "y": 8563787809.0,
-          "price": 303.33,
-          "change": 0.43,
-          "color": "#81C784"
-        },
-        {
-          "x": "GOOG",
-          "y": 4799535119.0,
-          "price": 303.94,
-          "change": 0.37,
-          "color": "#81C784"
-        },
-        {
-          "x": "NFLX",
-          "y": 2321182069.0,
-          "price": 77.99,
-          "change": 1.29,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "VZ",
-          "y": 1407731110.0,
-          "price": 48.05,
-          "change": -1.8,
-          "color": "#F44336"
-        },
-        {
-          "x": "TMUS",
-          "y": 1178053350.0,
-          "price": 213.25,
-          "change": -2.9,
-          "color": "#F44336"
-        },
-        {
-          "x": "T",
-          "y": 922491210.0,
-          "price": 27.88,
-          "change": -2.79,
-          "color": "#F44336"
-        },
-        {
-          "x": "DIS",
-          "y": 783199691.0,
-          "price": 107.1,
-          "change": 1.57,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "CMCSA",
-          "y": 639770290.0,
-          "price": 31.6,
-          "change": 0.16,
-          "color": "#81C784"
-        },
-        {
-          "x": "CHTR",
-          "y": 305100072.0,
-          "price": 239.14,
-          "change": 0.9,
-          "color": "#81C784"
-        }
-      ]
+      "ticker": "XLI",
+      "price": 176.98,
+      "change": 1.23,
+      "name": "Industrials"
     },
     {
-      "name": "Financials",
-      "data": [
-        {
-          "x": "BRK-B",
-          "y": 1859250377.0,
-          "price": 499.07,
-          "change": -0.86,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "GS",
-          "y": 1846285766.0,
-          "price": 933.73,
-          "change": 1.93,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "V",
-          "y": 1812545921.0,
-          "price": 320.3,
-          "change": 0.25,
-          "color": "#81C784"
-        },
-        {
-          "x": "JPM",
-          "y": 1649179152.0,
-          "price": 308.78,
-          "change": 0.54,
-          "color": "#81C784"
-        },
-        {
-          "x": "MA",
-          "y": 1587708135.0,
-          "price": 527.98,
-          "change": 1.16,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "BAC",
-          "y": 1311355418.0,
-          "price": 53.36,
-          "change": 1.18,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "SPGI",
-          "y": 1086142629.0,
-          "price": 419.38,
-          "change": 2.18,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "MS",
-          "y": 886678856.0,
-          "price": 176.59,
-          "change": 2.94,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "AXP",
-          "y": 643172636.0,
-          "price": 346.24,
-          "change": 0.5,
-          "color": "#81C784"
-        },
-        {
-          "x": "WFC",
-          "y": 524770324.0,
-          "price": 88.56,
-          "change": 1.33,
-          "color": "#4CAF50"
-        }
-      ]
+      "ticker": "XLU",
+      "price": 47.2,
+      "change": 1.11,
+      "name": "Utilities"
     },
     {
-      "name": "Consumer Staples",
-      "data": [
-        {
-          "x": "WMT",
-          "y": 4592926485.0,
-          "price": 126.62,
-          "change": -1.73,
-          "color": "#F44336"
-        },
-        {
-          "x": "PG",
-          "y": 2217713825.0,
-          "price": 156.86,
-          "change": -1.69,
-          "color": "#F44336"
-        },
-        {
-          "x": "COST",
-          "y": 1886227920.0,
-          "price": 996.08,
-          "change": -1.58,
-          "color": "#F44336"
-        },
-        {
-          "x": "PEP",
-          "y": 1189964792.0,
-          "price": 164.39,
-          "change": 1.53,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "KO",
-          "y": 868543726.0,
-          "price": 79.49,
-          "change": -0.09,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "KMB",
-          "y": 630632805.0,
-          "price": 109.9,
-          "change": 2.21,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "MDLZ",
-          "y": 473796542.0,
-          "price": 60.08,
-          "change": 0.37,
-          "color": "#81C784"
-        },
-        {
-          "x": "PM",
-          "y": 465739263.0,
-          "price": 182.67,
-          "change": -0.53,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "CL",
-          "y": 433685369.0,
-          "price": 95.58,
-          "change": -0.07,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "MO",
-          "y": 394488024.0,
-          "price": 66.77,
-          "change": 0.35,
-          "color": "#81C784"
-        }
-      ]
+      "ticker": "XLP",
+      "price": 89.74,
+      "change": 0.87,
+      "name": "Consumer Staples"
     },
     {
-      "name": "Healthcare",
-      "data": [
-        {
-          "x": "LLY",
-          "y": 3285546972.0,
-          "price": 1020.56,
-          "change": -1.5,
-          "color": "#F44336"
-        },
-        {
-          "x": "JNJ",
-          "y": 1989393812.0,
-          "price": 244.99,
-          "change": 0.68,
-          "color": "#81C784"
-        },
-        {
-          "x": "UNH",
-          "y": 1566750372.0,
-          "price": 288.2,
-          "change": -0.31,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "TMO",
-          "y": 1145811414.0,
-          "price": 513.56,
-          "change": 2.39,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "ABBV",
-          "y": 998202701.0,
-          "price": 228.72,
-          "change": -1.78,
-          "color": "#F44336"
-        },
-        {
-          "x": "MRK",
-          "y": 949161785.0,
-          "price": 121.66,
-          "change": 0.07,
-          "color": "#81C784"
-        },
-        {
-          "x": "DHR",
-          "y": 850908105.0,
-          "price": 208.56,
-          "change": 1.07,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "ABT",
-          "y": 592752544.0,
-          "price": 113.29,
-          "change": 0.92,
-          "color": "#81C784"
-        },
-        {
-          "x": "PFE",
-          "y": 569755587.0,
-          "price": 27.37,
-          "change": 0.0,
-          "color": "#81C784"
-        },
-        {
-          "x": "BMY",
-          "y": 563492099.0,
-          "price": 59.73,
-          "change": -1.03,
-          "color": "#F44336"
-        }
-      ]
+      "ticker": "XLB",
+      "price": 53.36,
+      "change": 0.76,
+      "name": "Materials"
     },
     {
-      "name": "Industrials",
-      "data": [
-        {
-          "x": "CAT",
-          "y": 1892896409.0,
-          "price": 751.97,
-          "change": -1.67,
-          "color": "#F44336"
-        },
-        {
-          "x": "DE",
-          "y": 1516115180.0,
-          "price": 593.27,
-          "change": -1.26,
-          "color": "#F44336"
-        },
-        {
-          "x": "BA",
-          "y": 1173512066.0,
-          "price": 238.93,
-          "change": -2.09,
-          "color": "#F44336"
-        },
-        {
-          "x": "GE",
-          "y": 965607400.0,
-          "price": 329.58,
-          "change": 0.76,
-          "color": "#81C784"
-        },
-        {
-          "x": "RTX",
-          "y": 948321082.0,
-          "price": 204.81,
-          "change": 0.64,
-          "color": "#81C784"
-        },
-        {
-          "x": "LMT",
-          "y": 876800326.0,
-          "price": 649.81,
-          "change": 0.04,
-          "color": "#81C784"
-        },
-        {
-          "x": "MMM",
-          "y": 691234166.0,
-          "price": 164.17,
-          "change": -2.06,
-          "color": "#F44336"
-        },
-        {
-          "x": "HON",
-          "y": 662954384.0,
-          "price": 241.14,
-          "change": -0.62,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "UNP",
-          "y": 557263465.0,
-          "price": 265.0,
-          "change": 0.84,
-          "color": "#81C784"
-        },
-        {
-          "x": "UPS",
-          "y": 456503844.0,
-          "price": 116.12,
-          "change": 0.53,
-          "color": "#81C784"
-        }
-      ]
+      "ticker": "XLC",
+      "price": 116.16,
+      "change": 0.69,
+      "name": "Communication"
     },
     {
-      "name": "Energy",
-      "data": [
-        {
-          "x": "XOM",
-          "y": 2988678287.0,
-          "price": 150.68,
-          "change": 3.07,
-          "color": "#00C853"
-        },
-        {
-          "x": "CVX",
-          "y": 1894673103.0,
-          "price": 183.87,
-          "change": 1.84,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "COP",
-          "y": 1037389317.0,
-          "price": 110.52,
-          "change": 1.6,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "SLB",
-          "y": 847518253.0,
-          "price": 51.59,
-          "change": 3.51,
-          "color": "#00C853"
-        },
-        {
-          "x": "EOG",
-          "y": 680917454.0,
-          "price": 122.27,
-          "change": 2.1,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "OXY",
-          "y": 530125304.0,
-          "price": 47.11,
-          "change": 2.55,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "WMB",
-          "y": 455144674.0,
-          "price": 72.14,
-          "change": 0.25,
-          "color": "#81C784"
-        },
-        {
-          "x": "VLO",
-          "y": 324040932.0,
-          "price": 199.46,
-          "change": 1.07,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "PSX",
-          "y": 302646347.0,
-          "price": 157.4,
-          "change": -0.48,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "MPC",
-          "y": 253815530.0,
-          "price": 199.57,
-          "change": -0.48,
-          "color": "#EF9A9A"
-        }
-      ]
+      "ticker": "XLF",
+      "price": 50.98,
+      "change": 0.49,
+      "name": "Financials"
     },
     {
-      "name": "Utilities",
-      "data": [
-        {
-          "x": "CEG",
-          "y": 1109587925.0,
-          "price": 294.05,
-          "change": -2.96,
-          "color": "#F44336"
-        },
-        {
-          "x": "NEE",
-          "y": 826762356.0,
-          "price": 91.22,
-          "change": -1.61,
-          "color": "#F44336"
-        },
-        {
-          "x": "SO",
-          "y": 707552053.0,
-          "price": 91.04,
-          "change": -1.04,
-          "color": "#F44336"
-        },
-        {
-          "x": "AEP",
-          "y": 461415082.0,
-          "price": 127.27,
-          "change": -2.28,
-          "color": "#F44336"
-        },
-        {
-          "x": "D",
-          "y": 425977664.0,
-          "price": 64.72,
-          "change": -1.42,
-          "color": "#F44336"
-        },
-        {
-          "x": "DUK",
-          "y": 422693259.0,
-          "price": 125.24,
-          "change": -1.16,
-          "color": "#F44336"
-        },
-        {
-          "x": "EXC",
-          "y": 376913046.0,
-          "price": 47.24,
-          "change": -1.67,
-          "color": "#F44336"
-        },
-        {
-          "x": "XEL",
-          "y": 323814103.0,
-          "price": 79.68,
-          "change": -1.33,
-          "color": "#F44336"
-        },
-        {
-          "x": "SRE",
-          "y": 313780364.0,
-          "price": 91.73,
-          "change": -1.3,
-          "color": "#F44336"
-        },
-        {
-          "x": "PCG",
-          "y": 271092167.0,
-          "price": 17.88,
-          "change": -0.78,
-          "color": "#EF9A9A"
-        }
-      ]
+      "ticker": "XLRE",
+      "price": 43.73,
+      "change": 0.28,
+      "name": "Real Estate"
     },
     {
-      "name": "Materials",
-      "data": [
-        {
-          "x": "LIN",
-          "y": 1175206941.0,
-          "price": 485.28,
-          "change": 0.63,
-          "color": "#81C784"
-        },
-        {
-          "x": "NEM",
-          "y": 971719788.0,
-          "price": 124.69,
-          "change": 1.95,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "FCX",
-          "y": 903032713.0,
-          "price": 62.55,
-          "change": 2.39,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "VMC",
-          "y": 408446465.0,
-          "price": 299.36,
-          "change": -0.95,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "APD",
-          "y": 400447396.0,
-          "price": 282.39,
-          "change": 1.69,
-          "color": "#4CAF50"
-        },
-        {
-          "x": "SHW",
-          "y": 339001007.0,
-          "price": 365.76,
-          "change": -0.59,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "ECL",
-          "y": 290949057.0,
-          "price": 302.59,
-          "change": -0.4,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "DOW",
-          "y": 261691333.0,
-          "price": 31.58,
-          "change": 0.51,
-          "color": "#81C784"
-        },
-        {
-          "x": "DD",
-          "y": 221254357.0,
-          "price": 51.35,
-          "change": 0.94,
-          "color": "#81C784"
-        },
-        {
-          "x": "NUE",
-          "y": 129229297.0,
-          "price": 184.54,
-          "change": 0.49,
-          "color": "#81C784"
-        }
-      ]
+      "ticker": "XLE",
+      "price": 55.1,
+      "change": -0.09,
+      "name": "Energy"
     },
     {
-      "name": "Real Estate",
-      "data": [
-        {
-          "x": "EQIX",
-          "y": 680124179.0,
-          "price": 924.24,
-          "change": -2.91,
-          "color": "#F44336"
-        },
-        {
-          "x": "PSA",
-          "y": 443464840.0,
-          "price": 299.0,
-          "change": -0.99,
-          "color": "#EF9A9A"
-        },
-        {
-          "x": "WELL",
-          "y": 421794212.0,
-          "price": 208.59,
-          "change": -3.2,
-          "color": "#B71C1C"
-        },
-        {
-          "x": "O",
-          "y": 409343460.0,
-          "price": 65.07,
-          "change": -2.14,
-          "color": "#F44336"
-        },
-        {
-          "x": "DLR",
-          "y": 401965794.0,
-          "price": 176.02,
-          "change": -2.15,
-          "color": "#F44336"
-        },
-        {
-          "x": "CCI",
-          "y": 396820204.0,
-          "price": 87.43,
-          "change": -4.82,
-          "color": "#B71C1C"
-        },
-        {
-          "x": "AMT",
-          "y": 391007147.0,
-          "price": 186.62,
-          "change": -3.35,
-          "color": "#B71C1C"
-        },
-        {
-          "x": "PLD",
-          "y": 381941961.0,
-          "price": 139.63,
-          "change": -1.51,
-          "color": "#F44336"
-        },
-        {
-          "x": "SPG",
-          "y": 242055174.0,
-          "price": 199.63,
-          "change": -1.18,
-          "color": "#F44336"
-        },
-        {
-          "x": "AVB",
-          "y": 120717556.0,
-          "price": 178.06,
-          "change": 0.23,
-          "color": "#81C784"
-        }
-      ]
+      "ticker": "XLV",
+      "price": 157.87,
+      "change": -0.42,
+      "name": "Healthcare"
     }
-  ]
+  ],
+  "top_stocks": [
+    {
+      "ticker": "AMD",
+      "price": 213.84,
+      "change": 8.77,
+      "name": "AMD",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "CRM",
+      "price": 185.42,
+      "change": 4.07,
+      "name": "Salesforce",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "ORCL",
+      "price": 146.14,
+      "change": 3.42,
+      "name": "Oracle",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "SPGI",
+      "price": 418.27,
+      "change": 3.33,
+      "name": "S&P Global",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "NFLX",
+      "price": 78.04,
+      "change": 2.66,
+      "name": "Netflix",
+      "sector": "Communication"
+    },
+    {
+      "ticker": "TSLA",
+      "price": 409.38,
+      "change": 2.39,
+      "name": "Tesla",
+      "sector": "Consumer Disc."
+    },
+    {
+      "ticker": "AAPL",
+      "price": 272.14,
+      "change": 2.24,
+      "name": "Apple",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "HD",
+      "price": 384.48,
+      "change": 1.99,
+      "name": "Home Depot",
+      "sector": "Consumer Disc."
+    },
+    {
+      "ticker": "GE",
+      "price": 345.64,
+      "change": 1.96,
+      "name": "GE Aerospace",
+      "sector": "Industrials"
+    },
+    {
+      "ticker": "NEE",
+      "price": 95.68,
+      "change": 1.72,
+      "name": "NextEra",
+      "sector": "Utilities"
+    },
+    {
+      "ticker": "AMZN",
+      "price": 208.56,
+      "change": 1.6,
+      "name": "Amazon",
+      "sector": "Consumer Disc."
+    },
+    {
+      "ticker": "NKE",
+      "price": 64.09,
+      "change": 1.59,
+      "name": "Nike",
+      "sector": "Consumer Disc."
+    },
+    {
+      "ticker": "LOW",
+      "price": 278.59,
+      "change": 1.54,
+      "name": "Lowe's",
+      "sector": "Consumer Disc."
+    },
+    {
+      "ticker": "VRTX",
+      "price": 487.43,
+      "change": 1.33,
+      "name": "Vertex Pharma",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "COST",
+      "price": 998.43,
+      "change": 1.26,
+      "name": "Costco",
+      "sector": "Consumer Staples"
+    },
+    {
+      "ticker": "MSFT",
+      "price": 389.0,
+      "change": 1.18,
+      "name": "Microsoft",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "LIN",
+      "price": 504.0,
+      "change": 1.17,
+      "name": "Linde",
+      "sector": "Materials"
+    },
+    {
+      "ticker": "AMAT",
+      "price": 377.93,
+      "change": 1.17,
+      "name": "Applied Mat.",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "GS",
+      "price": 902.27,
+      "change": 1.12,
+      "name": "Goldman Sachs",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "BLK",
+      "price": 1081.05,
+      "change": 0.94,
+      "name": "BlackRock",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "WMT",
+      "price": 126.75,
+      "change": 0.75,
+      "name": "Walmart",
+      "sector": "Consumer Staples"
+    },
+    {
+      "ticker": "PEP",
+      "price": 169.54,
+      "change": 0.72,
+      "name": "PepsiCo",
+      "sector": "Consumer Staples"
+    },
+    {
+      "ticker": "NVDA",
+      "price": 192.85,
+      "change": 0.68,
+      "name": "NVIDIA",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "CSCO",
+      "price": 78.14,
+      "change": 0.51,
+      "name": "Cisco",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "MA",
+      "price": 498.0,
+      "change": 0.4,
+      "name": "Mastercard",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "ISRG",
+      "price": 494.02,
+      "change": 0.39,
+      "name": "Intuitive Surg.",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "META",
+      "price": 639.3,
+      "change": 0.32,
+      "name": "Meta",
+      "sector": "Communication"
+    },
+    {
+      "ticker": "V",
+      "price": 307.22,
+      "change": 0.23,
+      "name": "Visa",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "HON",
+      "price": 243.61,
+      "change": 0.23,
+      "name": "Honeywell",
+      "sector": "Industrials"
+    },
+    {
+      "ticker": "KO",
+      "price": 80.72,
+      "change": 0.2,
+      "name": "Coca-Cola",
+      "sector": "Consumer Staples"
+    },
+    {
+      "ticker": "JNJ",
+      "price": 246.28,
+      "change": 0.18,
+      "name": "Johnson&Johnson",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "BRK-B",
+      "price": 494.51,
+      "change": 0.09,
+      "name": "Berkshire",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "MRK",
+      "price": 123.93,
+      "change": 0.09,
+      "name": "Merck",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "PG",
+      "price": 165.28,
+      "change": 0.07,
+      "name": "Procter&Gamble",
+      "sector": "Consumer Staples"
+    },
+    {
+      "ticker": "JPM",
+      "price": 297.3,
+      "change": -0.12,
+      "name": "JPMorgan",
+      "sector": "Financials"
+    },
+    {
+      "ticker": "PM",
+      "price": 187.0,
+      "change": -0.12,
+      "name": "Philip Morris",
+      "sector": "Consumer Staples"
+    },
+    {
+      "ticker": "TMO",
+      "price": 515.6,
+      "change": -0.16,
+      "name": "Thermo Fisher",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "GOOGL",
+      "price": 310.9,
+      "change": -0.19,
+      "name": "Alphabet",
+      "sector": "Communication"
+    },
+    {
+      "ticker": "INTU",
+      "price": 358.71,
+      "change": -0.23,
+      "name": "Intuit",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "ABBV",
+      "price": 228.44,
+      "change": -0.45,
+      "name": "AbbVie",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "MCD",
+      "price": 333.05,
+      "change": -0.45,
+      "name": "McDonald's",
+      "sector": "Consumer Disc."
+    },
+    {
+      "ticker": "ABT",
+      "price": 114.58,
+      "change": -0.62,
+      "name": "Abbott",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "PLTR",
+      "price": 128.84,
+      "change": -1.35,
+      "name": "Palantir",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "AVGO",
+      "price": 325.49,
+      "change": -1.47,
+      "name": "Broadcom",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "LLY",
+      "price": 1042.15,
+      "change": -1.55,
+      "name": "Eli Lilly",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "RTX",
+      "price": 198.46,
+      "change": -1.71,
+      "name": "RTX Corp",
+      "sector": "Industrials"
+    },
+    {
+      "ticker": "REGN",
+      "price": 772.19,
+      "change": -1.89,
+      "name": "Regeneron",
+      "sector": "Healthcare"
+    },
+    {
+      "ticker": "ACN",
+      "price": 196.73,
+      "change": -2.21,
+      "name": "Accenture",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "TXN",
+      "price": 213.35,
+      "change": -2.96,
+      "name": "Texas Inst.",
+      "sector": "Technology"
+    },
+    {
+      "ticker": "UNH",
+      "price": 273.95,
+      "change": -2.97,
+      "name": "UnitedHealth",
+      "sector": "Healthcare"
+    }
+  ],
+  "market_breadth": {
+    "total": 50,
+    "up": 34,
+    "down": 16,
+    "unchanged": 0,
+    "up_ratio": 68.0,
+    "avg_change": 0.64,
+    "top_gainer": {
+      "ticker": "AMD",
+      "price": 213.84,
+      "change": 8.77,
+      "name": "AMD",
+      "sector": "Technology"
+    },
+    "top_loser": {
+      "ticker": "UNH",
+      "price": 273.95,
+      "change": -2.97,
+      "name": "UnitedHealth",
+      "sector": "Healthcare"
+    }
+  },
+  "sector_groups": {
+    "Technology": [
+      {
+        "ticker": "AMD",
+        "name": "AMD",
+        "change": 8.77,
+        "price": 213.84
+      },
+      {
+        "ticker": "CRM",
+        "name": "Salesforce",
+        "change": 4.07,
+        "price": 185.42
+      },
+      {
+        "ticker": "ORCL",
+        "name": "Oracle",
+        "change": 3.42,
+        "price": 146.14
+      },
+      {
+        "ticker": "AAPL",
+        "name": "Apple",
+        "change": 2.24,
+        "price": 272.14
+      },
+      {
+        "ticker": "MSFT",
+        "name": "Microsoft",
+        "change": 1.18,
+        "price": 389.0
+      },
+      {
+        "ticker": "AMAT",
+        "name": "Applied Mat.",
+        "change": 1.17,
+        "price": 377.93
+      },
+      {
+        "ticker": "NVDA",
+        "name": "NVIDIA",
+        "change": 0.68,
+        "price": 192.85
+      },
+      {
+        "ticker": "CSCO",
+        "name": "Cisco",
+        "change": 0.51,
+        "price": 78.14
+      },
+      {
+        "ticker": "INTU",
+        "name": "Intuit",
+        "change": -0.23,
+        "price": 358.71
+      },
+      {
+        "ticker": "PLTR",
+        "name": "Palantir",
+        "change": -1.35,
+        "price": 128.84
+      },
+      {
+        "ticker": "AVGO",
+        "name": "Broadcom",
+        "change": -1.47,
+        "price": 325.49
+      },
+      {
+        "ticker": "ACN",
+        "name": "Accenture",
+        "change": -2.21,
+        "price": 196.73
+      },
+      {
+        "ticker": "TXN",
+        "name": "Texas Inst.",
+        "change": -2.96,
+        "price": 213.35
+      }
+    ],
+    "Financials": [
+      {
+        "ticker": "SPGI",
+        "name": "S&P Global",
+        "change": 3.33,
+        "price": 418.27
+      },
+      {
+        "ticker": "GS",
+        "name": "Goldman Sachs",
+        "change": 1.12,
+        "price": 902.27
+      },
+      {
+        "ticker": "BLK",
+        "name": "BlackRock",
+        "change": 0.94,
+        "price": 1081.05
+      },
+      {
+        "ticker": "MA",
+        "name": "Mastercard",
+        "change": 0.4,
+        "price": 498.0
+      },
+      {
+        "ticker": "V",
+        "name": "Visa",
+        "change": 0.23,
+        "price": 307.22
+      },
+      {
+        "ticker": "BRK-B",
+        "name": "Berkshire",
+        "change": 0.09,
+        "price": 494.51
+      },
+      {
+        "ticker": "JPM",
+        "name": "JPMorgan",
+        "change": -0.12,
+        "price": 297.3
+      }
+    ],
+    "Communication": [
+      {
+        "ticker": "NFLX",
+        "name": "Netflix",
+        "change": 2.66,
+        "price": 78.04
+      },
+      {
+        "ticker": "META",
+        "name": "Meta",
+        "change": 0.32,
+        "price": 639.3
+      },
+      {
+        "ticker": "GOOGL",
+        "name": "Alphabet",
+        "change": -0.19,
+        "price": 310.9
+      }
+    ],
+    "Consumer Disc.": [
+      {
+        "ticker": "TSLA",
+        "name": "Tesla",
+        "change": 2.39,
+        "price": 409.38
+      },
+      {
+        "ticker": "HD",
+        "name": "Home Depot",
+        "change": 1.99,
+        "price": 384.48
+      },
+      {
+        "ticker": "AMZN",
+        "name": "Amazon",
+        "change": 1.6,
+        "price": 208.56
+      },
+      {
+        "ticker": "NKE",
+        "name": "Nike",
+        "change": 1.59,
+        "price": 64.09
+      },
+      {
+        "ticker": "LOW",
+        "name": "Lowe's",
+        "change": 1.54,
+        "price": 278.59
+      },
+      {
+        "ticker": "MCD",
+        "name": "McDonald's",
+        "change": -0.45,
+        "price": 333.05
+      }
+    ],
+    "Industrials": [
+      {
+        "ticker": "GE",
+        "name": "GE Aerospace",
+        "change": 1.96,
+        "price": 345.64
+      },
+      {
+        "ticker": "HON",
+        "name": "Honeywell",
+        "change": 0.23,
+        "price": 243.61
+      },
+      {
+        "ticker": "RTX",
+        "name": "RTX Corp",
+        "change": -1.71,
+        "price": 198.46
+      }
+    ],
+    "Utilities": [
+      {
+        "ticker": "NEE",
+        "name": "NextEra",
+        "change": 1.72,
+        "price": 95.68
+      }
+    ],
+    "Healthcare": [
+      {
+        "ticker": "VRTX",
+        "name": "Vertex Pharma",
+        "change": 1.33,
+        "price": 487.43
+      },
+      {
+        "ticker": "ISRG",
+        "name": "Intuitive Surg.",
+        "change": 0.39,
+        "price": 494.02
+      },
+      {
+        "ticker": "JNJ",
+        "name": "Johnson&Johnson",
+        "change": 0.18,
+        "price": 246.28
+      },
+      {
+        "ticker": "MRK",
+        "name": "Merck",
+        "change": 0.09,
+        "price": 123.93
+      },
+      {
+        "ticker": "TMO",
+        "name": "Thermo Fisher",
+        "change": -0.16,
+        "price": 515.6
+      },
+      {
+        "ticker": "ABBV",
+        "name": "AbbVie",
+        "change": -0.45,
+        "price": 228.44
+      },
+      {
+        "ticker": "ABT",
+        "name": "Abbott",
+        "change": -0.62,
+        "price": 114.58
+      },
+      {
+        "ticker": "LLY",
+        "name": "Eli Lilly",
+        "change": -1.55,
+        "price": 1042.15
+      },
+      {
+        "ticker": "REGN",
+        "name": "Regeneron",
+        "change": -1.89,
+        "price": 772.19
+      },
+      {
+        "ticker": "UNH",
+        "name": "UnitedHealth",
+        "change": -2.97,
+        "price": 273.95
+      }
+    ],
+    "Consumer Staples": [
+      {
+        "ticker": "COST",
+        "name": "Costco",
+        "change": 1.26,
+        "price": 998.43
+      },
+      {
+        "ticker": "WMT",
+        "name": "Walmart",
+        "change": 0.75,
+        "price": 126.75
+      },
+      {
+        "ticker": "PEP",
+        "name": "PepsiCo",
+        "change": 0.72,
+        "price": 169.54
+      },
+      {
+        "ticker": "KO",
+        "name": "Coca-Cola",
+        "change": 0.2,
+        "price": 80.72
+      },
+      {
+        "ticker": "PG",
+        "name": "Procter&Gamble",
+        "change": 0.07,
+        "price": 165.28
+      },
+      {
+        "ticker": "PM",
+        "name": "Philip Morris",
+        "change": -0.12,
+        "price": 187.0
+      }
+    ],
+    "Materials": [
+      {
+        "ticker": "LIN",
+        "name": "Linde",
+        "change": 1.17,
+        "price": 504.0
+      }
+    ]
+  }
 }

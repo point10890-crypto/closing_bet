@@ -438,12 +438,45 @@ def snapshot_kr_vcp_history() -> bool:
 
 
 # ============================================================
-# US / Crypto / Economy 스냅샷 (단순 파일 복사)
+# US / Crypto / Economy 스냅샷
 # ============================================================
 
+def _fetch_flask_endpoint(endpoint: str, dst_name: str, port: int = 5001) -> bool:
+    """Flask API 엔드포인트에서 변환된 데이터를 가져와 스냅샷으로 저장"""
+    try:
+        import requests
+        resp = requests.get(f'http://localhost:{port}{endpoint}', timeout=15)
+        if resp.status_code == 200:
+            data = resp.json()
+            dst = os.path.join(SNAPSHOT_DIR, dst_name)
+            safe_json_dump(data, dst)
+            size = os.path.getsize(dst)
+            log(f"✓ {dst_name:45s} {size:>10,} bytes (Flask)")
+            return True
+        else:
+            log(f"✗ {dst_name:45s} HTTP {resp.status_code}")
+            return False
+    except Exception as e:
+        log(f"✗ {dst_name:45s} {str(e)[:50]}")
+        return False
+
+
 def snapshot_us_copies() -> int:
-    """US Market 관련 정적 파일 복사"""
+    """US Market 스냅샷 — Flask 변환 필요 엔드포인트 + 단순 파일 복사"""
     us_output = os.path.join(BASE_DIR, 'us_market_preview', 'output')
+    ok = 0
+
+    # ── Flask API 경유 (데이터 변환 필요한 엔드포인트) ──
+    flask_endpoints = [
+        ('/api/us/market-briefing',   'us-market-briefing.json'),
+        ('/api/us/heatmap-data',      'us-heatmap-data.json'),
+        ('/api/us/earnings-impact',   'us-earnings-impact.json'),
+    ]
+    for endpoint, dst_name in flask_endpoints:
+        if _fetch_flask_endpoint(endpoint, dst_name):
+            ok += 1
+
+    # ── 단순 파일 복사 (변환 불필요) ──
     copies = [
         (os.path.join(us_output, 'market_gate.json'),          'us-market-gate.json'),
         (os.path.join(us_output, 'smart_money_picks.json'),    'us-smart-money.json'),
@@ -457,12 +490,9 @@ def snapshot_us_copies() -> int:
         (os.path.join(us_output, 'top_picks.json'),            'us-top-picks-report.json'),
         (os.path.join(us_output, 'cumulative_performance.json'), 'us-cumulative-performance.json'),
         (os.path.join(us_output, 'earnings_analysis.json'),    'us-earnings-analysis.json'),
-        (os.path.join(us_output, 'earnings_impact.json'),      'us-earnings-impact.json'),
         (os.path.join(us_output, 'etf_flow_analysis.json'),    'us-etf-flow-analysis.json'),
-        (os.path.join(us_output, 'heatmap_data.json'),         'us-heatmap-data.json'),
         (os.path.join(us_output, 'portfolio.json'),            'us-portfolio.json'),
     ]
-    ok = 0
     for src, dst_name in copies:
         dst = os.path.join(SNAPSHOT_DIR, dst_name)
         if os.path.exists(src):

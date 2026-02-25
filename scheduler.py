@@ -60,6 +60,14 @@ except ImportError:
     def safe_read(filepath, timeout=10):
         yield filepath
 
+# 대시보드 동기화 임포트
+try:
+    from sync_dashboard import sync_dashboard
+except ImportError:
+    def sync_dashboard(scope='all', deploy=True):
+        logger.warning("⚠️ sync_dashboard.py를 찾을 수 없습니다")
+        return {'ok': 0, 'fail': 0, 'deployed': False}
+
 # 선택적 import (배포 시 설치 필요)
 try:
     import schedule
@@ -689,6 +697,14 @@ def run_round1():
 
     success_count = sum(1 for _, s in results if s)
     logger.info(f"📋 [1차] 완료: {success_count}/{len(results)} 성공")
+
+    # 대시보드 자동 동기화 + 배포
+    try:
+        logger.info("🔄 대시보드 동기화 시작 (KR)...")
+        sync_dashboard(scope='kr', deploy=True)
+    except Exception as e:
+        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+
     return all(r[1] for r in results)
 
 
@@ -726,6 +742,14 @@ def run_round2():
         msg += f"\n\n{vcp_summary}"
 
     send_telegram(msg)
+
+    # 대시보드 자동 동기화 + 배포
+    try:
+        logger.info("🔄 대시보드 동기화 시작 (KR)...")
+        sync_dashboard(scope='kr', deploy=True)
+    except Exception as e:
+        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+
     return all(r[1] for r in results)
 
 
@@ -767,6 +791,13 @@ def run_us_market_update():
             logger.info("📬 US Smart Money Top 5 텔레그램 전송 완료")
     except Exception as e:
         logger.error(f"❌ US 텔레그램 전송 실패: {e}")
+
+    # 대시보드 자동 동기화 + 배포
+    try:
+        logger.info("🔄 대시보드 동기화 시작 (US)...")
+        sync_dashboard(scope='us', deploy=True)
+    except Exception as e:
+        logger.error(f"❌ 대시보드 동기화 실패: {e}")
 
     return success
 
@@ -1175,6 +1206,13 @@ def run_crypto_pipeline():
 
     logger.info(f"🪙 Crypto 파이프라인 완료: {success_count}/{total_count} ({elapsed:.0f}초)")
 
+    # 대시보드 자동 동기화 + 배포
+    try:
+        logger.info("🔄 대시보드 동기화 시작 (Crypto)...")
+        sync_dashboard(scope='crypto', deploy=True)
+    except Exception as e:
+        logger.error(f"❌ 대시보드 동기화 실패: {e}")
+
     return success_count == total_count
 
 
@@ -1188,7 +1226,7 @@ def run_full_update():
     logger.info("🔄 전체 업데이트 시작 (수동) — US + KR + Crypto")
     logger.info("=" * 60)
 
-    # US Market
+    # US Market (개별 sync는 각 함수 내부에서 실행됨)
     run_us_market_update()
 
     # KR Market
@@ -1197,6 +1235,13 @@ def run_full_update():
 
     # Crypto
     run_crypto_pipeline()
+
+    # 전체 최종 동기화 (Economy 포함)
+    try:
+        logger.info("🔄 Economy 데이터 동기화...")
+        sync_dashboard(scope='econ', deploy=False)  # 이미 개별 배포됨
+    except Exception as e:
+        logger.error(f"❌ Economy 동기화 실패: {e}")
 
     return True
 

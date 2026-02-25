@@ -4,6 +4,7 @@
 import os
 import json
 import math
+import time
 import traceback
 from datetime import datetime
 from flask import Blueprint, jsonify, request
@@ -30,12 +31,24 @@ def _safe_float(val, default=0):
         return default
 
 
+_preview_cache = {}  # {filename: (data, timestamp)}
+_CACHE_TTL = 30      # seconds — safe for scheduler update cadence (4h+)
+
+
 def _load_preview_json(filename):
-    """Load a JSON file from the preview output directory"""
+    """Load a JSON file from preview output directory with 30s TTL cache"""
+    now = time.time()
+    if filename in _preview_cache:
+        data, ts = _preview_cache[filename]
+        if now - ts < _CACHE_TTL:
+            return data
+
     path = os.path.join(PREVIEW_OUTPUT_DIR, filename)
     if os.path.exists(path):
         with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+        _preview_cache[filename] = (data, now)
+        return data
     return {}
 
 
@@ -79,10 +92,12 @@ def get_us_portfolio():
             except Exception as e:
                 print(f"Error fetching {ticker}: {e}")
 
-        return jsonify({
+        resp = jsonify({
             'market_indices': market_indices,
             'timestamp': datetime.now().isoformat()
         })
+        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return resp
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e), 'market_indices': []}), 500
@@ -155,7 +170,7 @@ def get_us_market_gate():
         change_1d = ((price / float(hist['Close'].iloc[-2])) - 1) * 100 if len(hist) >= 2 else 0
         change_5d = ((price / float(hist['Close'].iloc[-6])) - 1) * 100 if len(hist) >= 6 else 0
 
-        return jsonify({
+        resp = jsonify({
             'gate': gate,
             'score': score,
             'status': status,
@@ -169,53 +184,11 @@ def get_us_market_gate():
                 'change_5d': round(change_5d, 2),
             }
         })
+        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return resp
     except Exception as e:
         traceback.print_exc()
         return jsonify({'error': str(e), 'gate': 'YELLOW', 'score': 50}), 500
-
-
-@us_bp.route('/sector-heatmap')
-def get_us_sector_heatmap():
-    """US Sector Performance Heatmap"""
-    try:
-        import yfinance as yf
-
-        sectors = {
-            'XLK': 'Technology',
-            'XLF': 'Financials',
-            'XLV': 'Healthcare',
-            'XLE': 'Energy',
-            'XLI': 'Industrials',
-            'XLY': 'Consumer Disc.',
-            'XLP': 'Consumer Staples',
-            'XLU': 'Utilities',
-            'XLRE': 'Real Estate',
-            'XLB': 'Materials',
-            'XLC': 'Communication',
-        }
-
-        result = []
-        for ticker, name in sectors.items():
-            try:
-                stock = yf.Ticker(ticker)
-                hist = stock.history(period='5d')
-                if not hist.empty and len(hist) >= 2:
-                    current = float(hist['Close'].iloc[-1])
-                    prev = float(hist['Close'].iloc[-2])
-                    change_pct = ((current / prev) - 1) * 100
-                    result.append({
-                        'ticker': ticker,
-                        'name': name,
-                        'price': round(current, 2),
-                        'change_pct': round(change_pct, 2),
-                    })
-            except Exception:
-                pass
-
-        result.sort(key=lambda x: x['change_pct'], reverse=True)
-        return jsonify({'sectors': result, 'timestamp': datetime.now().isoformat()})
-    except Exception as e:
-        return jsonify({'error': str(e), 'sectors': []}), 500
 
 
 @us_bp.route('/stock-chart/<ticker>')
@@ -420,10 +393,11 @@ def get_us_macro_analysis():
 
         lang = request.args.get('lang', 'ko')
 
+        # us_market_preview/output/ 우선, 없으면 us_market/data/ 폴백
         if lang == 'en':
-            analysis_path = os.path.join(US_DATA_DIR, 'macro_analysis_en.json')
+            analysis_path = os.path.join(PREVIEW_OUTPUT_DIR, 'macro_analysis_en.json')
         else:
-            analysis_path = os.path.join(US_DATA_DIR, 'macro_analysis.json')
+            analysis_path = os.path.join(PREVIEW_OUTPUT_DIR, 'macro_analysis.json')
 
         if not os.path.exists(analysis_path):
             analysis_path = os.path.join(US_DATA_DIR, 'macro_analysis.json')
@@ -492,7 +466,9 @@ def get_us_ai_summary(ticker):
     """AI-generated summary for a US stock"""
     try:
         lang = request.args.get('lang', 'ko')
-        summary_path = os.path.join(US_DATA_DIR, 'ai_summaries.json')
+        summary_path = os.path.join(PREVIEW_OUTPUT_DIR, 'ai_summaries.json')
+        if not os.path.exists(summary_path):
+            summary_path = os.path.join(US_DATA_DIR, 'ai_summaries.json')
 
         if not os.path.exists(summary_path):
             return jsonify({'error': 'AI summaries not found.'}), 404
@@ -679,18 +655,85 @@ def get_market_briefing():
         briefing = _load_preview_json('briefing.json')
         if not briefing:
             return jsonify({'error': 'Briefing not available'}), 404
-        # Merge market_data if briefing doesn't have it
+
+        # 1) Structure ai_analysis from top-level content/citations
+        if 'ai_analysis' not in briefing and 'content' in briefing:
+            briefing['ai_analysis'] = {
+                'content': briefing.pop('content', ''),
+                'citations': briefing.pop('citations', []),
+            }
+
+        # 2) Merge market_data if briefing doesn't have it
         if 'market_data' not in briefing:
             md = _load_preview_json('market_data.json')
             if md:
                 briefing['market_data'] = md.get('market_data', md)
-                briefing.setdefault('vix', md.get('vix'))
                 briefing.setdefault('fear_greed', md.get('fear_greed'))
-        # Merge smart_money
+
+        # 3) Build vix from market_data.volatility if missing
+        if not briefing.get('vix'):
+            vol = briefing.get('market_data', {}).get('volatility', {}).get('^VIX', {})
+            if vol:
+                vix_val = vol.get('price', 0)
+                if vix_val >= 30:
+                    level, color = 'High', '#F44336'
+                elif vix_val >= 20:
+                    level, color = 'Elevated', '#FFC107'
+                else:
+                    level, color = 'Low', '#4CAF50'
+                briefing['vix'] = {
+                    'value': vix_val,
+                    'change': vol.get('change', 0),
+                    'level': level,
+                    'color': color,
+                }
+
+        # 4) Fix fear_greed color if missing
+        fg = briefing.get('fear_greed') or {}
+        if fg and not fg.get('color'):
+            score = fg.get('score', 50)
+            if score <= 25:
+                fg['color'] = '#F44336'
+            elif score <= 45:
+                fg['color'] = '#FF5722'
+            elif score <= 55:
+                fg['color'] = '#FFC107'
+            elif score <= 75:
+                fg['color'] = '#4CAF50'
+            else:
+                fg['color'] = '#00C853'
+            briefing['fear_greed'] = fg
+
+        # 5) Merge smart_money from top_picks.json
         if 'smart_money' not in briefing:
             sm = _load_preview_json('top_picks.json')
             if sm:
                 briefing['smart_money'] = {'top_picks': sm}
+        # Fix smart_money.top_picks structure: rename top_picks→picks, map fields
+        sm = briefing.get('smart_money', {})
+        tp = sm.get('top_picks', {})
+        if isinstance(tp, dict):
+            raw_picks = tp.get('picks') or tp.get('top_picks', [])
+            tp['picks'] = [
+                {
+                    'rank': p.get('rank', i + 1),
+                    'ticker': p.get('ticker', ''),
+                    'name': p.get('name', ''),
+                    'final_score': p.get('final_score', p.get('composite_score', 0)),
+                    'ai_recommendation': p.get('ai_recommendation', p.get('signal', '')),
+                    'target_upside': p.get('target_upside', 0),
+                    'sd_stage': p.get('sd_stage', p.get('grade', '')),
+                }
+                for i, p in enumerate(raw_picks)
+            ]
+            tp.pop('top_picks', None)
+
+        # 6) Merge sector_rotation for tab content
+        if 'sector_rotation' not in briefing:
+            sr = _load_preview_json('sector_rotation.json')
+            if sr:
+                briefing['sector_rotation'] = sr
+
         briefing.setdefault('timestamp', datetime.now().isoformat())
         return jsonify(briefing)
     except Exception as e:
@@ -744,7 +787,7 @@ def get_decision_signal():
         # Try direct gate endpoint data
         try:
             import requests as _req
-            _gate_resp = _req.get('http://localhost:5002/api/us/market-gate', timeout=3).json()
+            _gate_resp = _req.get('http://localhost:5001/api/us/market-gate', timeout=3).json()
             gate_val = str(_gate_resp.get('score', '--'))
             _gs = _gate_resp.get('score', 50)
             gate_score_raw = (_gs - 50) / 50 * 15  # 0~100 → ±15
@@ -1045,11 +1088,91 @@ def get_risk_alerts():
 
 @us_bp.route('/earnings-impact')
 def get_earnings_impact():
-    """Earnings impact analysis"""
+    """Earnings impact analysis — merges earnings_impact + earnings_analysis"""
     try:
-        data = _load_preview_json('earnings_impact.json')
-        if not data:
-            return jsonify({'error': 'Earnings impact data not available'}), 404
+        data = _load_preview_json('earnings_impact.json') or {}
+        analysis = _load_preview_json('earnings_analysis.json') or {}
+
+        # Ensure sector_profiles exists
+        data.setdefault('sector_profiles', {})
+
+        # Enrich upcoming_earnings from earnings_analysis
+        existing_ue = data.get('upcoming_earnings', [])
+        if not existing_ue and analysis.get('upcoming_earnings'):
+            details = analysis.get('details', {})
+            # Map sector from top_picks or heatmap data for enrichment
+            top_picks = _load_preview_json('top_picks.json') or {}
+            ticker_sectors = {}
+            for p in top_picks.get('top_picks', []):
+                ticker_sectors[p.get('ticker', '')] = p.get('sector', 'N/A')
+
+            enriched = []
+            for ue in analysis['upcoming_earnings']:
+                ticker = ue.get('ticker', '')
+                det = details.get(ticker, {})
+                avg_surprise = det.get('avg_surprise_pct', 0)
+                revenue_growth = det.get('revenue_growth', 0)
+
+                # Derive signal and recommendation from surprise history
+                if avg_surprise > 5:
+                    signal, conf = 'Strong Beat Expected', 0.8
+                    rec_ko, rec_en = '실적 서프라이즈 기대 — 매수 대기', 'Beat expected — consider buying'
+                elif avg_surprise > 0:
+                    signal, conf = 'Likely Beat', 0.6
+                    rec_ko, rec_en = '양호한 실적 예상 — 관망 또는 소량 매수', 'Positive outlook — hold or light buy'
+                elif avg_surprise == 0:
+                    signal, conf = 'Neutral', 0.5
+                    rec_ko, rec_en = '실적 데이터 부족 — 관망', 'Insufficient data — hold'
+                else:
+                    signal, conf = 'Caution', 0.4
+                    rec_ko, rec_en = '실적 미스 이력 — 보수적 접근', 'Miss history — be cautious'
+
+                enriched.append({
+                    'ticker': ticker,
+                    'sector': ticker_sectors.get(ticker, 'N/A'),
+                    'earnings_date': ue.get('date', det.get('next_earnings_date', '')),
+                    'days_until': ue.get('days_left', 0),
+                    'signal': signal,
+                    'confidence': conf,
+                    'implied_move_pct': None,
+                    'historical_avg_move': abs(avg_surprise),
+                    'recommendation_ko': rec_ko,
+                    'recommendation_en': rec_en,
+                })
+            data['upcoming_earnings'] = enriched
+
+        # Also add upcoming from details with next_earnings_date
+        if not data.get('upcoming_earnings'):
+            details = analysis.get('details', {})
+            from datetime import datetime as dt
+            today = dt.now().date()
+            upcoming = []
+            for ticker, det in details.items():
+                ned = det.get('next_earnings_date')
+                if not ned:
+                    continue
+                try:
+                    edate = dt.strptime(ned, '%Y-%m-%d').date()
+                    days = (edate - today).days
+                    if 0 <= days <= 30:
+                        upcoming.append({
+                            'ticker': ticker,
+                            'sector': 'N/A',
+                            'earnings_date': ned,
+                            'days_until': days,
+                            'signal': 'Upcoming',
+                            'confidence': 0.5,
+                            'implied_move_pct': None,
+                            'historical_avg_move': abs(det.get('avg_surprise_pct', 0)),
+                            'recommendation_ko': '실적 발표 예정 — 주시',
+                            'recommendation_en': 'Earnings upcoming — monitor',
+                        })
+                except (ValueError, TypeError):
+                    continue
+            upcoming.sort(key=lambda x: x['days_until'])
+            data['upcoming_earnings'] = upcoming[:10]
+
+        data.setdefault('timestamp', datetime.now().isoformat())
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -1071,11 +1194,37 @@ def get_index_prediction():
 
 @us_bp.route('/heatmap-data')
 def get_heatmap_data():
-    """S&P 500 heatmap data"""
+    """S&P 500 heatmap data — transforms sector_groups into series format for frontend"""
     try:
         data = _load_preview_json('sector_heatmap.json')
         if not data:
             return jsonify({'error': 'Heatmap data not available'}), 404
-        return jsonify(data)
+
+        # Transform sector_groups → series: SectorSeries[]
+        sector_groups = data.get('sector_groups', {})
+        series = []
+        for sector_name, stocks in sector_groups.items():
+            items = [
+                {
+                    'x': s.get('ticker', ''),
+                    'y': abs(s.get('change', 0)) * 10 + 10,  # size weight
+                    'price': s.get('price', 0),
+                    'change': s.get('change', 0),
+                    'color': '',
+                }
+                for s in stocks
+            ]
+            # Sort by absolute change descending (biggest movers first)
+            items.sort(key=lambda i: abs(i['change']), reverse=True)
+            series.append({'name': sector_name, 'data': items})
+
+        # Sort sectors by stock count descending
+        series.sort(key=lambda s: len(s['data']), reverse=True)
+
+        return jsonify({
+            'series': series,
+            'data_date': data.get('timestamp', datetime.now().isoformat())[:10],
+            'market_breadth': data.get('market_breadth'),
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500

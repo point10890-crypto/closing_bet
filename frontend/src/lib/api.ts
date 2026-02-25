@@ -1,7 +1,7 @@
 // API utility functions
 //
 // Architecture:
-//   Local:  /api/kr/* → next.config.ts rewrite → Flask (localhost:5002)
+//   Local:  /api/kr/* → next.config.ts rewrite → Flask (localhost:5001)
 //   Vercel: /api/data/kr/* → static JSON snapshot (direct route handler)
 //
 // On Vercel, we bypass rewrite by calling /api/data/* directly to avoid ISR cache issues.
@@ -33,8 +33,7 @@ export async function fetchAPI<T>(endpoint: string): Promise<T> {
     const resolvedEndpoint = resolveEndpoint(endpoint);
     const url = `${API_BASE}${resolvedEndpoint}`;
 
-    // Next.js fetch 옵션 설정
-    // 클라이언트 사이드에서는 cache와 next 옵션이 충돌하거나 에러를 유발할 수 있으므로 서버 사이드에서만 적용
+    // Next.js fetch 옵션: 클라이언트에서는 cache/next 옵션이 에러를 유발할 수 있으므로 서버에서만 적용
     const options: RequestInit = {};
     if (IS_SERVER) {
         options.cache = 'no-store' as any;
@@ -477,7 +476,6 @@ export interface CumulativePerformanceData {
 export const usAPI = {
     getPortfolio: () => fetchAPI<{ market_indices: (USMarketIndex | PortfolioIndex)[]; timestamp: string }>('/api/us/portfolio'),
     getMarketGate: () => fetchAPI<USMarketGate>('/api/us/market-gate'),
-    getSectorHeatmap: () => fetchAPI<{ sectors: USSector[]; timestamp: string }>('/api/us/sector-heatmap'),
     getStockChart: (ticker: string, period = '6mo') =>
         fetchAPI<{ ticker: string; data: any[]; period: string }>(`/api/us/stock-chart/${ticker}?period=${period}`),
     getSmartMoney: () => fetchAPI<{ picks: SmartMoneyStock[]; count: number }>('/api/us/smart-money'),

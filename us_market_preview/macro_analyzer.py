@@ -377,8 +377,8 @@ class MacroAIAnalyzer:
     """Use Gemini 3.0 to analyze macro conditions and predict opportunities"""
     
     def __init__(self):
-        self.api_key = os.getenv('GOOGLE_API_KEY')
-        self.base_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent"
+        self.api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
+        self.base_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
     
     def analyze_macro_conditions(self, macro_data: Dict, news: List[Dict], patterns: List[Dict], corp_sentiment: Dict = None, lang: str = 'ko') -> str:
         """Generate AI analysis of current macro conditions"""
@@ -396,10 +396,7 @@ class MacroAIAnalyzer:
                     }],
                     "generationConfig": {
                         "temperature": 0.7,
-                        "maxOutputTokens": 2500,
-                        "thinkingConfig": {
-                            "thinkingLevel": "low"
-                        }
+                        "maxOutputTokens": 8192
                     }
                 },
                 timeout=90
@@ -407,10 +404,15 @@ class MacroAIAnalyzer:
             
             if response.status_code == 200:
                 result = response.json()
-                text = result['candidates'][0]['content']['parts'][0]['text']
+                parts = result['candidates'][0]['content']['parts']
+                # Gemini 2.5 Flash: skip thinking parts, collect text parts only
+                text = "\n".join(
+                    p['text'] for p in parts
+                    if 'text' in p and not p.get('thought', False)
+                )
                 return text.strip()
             else:
-                logger.error(f"Gemini API error: {response.status_code}")
+                logger.error(f"Gemini API error: {response.status_code} - {response.text[:200]}")
                 return "AI 분석 생성 실패"
                 
         except Exception as e:

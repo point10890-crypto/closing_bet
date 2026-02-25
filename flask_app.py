@@ -51,14 +51,15 @@ if _expected != _actual:
 app = create_app()
 
 if __name__ == '__main__':
+    port = int(os.environ.get('FLASK_PORT', 5001))
     print("\n" + "="*60)
-    print(f"[START] Flask App (port 5001)")
+    print(f"[START] Flask App (port {port})")
     print(f"   BASE_DIR: {BASE_DIR}")
     print(f"   app module: {_actual}")
     print("="*60 + "\n")
-    
+
     app.run(
         host='0.0.0.0',
-        port=5001,
+        port=port,
         debug=True
     )

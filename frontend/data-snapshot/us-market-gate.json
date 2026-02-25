@@ -1,17 +1,18 @@
 {
-  "gate": "YELLOW",
+  "gate": "GREEN",
   "reasons": [
-    "SPY above 200MA ($682 > $649)",
-    "50MA > 200MA (Golden Cross)"
+    "SPY above 200MA ($687 > $650)",
+    "50MA > 200MA (Golden Cross)",
+    "Price above 50MA"
   ],
-  "score": 65,
+  "score": 85,
   "spy": {
-    "change_1d": -1.02,
-    "change_5d": 0.09,
-    "ma200": 649.23,
-    "ma50": 687.17,
-    "price": 682.39,
-    "rsi": 40.1
+    "change_1d": 0.73,
+    "change_5d": 0.66,
+    "ma200": 649.89,
+    "ma50": 687.21,
+    "price": 687.35,
+    "rsi": 48.3
   },
-  "status": "NEUTRAL"
+  "status": "RISK_ON"
 }
