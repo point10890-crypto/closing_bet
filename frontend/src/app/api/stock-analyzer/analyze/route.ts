@@ -44,13 +44,48 @@ interface YahooQuoteSummary {
   };
 }
 
+// Yahoo Finance requires cookie + crumb authentication
+let _cachedCrumb: { crumb: string; cookie: string; ts: number } | null = null;
+
+async function getYahooCrumb(): Promise<{ crumb: string; cookie: string }> {
+  // Cache for 30 minutes
+  if (_cachedCrumb && Date.now() - _cachedCrumb.ts < 1800000) {
+    return _cachedCrumb;
+  }
+
+  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+  // Step 1: Get consent cookie
+  const consentResp = await fetch('https://fc.yahoo.com/cubed/api/v1/mrt/asset', {
+    headers: { 'User-Agent': UA },
+    redirect: 'manual',
+  });
+  const setCookies = consentResp.headers.getSetCookie?.() || [];
+  const cookieStr = setCookies.map(c => c.split(';')[0]).join('; ');
+
+  // Step 2: Get crumb
+  const crumbResp = await fetch('https://query2.finance.yahoo.com/v1/test/getcrumb', {
+    headers: { 'User-Agent': UA, 'Cookie': cookieStr },
+  });
+  const crumb = await crumbResp.text();
+
+  if (!crumb || crumb.length > 50) {
+    throw new Error('Failed to get Yahoo crumb');
+  }
+
+  _cachedCrumb = { crumb, cookie: cookieStr, ts: Date.now() };
+  return _cachedCrumb;
+}
+
 async function fetchYahooData(ticker: string): Promise<YahooQuoteSummary> {
+  const { crumb, cookie } = await getYahooCrumb();
   const modules = 'price,summaryDetail,defaultKeyStatistics,recommendationTrend,financialData';
-  const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}`;
+  const url = `https://query2.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(ticker)}?modules=${modules}&crumb=${encodeURIComponent(crumb)}`;
 
   const resp = await fetch(url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Cookie': cookie,
     },
     signal: AbortSignal.timeout(15000),
   });
