@@ -122,7 +122,8 @@ const adminNavigation: NavItem[] = [
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const { data: session } = useSession();
+    const sessionResult = useSession();
+    const session = sessionResult?.data;
 
     // 세션에서 유저 정보 읽기 (없으면 기본값)
     const user = session?.user as Record<string, unknown> | undefined;
