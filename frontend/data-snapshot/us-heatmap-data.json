@@ -1,120 +1,120 @@
 {
-  "data_date": "2026-02-24",
+  "data_date": "2026-02-25",
   "market_breadth": {
-    "avg_change": -1.04,
-    "down": 30,
+    "avg_change": 0.64,
+    "down": 16,
     "top_gainer": {
-      "change": 4.86,
-      "name": "Eli Lilly",
-      "price": 1058.56,
-      "sector": "Healthcare",
-      "ticker": "LLY"
+      "change": 8.77,
+      "name": "AMD",
+      "price": 213.84,
+      "sector": "Technology",
+      "ticker": "AMD"
     },
     "top_loser": {
-      "change": -6.58,
-      "name": "Accenture",
-      "price": 201.18,
-      "sector": "Technology",
-      "ticker": "ACN"
+      "change": -2.97,
+      "name": "UnitedHealth",
+      "price": 273.95,
+      "sector": "Healthcare",
+      "ticker": "UNH"
     },
     "total": 50,
     "unchanged": 0,
-    "up": 20,
-    "up_ratio": 40.0
+    "up": 34,
+    "up_ratio": 68.0
   },
   "series": [
     {
       "data": [
         {
-          "change": -6.58,
+          "change": 8.77,
           "color": "",
-          "price": 201.18,
-          "x": "ACN",
-          "y": 75.8
-        },
-        {
-          "change": -5.52,
-          "color": "",
-          "price": 359.55,
-          "x": "INTU",
-          "y": 65.19999999999999
-        },
-        {
-          "change": -4.57,
-          "color": "",
-          "price": 141.31,
-          "x": "ORCL",
-          "y": 55.7
-        },
-        {
-          "change": -3.78,
-          "color": "",
-          "price": 178.16,
-          "x": "CRM",
-          "y": 47.8
-        },
-        {
-          "change": -3.43,
-          "color": "",
-          "price": 130.6,
-          "x": "PLTR",
-          "y": 44.300000000000004
-        },
-        {
-          "change": -3.21,
-          "color": "",
-          "price": 384.47,
-          "x": "MSFT",
-          "y": 42.1
-        },
-        {
-          "change": -1.84,
-          "color": "",
-          "price": 77.74,
-          "x": "CSCO",
-          "y": 28.400000000000002
-        },
-        {
-          "change": -1.77,
-          "color": "",
-          "price": 196.6,
+          "price": 213.84,
           "x": "AMD",
-          "y": 27.7
+          "y": 97.69999999999999
         },
         {
-          "change": 0.91,
+          "change": 4.07,
           "color": "",
-          "price": 191.55,
-          "x": "NVDA",
-          "y": 19.1
+          "price": 185.42,
+          "x": "CRM",
+          "y": 50.7
         },
         {
-          "change": -0.69,
+          "change": 3.42,
           "color": "",
-          "price": 330.34,
-          "x": "AVGO",
-          "y": 16.9
+          "price": 146.14,
+          "x": "ORCL",
+          "y": 44.2
         },
         {
-          "change": 0.6,
+          "change": -2.96,
           "color": "",
-          "price": 266.18,
-          "x": "AAPL",
-          "y": 16.0
-        },
-        {
-          "change": -0.49,
-          "color": "",
-          "price": 373.55,
-          "x": "AMAT",
-          "y": 14.9
-        },
-        {
-          "change": 0.06,
-          "color": "",
-          "price": 219.86,
+          "price": 213.35,
           "x": "TXN",
-          "y": 10.6
+          "y": 39.6
+        },
+        {
+          "change": 2.24,
+          "color": "",
+          "price": 272.14,
+          "x": "AAPL",
+          "y": 32.400000000000006
+        },
+        {
+          "change": -2.21,
+          "color": "",
+          "price": 196.73,
+          "x": "ACN",
+          "y": 32.1
+        },
+        {
+          "change": -1.47,
+          "color": "",
+          "price": 325.49,
+          "x": "AVGO",
+          "y": 24.7
+        },
+        {
+          "change": -1.35,
+          "color": "",
+          "price": 128.84,
+          "x": "PLTR",
+          "y": 23.5
+        },
+        {
+          "change": 1.18,
+          "color": "",
+          "price": 389.0,
+          "x": "MSFT",
+          "y": 21.799999999999997
+        },
+        {
+          "change": 1.17,
+          "color": "",
+          "price": 377.93,
+          "x": "AMAT",
+          "y": 21.7
+        },
+        {
+          "change": 0.68,
+          "color": "",
+          "price": 192.85,
+          "x": "NVDA",
+          "y": 16.8
+        },
+        {
+          "change": 0.51,
+          "color": "",
+          "price": 78.14,
+          "x": "CSCO",
+          "y": 15.1
+        },
+        {
+          "change": -0.23,
+          "color": "",
+          "price": 358.71,
+          "x": "INTU",
+          "y": 12.3
         }
       ],
       "name": "Technology"
@@ -122,74 +122,74 @@
     {
       "data": [
         {
-          "change": 4.86,
+          "change": -2.97,
           "color": "",
-          "price": 1058.56,
-          "x": "LLY",
-          "y": 58.6
-        },
-        {
-          "change": 2.74,
-          "color": "",
-          "price": 115.29,
-          "x": "ABT",
-          "y": 37.400000000000006
-        },
-        {
-          "change": -2.64,
-          "color": "",
-          "price": 282.34,
+          "price": 273.95,
           "x": "UNH",
-          "y": 36.400000000000006
+          "y": 39.7
         },
         {
-          "change": -2.37,
+          "change": -1.89,
           "color": "",
-          "price": 492.1,
-          "x": "ISRG",
-          "y": 33.7
-        },
-        {
-          "change": 2.08,
-          "color": "",
-          "price": 229.48,
-          "x": "ABBV",
-          "y": 30.8
-        },
-        {
-          "change": 1.38,
-          "color": "",
-          "price": 245.84,
-          "x": "JNJ",
-          "y": 23.799999999999997
-        },
-        {
-          "change": 1.28,
-          "color": "",
-          "price": 123.82,
-          "x": "MRK",
-          "y": 22.8
-        },
-        {
-          "change": 1.08,
-          "color": "",
-          "price": 516.44,
-          "x": "TMO",
-          "y": 20.8
-        },
-        {
-          "change": 0.95,
-          "color": "",
-          "price": 787.04,
+          "price": 772.19,
           "x": "REGN",
-          "y": 19.5
+          "y": 28.9
         },
         {
-          "change": 0.86,
+          "change": -1.55,
           "color": "",
-          "price": 481.01,
+          "price": 1042.15,
+          "x": "LLY",
+          "y": 25.5
+        },
+        {
+          "change": 1.33,
+          "color": "",
+          "price": 487.43,
           "x": "VRTX",
-          "y": 18.6
+          "y": 23.3
+        },
+        {
+          "change": -0.62,
+          "color": "",
+          "price": 114.58,
+          "x": "ABT",
+          "y": 16.2
+        },
+        {
+          "change": -0.45,
+          "color": "",
+          "price": 228.44,
+          "x": "ABBV",
+          "y": 14.5
+        },
+        {
+          "change": 0.39,
+          "color": "",
+          "price": 494.02,
+          "x": "ISRG",
+          "y": 13.9
+        },
+        {
+          "change": 0.18,
+          "color": "",
+          "price": 246.28,
+          "x": "JNJ",
+          "y": 11.8
+        },
+        {
+          "change": -0.16,
+          "color": "",
+          "price": 515.6,
+          "x": "TMO",
+          "y": 11.6
+        },
+        {
+          "change": 0.09,
+          "color": "",
+          "price": 123.93,
+          "x": "MRK",
+          "y": 10.9
         }
       ],
       "name": "Healthcare"
@@ -197,53 +197,53 @@
     {
       "data": [
         {
-          "change": -5.77,
+          "change": 3.33,
           "color": "",
-          "price": 496.03,
-          "x": "MA",
-          "y": 67.69999999999999
-        },
-        {
-          "change": -4.5,
-          "color": "",
-          "price": 306.52,
-          "x": "V",
-          "y": 55.0
-        },
-        {
-          "change": -4.22,
-          "color": "",
-          "price": 297.67,
-          "x": "JPM",
-          "y": 52.199999999999996
-        },
-        {
-          "change": -3.25,
-          "color": "",
-          "price": 892.31,
-          "x": "GS",
-          "y": 42.5
-        },
-        {
-          "change": -3.04,
-          "color": "",
-          "price": 404.78,
+          "price": 418.27,
           "x": "SPGI",
-          "y": 40.4
+          "y": 43.3
         },
         {
-          "change": -2.07,
+          "change": 1.12,
           "color": "",
-          "price": 1071.01,
+          "price": 902.27,
+          "x": "GS",
+          "y": 21.200000000000003
+        },
+        {
+          "change": 0.94,
+          "color": "",
+          "price": 1081.05,
           "x": "BLK",
-          "y": 30.7
+          "y": 19.4
         },
         {
-          "change": -0.82,
+          "change": 0.4,
           "color": "",
-          "price": 494.09,
+          "price": 498.0,
+          "x": "MA",
+          "y": 14.0
+        },
+        {
+          "change": 0.23,
+          "color": "",
+          "price": 307.22,
+          "x": "V",
+          "y": 12.3
+        },
+        {
+          "change": -0.12,
+          "color": "",
+          "price": 297.3,
+          "x": "JPM",
+          "y": 11.2
+        },
+        {
+          "change": 0.09,
+          "color": "",
+          "price": 494.51,
           "x": "BRK-B",
-          "y": 18.2
+          "y": 10.9
         }
       ],
       "name": "Financials"
@@ -251,93 +251,46 @@
     {
       "data": [
         {
-          "change": 2.73,
+          "change": 2.39,
           "color": "",
-          "price": 165.17,
-          "x": "PG",
-          "y": 37.3
-        },
-        {
-          "change": 2.29,
-          "color": "",
-          "price": 125.81,
-          "x": "WMT",
-          "y": 32.9
-        },
-        {
-          "change": 2.08,
-          "color": "",
-          "price": 187.22,
-          "x": "PM",
-          "y": 30.8
-        },
-        {
-          "change": 2.05,
-          "color": "",
-          "price": 168.32,
-          "x": "PEP",
-          "y": 30.5
-        },
-        {
-          "change": 0.9,
-          "color": "",
-          "price": 80.56,
-          "x": "KO",
-          "y": 19.0
-        },
-        {
-          "change": 0.08,
-          "color": "",
-          "price": 986.02,
-          "x": "COST",
-          "y": 10.8
-        }
-      ],
-      "name": "Consumer Staples"
-    },
-    {
-      "data": [
-        {
-          "change": -3.53,
-          "color": "",
-          "price": 63.09,
-          "x": "NKE",
-          "y": 45.3
-        },
-        {
-          "change": -2.91,
-          "color": "",
-          "price": 399.83,
+          "price": 409.38,
           "x": "TSLA",
-          "y": 39.1
+          "y": 33.900000000000006
         },
         {
-          "change": -2.3,
+          "change": 1.99,
           "color": "",
-          "price": 205.27,
-          "x": "AMZN",
-          "y": 33.0
-        },
-        {
-          "change": -2.14,
-          "color": "",
-          "price": 274.36,
-          "x": "LOW",
-          "y": 31.400000000000002
-        },
-        {
-          "change": 1.62,
-          "color": "",
-          "price": 334.56,
-          "x": "MCD",
-          "y": 26.200000000000003
-        },
-        {
-          "change": -1.38,
-          "color": "",
-          "price": 376.99,
+          "price": 384.48,
           "x": "HD",
-          "y": 23.799999999999997
+          "y": 29.9
+        },
+        {
+          "change": 1.6,
+          "color": "",
+          "price": 208.56,
+          "x": "AMZN",
+          "y": 26.0
+        },
+        {
+          "change": 1.59,
+          "color": "",
+          "price": 64.09,
+          "x": "NKE",
+          "y": 25.9
+        },
+        {
+          "change": 1.54,
+          "color": "",
+          "price": 278.59,
+          "x": "LOW",
+          "y": 25.4
+        },
+        {
+          "change": -0.45,
+          "color": "",
+          "price": 333.05,
+          "x": "MCD",
+          "y": 14.5
         }
       ],
       "name": "Consumer Disc."
@@ -345,51 +298,72 @@
     {
       "data": [
         {
-          "change": -1.46,
+          "change": 1.26,
           "color": "",
-          "price": 201.92,
-          "x": "RTX",
-          "y": 24.6
+          "price": 998.43,
+          "x": "COST",
+          "y": 22.6
         },
         {
-          "change": -1.23,
+          "change": 0.75,
           "color": "",
-          "price": 338.99,
-          "x": "GE",
-          "y": 22.3
+          "price": 126.75,
+          "x": "WMT",
+          "y": 17.5
         },
         {
-          "change": -0.37,
+          "change": 0.72,
           "color": "",
-          "price": 243.06,
-          "x": "HON",
-          "y": 13.7
+          "price": 169.54,
+          "x": "PEP",
+          "y": 17.2
+        },
+        {
+          "change": 0.2,
+          "color": "",
+          "price": 80.72,
+          "x": "KO",
+          "y": 12.0
+        },
+        {
+          "change": -0.12,
+          "color": "",
+          "price": 187.0,
+          "x": "PM",
+          "y": 11.2
+        },
+        {
+          "change": 0.07,
+          "color": "",
+          "price": 165.28,
+          "x": "PG",
+          "y": 10.7
         }
       ],
-      "name": "Industrials"
+      "name": "Consumer Staples"
     },
     {
       "data": [
         {
-          "change": -3.37,
+          "change": 2.66,
           "color": "",
-          "price": 76.02,
+          "price": 78.04,
           "x": "NFLX",
-          "y": 43.7
+          "y": 36.6
         },
         {
-          "change": -2.81,
+          "change": 0.32,
           "color": "",
-          "price": 637.25,
+          "price": 639.3,
           "x": "META",
-          "y": 38.1
+          "y": 13.2
         },
         {
-          "change": -1.11,
+          "change": -0.19,
           "color": "",
-          "price": 311.49,
+          "price": 310.9,
           "x": "GOOGL",
-          "y": 21.1
+          "y": 11.9
         }
       ],
       "name": "Communication"
@@ -397,11 +371,37 @@
     {
       "data": [
         {
-          "change": 2.04,
+          "change": 1.96,
           "color": "",
-          "price": 94.06,
+          "price": 345.64,
+          "x": "GE",
+          "y": 29.6
+        },
+        {
+          "change": -1.71,
+          "color": "",
+          "price": 198.46,
+          "x": "RTX",
+          "y": 27.1
+        },
+        {
+          "change": 0.23,
+          "color": "",
+          "price": 243.61,
+          "x": "HON",
+          "y": 12.3
+        }
+      ],
+      "name": "Industrials"
+    },
+    {
+      "data": [
+        {
+          "change": 1.72,
+          "color": "",
+          "price": 95.68,
           "x": "NEE",
-          "y": 30.4
+          "y": 27.2
         }
       ],
       "name": "Utilities"
@@ -409,11 +409,11 @@
     {
       "data": [
         {
-          "change": 0.34,
+          "change": 1.17,
           "color": "",
-          "price": 498.19,
+          "price": 504.0,
           "x": "LIN",
-          "y": 13.4
+          "y": 21.7
         }
       ],
       "name": "Materials"
