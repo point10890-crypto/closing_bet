@@ -143,12 +143,17 @@ def run_script(script_name, description, timeout=600):
     start_time = time.time()
 
     try:
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
         result = subprocess.run(
             [sys.executable, script_path] + script_args,
             cwd=SCRIPT_DIR,
             capture_output=True,
             text=True,
-            timeout=timeout
+            encoding='utf-8',
+            errors='replace',
+            timeout=timeout,
+            env=env
         )
 
         elapsed = time.time() - start_time

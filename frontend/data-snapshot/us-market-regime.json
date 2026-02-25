@@ -2,7 +2,7 @@
   "backtest": {
     "risk_free_rate": 0.04
   },
-  "confidence": 100.0,
+  "confidence": 75.0,
   "earnings_impact": {
     "lookback_quarters": 4,
     "max_beat_rate_bearish": 40,
@@ -10,15 +10,15 @@
   },
   "index_predictor": {
     "momentum_lookback": 20,
-    "rsi_overbought": 70,
-    "rsi_oversold": 30,
-    "vix_high": 20
+    "rsi_overbought": 75,
+    "rsi_oversold": 25,
+    "vix_high": 22
   },
-  "regime": "neutral",
+  "regime": "risk_on",
   "risk_alert": {
-    "max_drawdown_critical": -20.0,
-    "max_drawdown_warning": -10.0,
-    "stop_loss_default": -8.0,
+    "max_drawdown_critical": -25.0,
+    "max_drawdown_warning": -12.0,
+    "stop_loss_default": -10.0,
     "var_confidence": 0.95
   },
   "sector_rotation": {
@@ -32,32 +32,32 @@
       "breadth_regime": "neutral"
     },
     "trend": {
-      "sma200_slope": 15.2539,
+      "sma200_slope": 13.9461,
       "spy_above_200": true,
-      "spy_above_50": false,
-      "trend_regime": "neutral"
+      "spy_above_50": true,
+      "trend_regime": "risk_on"
     },
     "vix": {
-      "vix_current": 19.62,
-      "vix_ma20": 18.05,
+      "vix_current": 18.55,
+      "vix_ma20": 18.92,
       "vix_regime": "neutral",
-      "vix_trend": "rising"
+      "vix_trend": "falling"
     },
     "yield_curve": {
       "yield_regime": "neutral",
-      "yield_spread": 0.48
+      "yield_spread": 0.46
     }
   },
   "smart_money": {
     "institutional_weight": 0.2,
-    "min_composite_score": 60,
+    "min_composite_score": 55,
     "volume_weight": 0.25
   },
-  "timestamp": "2026-02-19T15:20:12.870968",
+  "timestamp": "2026-02-26T00:47:48.101734",
   "vcp_scanner": {
-    "max_base_depth": 0.3,
-    "min_rs_rating": 60,
-    "min_trend_score": 6
+    "max_base_depth": 0.35,
+    "min_rs_rating": 55,
+    "min_trend_score": 5
   },
-  "weighted_score": 1.0
+  "weighted_score": 0.7
 }

@@ -214,9 +214,9 @@ class GeminiSummaryGenerator:
     """Generate stock summaries using Gemini AI"""
     
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.getenv('GOOGLE_API_KEY')
+        self.api_key = api_key or os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY')
         if not self.api_key:
-            raise ValueError("GOOGLE_API_KEY not found in environment")
+            raise ValueError("GOOGLE_API_KEY or GEMINI_API_KEY not found in environment")
         
         # Gemini 3.0 Pro Preview (User Requested)
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent"

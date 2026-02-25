@@ -1,32 +1,33 @@
 {
   "gate": "RED",
-  "generated_at": "2026-02-20T00:25:49.334582",
+  "generated_at": "2026-02-24T20:00:23.749977",
   "metrics": {
     "alt_breadth_above_ema50": 0.0,
-    "btc_atrp_14_pct": 5.324605629555144,
-    "btc_ema200": 93064.83047058263,
-    "btc_ema200_slope_pct_20": -5.19535009903314,
-    "btc_ema50": 79061.9020696806,
-    "btc_price": 65990.6875,
-    "btc_volume_z_50": -0.6014381897408596,
+    "btc_atrp_14_pct": 3.893554198330982,
+    "btc_ema200": 91767.91929575238,
+    "btc_ema200_slope_pct_20": -5.502134958380705,
+    "btc_ema50": 76763.06186302203,
+    "btc_price": 63283.37890625,
+    "btc_volume_z_50": -0.09826692763994298,
     "fear_greed_class": "Extreme Fear",
-    "fear_greed_index": 9,
-    "funding_rate": -2.875e-05,
+    "fear_greed_index": 8,
+    "funding_rate": -3.266e-05,
     "gate_score_components": {
       "breadth": 2.0,
       "leverage": 9.0,
-      "participation": 2.0,
+      "participation": 6.0,
       "trend": 0.0,
-      "volatility": 2.0
+      "volatility": 8.0
     },
     "open_interest_delta_z": null
   },
   "reasons": [
     "BTC가 EMA50 아래 (하락 추세)",
     "EMA200 하락 중 (장기 약세)",
-    "변동성 급증 (시장 불안정)",
-    "거래량 부족 (관심 저조)",
+    "변동성 다소 높음 (휩쏘 주의)",
+    "거래량 평범 (유동성 유입 약함)",
     "알트 breadth 붕괴 (0% > EMA50)"
   ],
-  "score": 15
+  "score": 25,
+  "status": "RISK_OFF"
 }

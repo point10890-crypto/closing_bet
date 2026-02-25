@@ -12,650 +12,446 @@
     "content": "# 미국 주식 시장 분석\n\n**S&P 500이 0.77% 상승하며 반등했으며, VIX 19.55는 시장 변동성이 완화되는 추세를 보여줍니다.**\n\n## 시장 반등의 배경\n\n어제(2월 23일) 관세 불확실성과 AI 우려로 급락했던 미국 증시가 회복세를 보였습니다.[1] 다우존스지수는 0.76% 상승한 49,174.50으로 마감했으며, S&P 500도 0.77% 올랐습니다.[2] 이는 **AI가 대체가 아닌 보완 기술**이라는 인식이 확산되면서 AI 공포심이 완화된 결과입니다.[5]\n\n## 긍정 신호\n\n**기술주의 강한 수요**가 지속되고 있습니다. AMD는 메타와의 전략적 파트너십을 대폭 확대한다고 발표했으며, AI 수요가 \"미쳤다(INSANE)\"는 표현을 쓸 정도로 강하다고 언급했습니다.[7] 이는 AI 산업의 기본적 수요가 여전히 견고함을 시사합니다.\n\n## 주의할 점\n\n**거시적 불확실성은 여전합니다.** 트럼프 행정부의 관세 정책이 2월 24일부터 시행되면서 시장 변동성이 확대될 전망입니다.[1] 금과 은 같은 안전자산이 상승하고 있는 것은 투자자들이 여전히 방어적 포지션을 유지하고 있음을 보여줍니다.[6]\n\n## 투자 전략\n\n단기적으로는 현금과 금 비중을 유지하며 관망하되, 중장기적으로는 정책 불확실성 해소 시점에 기술·제조 섹터 저점 매수를 고려할 필요가 있습니다.[1]"
   },
   "fear_greed": {
-    "color": "#FFC107",
-    "level": "Neutral",
-    "score": 50,
-    "vix": 19.6
+    "color": "#4CAF50",
+    "components": {
+      "breadth": {
+        "iwm_chg": -0.15,
+        "score": 43,
+        "spy_chg": 0.53
+      },
+      "junk_bond": {
+        "score": 52,
+        "yield_change": 0.32
+      },
+      "momentum": {
+        "pct_from_high": -0.98,
+        "score": 95
+      },
+      "safe_haven": {
+        "gold_chg": 1.13,
+        "score": 44,
+        "stock_chg": 0.53
+      },
+      "vix": {
+        "score": 71,
+        "value": 18.63
+      }
+    },
+    "level": "Greed",
+    "score": 65
   },
   "market_data": {
     "bonds": {
+      "^FVX": {
+        "change": 0.47,
+        "high_52w": 4.22,
+        "low_52w": 3.53,
+        "name": "5Y Treasury",
+        "pct_from_high": -14.4,
+        "prev_close": 3.6,
+        "price": 3.62
+      },
+      "^IRX": {
+        "change": 0.0,
+        "high_52w": 4.3,
+        "low_52w": 3.51,
+        "name": "3M T-Bill",
+        "pct_from_high": -16.66,
+        "prev_close": 3.59,
+        "price": 3.59
+      },
       "^TNX": {
-        "change": 0.1,
+        "change": 0.32,
+        "high_52w": 4.63,
+        "low_52w": 3.89,
         "name": "10Y Treasury",
-        "price": 4.03
+        "pct_from_high": -12.59,
+        "prev_close": 4.03,
+        "price": 4.05
       }
     },
     "commodities": {
       "BTC-USD": {
-        "change": -0.84,
+        "change": 5.6,
+        "high_52w": 126198.07,
+        "low_52w": 60074.2,
         "name": "Bitcoin",
-        "price": 64071.33
+        "pct_from_high": -46.38,
+        "prev_close": 64080.04,
+        "price": 67667.03
+      },
+      "CL=F": {
+        "change": -0.41,
+        "high_52w": 78.4,
+        "low_52w": 54.98,
+        "name": "Crude Oil",
+        "pct_from_high": -16.63,
+        "prev_close": 65.63,
+        "price": 65.36
       },
       "GC=F": {
-        "change": -0.88,
+        "change": 1.13,
+        "high_52w": 5586.2,
+        "low_52w": 2834.1,
         "name": "Gold",
-        "price": 5158.8
+        "pct_from_high": -6.66,
+        "prev_close": 5155.8,
+        "price": 5214.3
       }
     },
     "currencies": {
       "DX-Y.NYB": {
-        "change": 0.19,
+        "change": -0.14,
+        "high_52w": 107.66,
+        "low_52w": 95.55,
         "name": "Dollar Index",
-        "price": 97.88
+        "pct_from_high": -9.21,
+        "prev_close": 97.88,
+        "price": 97.74
+      },
+      "EURUSD=X": {
+        "change": 0.12,
+        "high_52w": 1.2,
+        "low_52w": 1.04,
+        "name": "EUR/USD",
+        "pct_from_high": -1.79,
+        "prev_close": 1.18,
+        "price": 1.18
+      },
+      "USDJPY=X": {
+        "change": 1.15,
+        "high_52w": 159.44,
+        "low_52w": 139.89,
+        "name": "USD/JPY",
+        "pct_from_high": -1.9,
+        "prev_close": 154.63,
+        "price": 156.41
       },
       "USDKRW=X": {
-        "change": -0.08,
+        "change": -1.06,
+        "high_52w": 1486.9,
+        "low_52w": 1322.42,
         "name": "USD/KRW",
-        "price": 1441.08
+        "pct_from_high": -4.03,
+        "prev_close": 1442.2,
+        "price": 1426.94
       }
     },
-    "fear_greed": {
-      "color": "#FFC107",
-      "level": "Neutral",
-      "score": 50,
-      "vix": 19.6
+    "futures": {
+      "ES=F": {
+        "change": 0.49,
+        "high_52w": 7043.0,
+        "low_52w": 4832.0,
+        "name": "S&P 500 Futures",
+        "pct_from_high": -1.5,
+        "prev_close": 6903.75,
+        "price": 6937.25
+      },
+      "NQ=F": {
+        "change": 1.03,
+        "high_52w": 26399.0,
+        "low_52w": 16460.0,
+        "name": "NASDAQ Futures",
+        "pct_from_high": -4.21,
+        "prev_close": 25028.75,
+        "price": 25286.75
+      },
+      "YM=F": {
+        "change": 0.24,
+        "high_52w": 50611.0,
+        "low_52w": 36708.0,
+        "name": "Dow Futures",
+        "pct_from_high": -2.49,
+        "prev_close": 49236.0,
+        "price": 49352.0
+      }
     },
     "indices": {
       "DIA": {
-        "change": 0.77,
+        "change": 0.27,
+        "high_52w": 504.67,
+        "low_52w": 361.47,
         "name": "Dow Jones",
-        "price": 491.79
+        "pct_from_high": -2.29,
+        "prev_close": 491.79,
+        "price": 493.11
       },
       "IWM": {
-        "change": 1.09,
+        "change": -0.15,
+        "high_52w": 271.6,
+        "low_52w": 170.2,
         "name": "Russell 2000",
-        "price": 263.33
+        "pct_from_high": -3.19,
+        "prev_close": 263.33,
+        "price": 262.93
       },
       "QQQ": {
-        "change": 1.07,
+        "change": 1.04,
+        "high_52w": 636.6,
+        "low_52w": 400.96,
         "name": "NASDAQ 100",
-        "price": 607.87
+        "pct_from_high": -3.52,
+        "prev_close": 607.87,
+        "price": 614.22
       },
       "SPY": {
-        "change": 0.73,
+        "change": 0.53,
+        "high_52w": 697.84,
+        "low_52w": 477.64,
         "name": "S&P 500",
-        "price": 687.35
+        "pct_from_high": -0.98,
+        "prev_close": 687.35,
+        "price": 690.99
       }
     },
-    "timestamp": "2026-02-25T09:36:55.337908",
-    "volatility": {
-      "^VIX": {
-        "change": -6.95,
-        "name": "VIX",
-        "price": 19.55
+    "korean_indices": {
+      "^KQ11": {
+        "change": 0.02,
+        "high_52w": 1180.87,
+        "low_52w": 637.55,
+        "name": "KOSDAQ",
+        "pct_from_high": -1.32,
+        "prev_close": 1165.0,
+        "price": 1165.25
+      },
+      "^KS11": {
+        "change": 1.91,
+        "high_52w": 6144.71,
+        "low_52w": 2284.72,
+        "name": "KOSPI",
+        "pct_from_high": -0.99,
+        "prev_close": 5969.64,
+        "price": 6083.86
       }
+    },
+    "timestamp": "2026-02-26T01:15:32.846210",
+    "vix": {
+      "change": -4.71,
+      "color": "#FFC107",
+      "level": "Neutral",
+      "value": 18.63
+    }
+  },
+  "quant_signals": {
+    "backtest": {
+      "alpha": "N/A",
+      "max_dd": "N/A",
+      "sharpe": "N/A",
+      "total_return": "N/A",
+      "win_rate": "N/A"
+    },
+    "decision_signal": {
+      "action": "BUY",
+      "components": {
+        "market_gate": {
+          "contribution": 0,
+          "score": 50
+        },
+        "prediction": {
+          "contribution": 0,
+          "spy_bullish": 50
+        },
+        "regime": {
+          "contribution": 15,
+          "regime": "risk_on"
+        },
+        "risk": {
+          "contribution": 0,
+          "level": "No Data"
+        },
+        "sector_phase": {
+          "contribution": -5,
+          "phase": "Late Cycle"
+        }
+      },
+      "score": 60,
+      "timing": "SELECTIVE"
+    },
+    "prediction": {
+      "qqq_bullish": 50,
+      "spy_bullish": 50
+    },
+    "regime": {
+      "confidence": 75.0,
+      "regime": "risk_on"
+    },
+    "risk": {
+      "cvar_95_5d": 0,
+      "risk_level": "No Data",
+      "var_95_5d": 0
+    },
+    "top_picks": [
+      {
+        "ai_bonus": 13,
+        "ai_recommendation": "매수",
+        "ai_summary": "```json\n{\n  \"thesis\": \"Allstate는 현재 5.45배의 극도로 낮은 P/E와 강력한 비용 절감 프로그램(SAVE)을 통해 수익성 개선이 가시화되고 있으며, 금리 하락기 주택 시장 활성화에 따른 보험 수요 증가 수혜가 예상됩니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"구조적 비용 절감 및 마진 개선\",\n      \"evidence\": \"SAVE 프로그램을 통해 4분기 실적 강세를 장기적 경쟁 우위로 전환하고 있으며, 비용 주도 마진 개선과 배당금 인상이 주주 가치를 제고함 [2026-02-15, Allstate SAVE Program & Dividend News]\"\n    },\n    {\n      \"point\": \"주택 시장 바이어 우위 전환에 따른 보험 갱신/신규 수요\",\n      \"evidence\": \"주택 시장이 현금 구매자 중심에서 바이어 우위 시장(Buyers' market)으로 전환되면서 거래량 회복 및 신규 주택",
+        "current_price": 207.72,
+        "final_score": 74.4,
+        "grade": "🌟 A급 (적극 매수)",
+        "inst_pct": 82.43,
+        "name": "The Allstate Corporation",
+        "quant_score": 76.8,
+        "rank": 1,
+        "rsi": 53.6,
+        "sd_stage": "Strong Accumulation",
+        "target_upside": 15.5,
+        "ticker": "ALL"
+      },
+      {
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "ai_summary": "```json\n{\n  \"thesis\": \"Align Technology(ALGN)는 98.5%에 달하는 강력한 기관 보유 비중과 스위스 구강 건강 연구를 통한 장기적 해자 구축, 그리고 자사주 매입이라는 주주 환원 정책이 맞물려 구조적 성장 국면에 재진입했습니다. 현재 P/E 33.0배는 역사적 고점 대비 합리적인 수준이며, RSI 61.7과 Bullish MA Signal은 기술적으로도 상승 추세가 유효함을 시사합니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"장기적 경제적 해자(Moat) 강화\",\n      \"evidence\": \"스위스 구강 건강 연구(Swiss Oral Health Study) 데이터를 활용하여 경쟁사 대비 차별화된 임상 데이터 확보 및 장기적 진입 장벽 구축 [2026-02-15 뉴스]\"\n    },\n    {\n      \"point\": \"주주 친화 정책 및 가이던스 상향\",\n      \"evidence\": \"새로운 가이던스 ",
+        "current_price": 185.98,
+        "final_score": 73.8,
+        "grade": "📈 B급 (매수 고려)",
+        "inst_pct": 95.56,
+        "name": "Align Technology, Inc.",
+        "quant_score": 69.8,
+        "rank": 2,
+        "rsi": 57.1,
+        "sd_stage": "Strong Accumulation",
+        "target_upside": 6.8,
+        "ticker": "ALGN"
+      },
+      {
+        "ai_bonus": 13,
+        "ai_recommendation": "매수",
+        "ai_summary": "```json\n{\n  \"thesis\": \"Analog Devices(ADI)는 강력한 기관 수급(93.5%)과 견조한 매출 성장(25.9%)을 바탕으로 산업 자동화 및 전장화 트렌드의 수혜를 입고 있으나, 현재 주가가 목표가에 근접(-5.3%)했고 RSI가 과매수권(70.5)에 진입하여 단기 조정 가능성이 상존합니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"1분기 실적 발표에 대한 긍정적 기대감\",\n      \"evidence\": \"Barclays 등 주요 기관의 투자의견 상향 조정 및 실적 기대감 반영 [The Globe and Mail, 2026-02-16]\"\n    },\n    {\n      \"point\": \"거버넌스 개선 및 산업용 반도체 수요 회복\",\n      \"evidence\": \"특별 주주총회 안건 및 산업용 반도체 내러티브 재편에 대한 시장의 긍정적 평가 [simplywall.st, 2026-02-16]\"\n    },\n    {\n  ",
+        "current_price": 361.23,
+        "final_score": 70.5,
+        "grade": "🌟 A급 (적극 매수)",
+        "inst_pct": 93.29,
+        "name": "Analog Devices, Inc.",
+        "quant_score": 71.9,
+        "rank": 3,
+        "rsi": 79.4,
+        "sd_stage": "Strong Accumulation",
+        "target_upside": 5.9,
+        "ticker": "ADI"
+      },
+      {
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "ai_summary": "```json\n{\n  \"thesis\": \"경기 방어적 성격을 지닌 헬스케어 섹터 내에서 견고한 기관 수급(84.7%)과 희귀질환 치료제(UPLIZNA)의 EU 승인 등 R&D 파이프라인 성과가 주가 상승을 뒷받침하고 있습니다. 시장 변동성(VIX 21.2)이 높은 상황에서 안정적인 현금 흐름과 신약 모멘텀을 겸비한 매력적인 대안입니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"신약 파이프라인 확장 및 규제 승인 모멘텀\",\n      \"evidence\": \"UPLIZNA의 EU 승인으로 희귀질환 포트폴리오가 강화되며 장기 성장 동력 확보 [2026-02-14, GuruFocus/News]\"\n    },\n    {\n      \"point\": \"강력한 기관 수급 및 기술적 강세\",\n      \"evidence\": \"수급 점수 75점(Strong Accumulation) 및 기관 보유 비중 84.7%로 스마트 머니 유입 지속, MA Signal이 Bullis",
+        "current_price": 382.26,
+        "final_score": 70.2,
+        "grade": "📈 B급 (매수 고려)",
+        "inst_pct": 85.11,
+        "name": "Amgen Inc.",
+        "quant_score": 65.2,
+        "rank": 4,
+        "rsi": 67.0,
+        "sd_stage": "Accumulation",
+        "target_upside": -8.4,
+        "ticker": "AMGN"
+      },
+      {
+        "ai_bonus": 18,
+        "ai_recommendation": "매수",
+        "ai_summary": "```json\n{\n  \"thesis\": \"AI 및 HBM 관련 수요 증가에 힘입어 강력한 1분기 실적과 2분기 가이던스를 제시하며 반도체 장비 업종 내 차별화된 성장세를 보이고 있습니다. 높은 기관 보유율(86.3%)과 기술적 강세(Bullish MA Signal)는 추가 상승 여력을 지지하나, 높은 VIX와 P/E 밸류에이션 부담은 단기 변동성을 유발할 수 있습니다.\",\n  \"catalysts\": [\n    {\n      \"point\": \"강력한 실적 및 가이던스 상향\",\n      \"evidence\": \"1분기 어닝 서프라이즈 달성 및 강력한 2분기 전망 제시 후 주가 8% 급등 [TIKR.com, 2026-02-16]\"\n    },\n    {\n      \"point\": \"AI 메모리(HBM) 및 삼성전자 협력 수혜\",\n      \"evidence\": \"삼성전자의 HBM4 생산 확대 계획과 EPIC 센터에서의 역할이 AI 메모리 스토리의 핵심 동력으로 작용 [뉴스 4, 2026-",
+        "current_price": 391.5,
+        "final_score": 70.0,
+        "grade": "📈 B급 (매수 고려)",
+        "inst_pct": 85.63,
+        "name": "Applied Materials, Inc.",
+        "quant_score": 65.0,
+        "rank": 5,
+        "rsi": 73.5,
+        "sd_stage": "Accumulation",
+        "target_upside": 4.5,
+        "ticker": "AMAT"
+      }
+    ],
+    "track_record": {
+      "alpha": "N/A",
+      "avg_return": -0.11,
+      "total_picks": "N/A",
+      "win_rate": 33.3
     }
   },
   "sector_rotation": {
-    "money_flow": {
-      "inflows": [
-        {
-          "name": "Energy",
-          "recent_rs": 2.84,
-          "rs_change": 3.52,
-          "ticker": "XLE"
-        },
-        {
-          "name": "Utilities",
-          "recent_rs": 1.91,
-          "rs_change": 3.46,
-          "ticker": "XLU"
-        },
-        {
-          "name": "Consumer Staples",
-          "recent_rs": 1.65,
-          "rs_change": 2.13,
-          "ticker": "XLP"
-        },
-        {
-          "name": "Real Estate",
-          "recent_rs": 1.36,
-          "rs_change": 2.11,
-          "ticker": "XLRE"
-        },
-        {
-          "name": "Industrials",
-          "recent_rs": 1.73,
-          "rs_change": 1.4,
-          "ticker": "XLI"
-        },
-        {
-          "name": "Materials",
-          "recent_rs": 1.63,
-          "rs_change": 1.04,
-          "ticker": "XLB"
-        },
-        {
-          "name": "Healthcare",
-          "recent_rs": 0.14,
-          "rs_change": 0.6,
-          "ticker": "XLV"
-        }
-      ],
-      "outflows": [
-        {
-          "name": "Consumer Disc.",
-          "recent_rs": -1.15,
-          "rs_change": -1.67,
-          "ticker": "XLY"
-        },
-        {
-          "name": "Technology",
-          "recent_rs": -0.62,
-          "rs_change": -0.94,
-          "ticker": "XLK"
-        },
-        {
-          "name": "Financials",
-          "recent_rs": -0.09,
-          "rs_change": -0.91,
-          "ticker": "XLF"
-        },
-        {
-          "name": "Comm. Services",
-          "recent_rs": -0.38,
-          "rs_change": -0.69,
-          "ticker": "XLC"
-        }
-      ],
-      "regime_change_alert": false
-    },
-    "performance_matrix": {
-      "SPY": {
-        "12m": 13.28,
-        "1m": -0.8,
-        "1w": -1.1,
-        "3m": 2.56,
-        "6m": 16.8,
-        "current_price": 686.29,
-        "name": "SPY"
-      },
-      "XLB": {
-        "12m": 20.28,
-        "1m": 11.62,
-        "1w": 1.61,
-        "3m": 20.21,
-        "6m": 23.94,
-        "current_price": 53.02,
-        "name": "Materials"
-      },
-      "XLC": {
-        "12m": 10.52,
-        "1m": -2.34,
-        "1w": -1.96,
-        "3m": 0.04,
-        "6m": 13.49,
-        "current_price": 114.59,
-        "name": "Comm. Services"
-      },
-      "XLE": {
-        "12m": 23.04,
-        "1m": 20.03,
-        "1w": 2.13,
-        "3m": 25.9,
-        "6m": 36.01,
-        "current_price": 54.78,
-        "name": "Energy"
-      },
-      "XLF": {
-        "12m": 2.17,
-        "1m": -6.76,
-        "1w": -2.5,
-        "3m": -1.02,
-        "6m": 4.22,
-        "current_price": 52.59,
-        "name": "Financials"
-      },
-      "XLI": {
-        "12m": 27.87,
-        "1m": 8.04,
-        "1w": 0.77,
-        "3m": 14.58,
-        "6m": 24.02,
-        "current_price": 175.04,
-        "name": "Industrials"
-      },
-      "XLK": {
-        "12m": 17.09,
-        "1m": -3.91,
-        "1w": -1.7,
-        "3m": -2.74,
-        "6m": 21.52,
-        "current_price": 140.91,
-        "name": "Technology"
-      },
-      "XLP": {
-        "12m": 10.91,
-        "1m": 13.64,
-        "1w": 0.7,
-        "3m": 13.72,
-        "6m": 8.55,
-        "current_price": 88.04,
-        "name": "Consumer Staples"
-      },
-      "XLRE": {
-        "12m": 6.04,
-        "1m": 6.51,
-        "1w": 2.6,
-        "3m": 6.55,
-        "6m": 6.62,
-        "current_price": 43.35,
-        "name": "Real Estate"
-      },
-      "XLU": {
-        "12m": 16.9,
-        "1m": 6.29,
-        "1w": 4.9,
-        "3m": 1.47,
-        "6m": 13.37,
-        "current_price": 45.61,
-        "name": "Utilities"
-      },
-      "XLV": {
-        "12m": 9.59,
-        "1m": -0.27,
-        "1w": 0.86,
-        "3m": 9.81,
-        "6m": 20.42,
-        "current_price": 157.67,
-        "name": "Healthcare"
-      },
-      "XLY": {
-        "12m": 4.34,
-        "1m": -3.35,
-        "1w": -0.45,
-        "3m": -0.3,
-        "6m": 9.85,
-        "current_price": 117.02,
-        "name": "Consumer Disc."
-      }
-    },
-    "regime_change": {
-      "current_phase": "Late Cycle",
-      "previous_phase": "Late Cycle",
-      "regime_change_alert": false
-    },
-    "relative_strength_history": {
-      "dates": [
-        "2025-12-05",
-        "2025-12-12",
-        "2025-12-19",
-        "2025-12-26",
-        "2026-01-02",
-        "2026-01-09",
-        "2026-01-16",
-        "2026-01-23",
-        "2026-01-30",
-        "2026-02-06",
-        "2026-02-13",
-        "2026-02-20"
-      ],
-      "sectors": {
-        "XLB": [
-          -1.7,
-          2.98,
-          0.36,
-          0.73,
-          1.06,
-          3.04,
-          1.22,
-          3.0,
-          -1.8,
-          4.74,
-          4.78,
-          -1.21
-        ],
-        "XLC": [
-          1.17,
-          0.08,
-          -0.15,
-          0.14,
-          0.13,
-          -0.73,
-          -1.98,
-          1.91,
-          2.27,
-          -3.4,
-          0.27,
-          -0.66
-        ],
-        "XLE": [
-          1.2,
-          -0.32,
-          -3.16,
-          -0.42,
-          4.31,
-          0.64,
-          2.53,
-          3.5,
-          3.38,
-          4.5,
-          3.35,
-          0.13
-        ],
-        "XLF": [
-          0.32,
-          2.94,
-          -0.32,
-          0.35,
-          -0.21,
-          -0.14,
-          -1.97,
-          -2.17,
-          0.3,
-          1.73,
-          -3.53,
-          1.15
-        ],
-        "XLI": [
-          0.24,
-          1.97,
-          -0.68,
-          -0.22,
-          1.52,
-          0.9,
-          3.42,
-          -1.25,
-          0.35,
-          4.87,
-          1.86,
-          -0.17
-        ],
-        "XLK": [
-          2.1,
-          -1.41,
-          0.51,
-          0.06,
-          -0.49,
-          -0.31,
-          -0.02,
-          -0.01,
-          -1.23,
-          -1.72,
-          0.17,
-          0.3
-        ],
-        "XLP": [
-          -1.48,
-          1.8,
-          -0.93,
-          -1.33,
-          0.34,
-          0.41,
-          3.96,
-          1.33,
-          0.33,
-          5.5,
-          3.07,
-          -2.31
-        ],
-        "XLRE": [
-          -1.97,
-          -0.01,
-          -1.15,
-          0.14,
-          0.69,
-          -1.3,
-          4.57,
-          -1.92,
-          0.04,
-          1.55,
-          4.88,
-          -1.01
-        ],
-        "XLU": [
-          -4.78,
-          -0.51,
-          -0.59,
-          -0.32,
-          1.97,
-          -3.15,
-          2.42,
-          -1.56,
-          1.22,
-          0.43,
-          8.55,
-          -2.58
-        ],
-        "XLV": [
-          -3.12,
-          1.1,
-          0.45,
-          -0.28,
-          0.69,
-          -0.44,
-          -0.65,
-          1.47,
-          -2.14,
-          2.11,
-          1.26,
-          -0.67
-        ],
-        "XLY": [
-          0.93,
-          1.38,
-          0.83,
-          -1.07,
-          -2.0,
-          3.52,
-          -1.35,
-          1.03,
-          -1.99,
-          -2.43,
-          -0.25,
-          0.06
-        ]
-      }
-    },
-    "rotation_clock": {
-      "current_angle": 225,
-      "phases": {
-        "Early Cycle": {
-          "angle": 45,
-          "score": 0.79,
-          "sectors": [
-            {
-              "name": "Financials",
-              "return_1m": -6.76,
-              "ticker": "XLF"
-            },
-            {
-              "name": "Consumer Disc.",
-              "return_1m": -3.35,
-              "ticker": "XLY"
-            },
-            {
-              "name": "Industrials",
-              "return_1m": 8.04,
-              "ticker": "XLI"
-            }
-          ]
-        },
-        "Late Cycle": {
-          "angle": 225,
-          "score": 11.28,
-          "sectors": [
-            {
-              "name": "Energy",
-              "return_1m": 20.03,
-              "ticker": "XLE"
-            },
-            {
-              "name": "Real Estate",
-              "return_1m": 6.51,
-              "ticker": "XLRE"
-            }
-          ]
-        },
-        "Mid Cycle": {
-          "angle": 135,
-          "score": 2.29,
-          "sectors": [
-            {
-              "name": "Technology",
-              "return_1m": -3.91,
-              "ticker": "XLK"
-            },
-            {
-              "name": "Comm. Services",
-              "return_1m": -2.34,
-              "ticker": "XLC"
-            },
-            {
-              "name": "Materials",
-              "return_1m": 11.62,
-              "ticker": "XLB"
-            }
-          ]
-        },
-        "Recession": {
-          "angle": 315,
-          "score": 5.78,
-          "sectors": [
-            {
-              "name": "Utilities",
-              "return_1m": 6.29,
-              "ticker": "XLU"
-            },
-            {
-              "name": "Consumer Staples",
-              "return_1m": 13.64,
-              "ticker": "XLP"
-            },
-            {
-              "name": "Healthcare",
-              "return_1m": -0.27,
-              "ticker": "XLV"
-            }
-          ]
-        }
-      }
-    },
-    "rotation_signals": {
-      "current_phase": "Late Cycle",
-      "lagging_sectors": [
-        "XLC",
-        "XLK",
-        "XLF"
-      ],
-      "leading_sectors": [
-        "XLE",
-        "XLP",
-        "XLB"
-      ],
-      "phase_confidence": 77,
-      "phase_scores": {
-        "Early Cycle": 0.79,
-        "Late Cycle": 11.28,
-        "Mid Cycle": 2.29,
-        "Recession": 5.78
-      },
-      "rotation_velocity": 4.03
-    },
-    "timestamp": "2026-02-19T15:24:08.765028"
+    "citations": [],
+    "content": ""
   },
   "smart_money": {
+    "performance": {
+      "overall_avg": -0.11,
+      "overall_win_rate": 33.3,
+      "recent_dates": [
+        {
+          "avg_return": -0.1,
+          "date": "2026-02-26",
+          "win_rate": 20.0
+        },
+        {
+          "avg_return": -0.11,
+          "date": "2026-02-19",
+          "win_rate": 40.0
+        },
+        {
+          "avg_return": -0.11,
+          "date": "2026-02-18",
+          "win_rate": 40.0
+        }
+      ]
+    },
     "top_picks": {
       "picks": [
         {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 83.7,
-          "name": "NVIDIA Corporation",
+          "ai_recommendation": "매수",
+          "final_score": 74.4,
+          "name": "The Allstate Corporation",
           "rank": 1,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "NVDA"
+          "sd_stage": "Strong Accumulation",
+          "target_upside": 15.5,
+          "ticker": "ALL"
         },
         {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 82.9,
-          "name": "Vertex Pharmaceuticals Incorpor",
+          "ai_recommendation": "매수",
+          "final_score": 73.8,
+          "name": "Align Technology, Inc.",
           "rank": 2,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "VRTX"
+          "sd_stage": "Strong Accumulation",
+          "target_upside": 6.8,
+          "ticker": "ALGN"
         },
         {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 80.6,
-          "name": "Mondelez International, Inc.",
+          "ai_recommendation": "매수",
+          "final_score": 70.5,
+          "name": "Analog Devices, Inc.",
           "rank": 3,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "MDLZ"
+          "sd_stage": "Strong Accumulation",
+          "target_upside": 5.9,
+          "ticker": "ADI"
         },
         {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 80.1,
-          "name": "RTX Corporation",
+          "ai_recommendation": "매수",
+          "final_score": 70.2,
+          "name": "Amgen Inc.",
           "rank": 4,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "RTX"
+          "sd_stage": "Accumulation",
+          "target_upside": -8.4,
+          "ticker": "AMGN"
         },
         {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 79.1,
-          "name": "Cisco Systems, Inc.",
+          "ai_recommendation": "매수",
+          "final_score": 70.0,
+          "name": "Applied Materials, Inc.",
           "rank": 5,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "CSCO"
-        },
-        {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 77.9,
-          "name": "Apple Inc.",
-          "rank": 6,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "AAPL"
-        },
-        {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 77.8,
-          "name": "AbbVie Inc.",
-          "rank": 7,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "ABBV"
-        },
-        {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 77.7,
-          "name": "Regeneron Pharmaceuticals, Inc.",
-          "rank": 8,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "REGN"
-        },
-        {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 76.5,
-          "name": "Pepsico, Inc.",
-          "rank": 9,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "PEP"
-        },
-        {
-          "ai_recommendation": "Strong Buy",
-          "final_score": 76.0,
-          "name": "Costco Wholesale Corporation",
-          "rank": 10,
-          "sd_stage": "A",
-          "target_upside": 0,
-          "ticker": "COST"
+          "sd_stage": "Accumulation",
+          "target_upside": 4.5,
+          "ticker": "AMAT"
         }
       ],
-      "timestamp": "2026-02-25T09:37:33.721559"
+      "timestamp": "2026-02-26T01:01:05.578108"
     }
   },
-  "timestamp": "2026-02-25T09:37:46.133388",
+  "timestamp": "2026-02-26T01:15:32.846204",
+  "version": "2.0",
   "vix": {
-    "change": -6.95,
-    "color": "#4CAF50",
-    "level": "Low",
-    "value": 19.55
+    "change": -4.71,
+    "color": "#FFC107",
+    "level": "Neutral",
+    "value": 18.63
   }
 }

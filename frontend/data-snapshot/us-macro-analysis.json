@@ -1,447 +1,25 @@
 {
-  "timestamp": "2026-02-25T01:08:26.790423",
-  "lang": "ko",
-  "model": "gemini",
-  "macro_indicators": {
-    "VIX": {
-      "value": 20.01,
-      "change_1d": -4.76,
-      "high_52w": 60.13,
-      "low_52w": 13.38,
-      "pct_from_high": -66.72,
-      "pct_from_low": 49.55,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:20.302571"
-    },
-    "SKEW": {
-      "value": 141.43,
-      "change_1d": -2.81,
-      "high_52w": 161.86,
-      "low_52w": 125.77,
-      "pct_from_high": -12.62,
-      "pct_from_low": 12.45,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:20.432024"
-    },
-    "DXY": {
-      "value": 97.89,
-      "change_1d": 0.19,
-      "high_52w": 107.66,
-      "low_52w": 95.55,
-      "pct_from_high": -9.08,
-      "pct_from_low": 2.45,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:20.565323"
-    },
-    "EUR/USD": {
-      "value": 1.18,
-      "change_1d": -0.43,
-      "high_52w": 1.2,
-      "low_52w": 1.04,
-      "pct_from_high": -1.99,
-      "pct_from_low": 13.51,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:20.697086"
-    },
-    "USD/JPY": {
-      "value": 155.79,
-      "change_1d": 0.94,
-      "high_52w": 159.44,
-      "low_52w": 139.89,
-      "pct_from_high": -2.29,
-      "pct_from_low": 11.37,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:20.830875"
-    },
-    "2Y_Yield": {
-      "value": 3.59,
-      "change_1d": 0.0,
-      "high_52w": 4.3,
-      "low_52w": 3.51,
-      "pct_from_high": -16.66,
-      "pct_from_low": 2.31,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:20.961414"
-    },
-    "10Y_Yield": {
-      "value": 4.04,
-      "change_1d": 0.25,
-      "high_52w": 4.63,
-      "low_52w": 3.89,
-      "pct_from_high": -12.75,
-      "pct_from_low": 3.94,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.091879"
-    },
-    "30Y_Yield": {
-      "value": 4.69,
-      "change_1d": -0.17,
-      "high_52w": 5.15,
-      "low_52w": 4.34,
-      "pct_from_high": -9.02,
-      "pct_from_low": 7.99,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.222057"
-    },
-    "HY_Credit": {
-      "value": 80.82,
-      "change_1d": -0.06,
-      "high_52w": 81.01,
-      "low_52w": 71.53,
-      "pct_from_high": -0.23,
-      "pct_from_low": 12.99,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.384714"
-    },
-    "IG_Credit": {
-      "value": 111.68,
-      "change_1d": -0.03,
-      "high_52w": 111.83,
-      "low_52w": 99.64,
-      "pct_from_high": -0.13,
-      "pct_from_low": 12.09,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.557620"
-    },
-    "GOLD": {
-      "value": 5168.8,
-      "change_1d": -0.69,
-      "high_52w": 5586.2,
-      "low_52w": 2834.1,
-      "pct_from_high": -7.47,
-      "pct_from_low": 82.38,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.686119"
-    },
-    "SILVER": {
-      "value": 87.73,
-      "change_1d": 1.4,
-      "high_52w": 121.3,
-      "low_52w": 28.31,
-      "pct_from_high": -27.68,
-      "pct_from_low": 209.89,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.816933"
-    },
-    "OIL": {
-      "value": 65.88,
-      "change_1d": -0.65,
-      "high_52w": 78.4,
-      "low_52w": 54.98,
-      "pct_from_high": -15.97,
-      "pct_from_low": 19.83,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:21.947809"
-    },
-    "COPPER": {
-      "value": 5.97,
-      "change_1d": 3.45,
-      "high_52w": 6.51,
-      "low_52w": 4.1,
-      "pct_from_high": -8.24,
-      "pct_from_low": 45.71,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:22.079783"
-    },
-    "NAT_GAS": {
-      "value": 2.88,
-      "change_1d": -3.42,
-      "high_52w": 7.83,
-      "low_52w": 2.62,
-      "pct_from_high": -63.17,
-      "pct_from_low": 9.95,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:22.211569"
-    },
-    "SPY": {
-      "value": 686.12,
-      "change_1d": 0.55,
-      "high_52w": 697.84,
-      "low_52w": 477.64,
-      "pct_from_high": -1.68,
-      "pct_from_low": 43.65,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:22.388122"
-    },
-    "QQQ": {
-      "value": 607.38,
-      "change_1d": 0.99,
-      "high_52w": 636.6,
-      "low_52w": 400.96,
-      "pct_from_high": -4.59,
-      "pct_from_low": 51.48,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:22.549965"
-    },
-    "IWM": {
-      "value": 262.69,
-      "change_1d": 0.84,
-      "high_52w": 271.6,
-      "low_52w": 170.2,
-      "pct_from_high": -3.28,
-      "pct_from_low": 54.34,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:22.722989"
-    },
-    "DIA": {
-      "value": 491.91,
-      "change_1d": 0.8,
-      "high_52w": 504.67,
-      "low_52w": 361.47,
-      "pct_from_high": -2.53,
-      "pct_from_low": 36.09,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:22.917650"
-    },
-    "BTC": {
-      "value": 64246.66,
-      "change_1d": -0.57,
-      "high_52w": 126198.07,
-      "low_52w": 60074.2,
-      "pct_from_high": -49.09,
-      "pct_from_low": 6.95,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:23.052350"
-    },
-    "ETH": {
-      "value": 1857.59,
-      "change_1d": 0.11,
-      "high_52w": 4953.73,
-      "low_52w": 1386.8,
-      "pct_from_high": -62.5,
-      "pct_from_low": 33.95,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:23.187854"
-    },
-    "CSI300": {
-      "value": 4707.54,
-      "change_1d": 1.01,
-      "high_52w": 4836.96,
-      "low_52w": 3514.12,
-      "pct_from_high": -2.68,
-      "pct_from_low": 33.96,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:23.416377"
-    },
-    "NIKKEI": {
-      "value": 57321.09,
-      "change_1d": 0.87,
-      "high_52w": 58015.08,
-      "low_52w": 30792.74,
-      "pct_from_high": -1.2,
-      "pct_from_low": 86.15,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:23.648565"
-    },
-    "DAX": {
-      "value": 25032.43,
-      "change_1d": 0.16,
-      "high_52w": 25507.79,
-      "low_52w": 18489.91,
-      "pct_from_high": -1.86,
-      "pct_from_low": 35.38,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:23.778934"
-    },
-    "FTSE": {
-      "value": 10695.83,
-      "change_1d": 0.1,
-      "high_52w": 10745.8,
-      "low_52w": 7544.8,
-      "pct_from_high": -0.47,
-      "pct_from_low": 41.76,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:23.910201"
-    },
-    "KOSPI": {
-      "value": 5969.64,
-      "change_1d": 2.11,
-      "high_52w": 5969.64,
-      "low_52w": 2284.72,
-      "pct_from_high": 0.0,
-      "pct_from_low": 161.29,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:24.044016"
-    },
-    "RSP": {
-      "value": 203.01,
-      "change_1d": 0.57,
-      "high_52w": 205.24,
-      "low_52w": 148.5,
-      "pct_from_high": -1.09,
-      "pct_from_low": 36.71,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:24.202406"
-    },
-    "IEF": {
-      "value": 97.42,
-      "change_1d": -0.02,
-      "high_52w": 97.53,
-      "low_52w": 89.88,
-      "pct_from_high": -0.11,
-      "pct_from_low": 8.39,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:24.368615"
-    },
-    "XLF": {
-      "value": 50.56,
-      "change_1d": -0.33,
-      "high_52w": 56.52,
-      "low_52w": 41.78,
-      "pct_from_high": -10.54,
-      "pct_from_low": 21.02,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:24.557947"
-    },
-    "XLE": {
-      "value": 54.69,
-      "change_1d": -0.83,
-      "high_52w": 55.93,
-      "low_52w": 36.32,
-      "pct_from_high": -2.22,
-      "pct_from_low": 50.57,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:24.727989"
-    },
-    "XLK": {
-      "value": 140.55,
-      "change_1d": 1.47,
-      "high_52w": 152.76,
-      "low_52w": 85.84,
-      "pct_from_high": -7.99,
-      "pct_from_low": 63.74,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:24.895102"
-    },
-    "XLU": {
-      "value": 46.56,
-      "change_1d": -0.26,
-      "high_52w": 47.08,
-      "low_52w": 34.77,
-      "pct_from_high": -1.1,
-      "pct_from_low": 33.91,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:25.057023"
-    },
-    "XHB": {
-      "value": 117.78,
-      "change_1d": 1.12,
-      "high_52w": 123.13,
-      "low_52w": 84.08,
-      "pct_from_high": -4.35,
-      "pct_from_low": 40.08,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:25.222497"
-    },
-    "VNQ": {
-      "value": 94.89,
-      "change_1d": -0.01,
-      "high_52w": 95.64,
-      "low_52w": 74.77,
-      "pct_from_high": -0.79,
-      "pct_from_low": 26.9,
-      "data_quality": "actual",
-      "last_updated": "2026-02-25T01:08:25.372975"
-    },
-    "YieldSpread": {
-      "value": 0.45,
-      "change_1d": 0,
-      "pct_from_high": 0,
-      "signal": "Normal",
-      "desc": "10Y - 2Y Yield"
-    },
-    "Breadth": {
-      "value": 0.2959,
-      "change_1d": 0,
-      "pct_from_high": 0,
-      "signal": "Check Trend",
-      "desc": "RSP/SPY Ratio (Rising = Healthy)"
-    },
-    "CreditRisk": {
-      "value": 0.8296,
-      "change_1d": 0,
-      "pct_from_high": 0,
-      "signal": "Check Trend",
-      "desc": "HYG/IEF Ratio (Falling = Stress)"
-    },
-    "FearGreed": {
-      "value": 50,
-      "change_1d": 0,
-      "signal": "Neutral (unavailable)",
-      "pct_from_high": 0,
-      "pct_from_low": 0,
-      "data_quality": "simulated",
-      "note": "CNN API unavailable - using neutral placeholder"
-    }
+  "ai_analysis": "AI 분석 생성 실패",
+  "corporate_sentiment": {
+    "details": [
+      "Earnings data for 5 tickers"
+    ],
+    "earnings_tone": "Analyzed 5 companies",
+    "filing_activity": "Recent filings: 5 companies",
+    "guidance_trend": "Stable"
   },
-  "news": [
-    {
-      "title": "Fed's Waller says he could shift to holding rates steady if next jobs report comes in strong - Yahoo Finance",
-      "source": "Yahoo Finance",
-      "date": "Mon, 23 Feb 2026 13:35:11 GMT",
-      "category": "Federal"
-    },
-    {
-      "title": "Fed’s Waller calls March interest-rate cut ‘a coin flip’ - thestreet.com",
-      "source": "thestreet.com",
-      "date": "Mon, 23 Feb 2026 22:37:00 GMT",
-      "category": "Federal"
-    },
-    {
-      "title": "Federal Reserve holds interest rates as Trump piles on pressure - The Guardian",
-      "source": "The Guardian",
-      "date": "Wed, 28 Jan 2026 08:00:00 GMT",
-      "category": "Federal"
-    },
-    {
-      "title": "Statement from Federal Reserve Chair Jerome H. Powell - Federal Reserve Board (.gov)",
-      "source": "Federal Reserve Board (.gov)",
-      "date": "Sun, 11 Jan 2026 08:00:00 GMT",
-      "category": "Fed"
-    },
-    {
-      "title": "Think you could run the Fed better than Jerome Powell? Now you can try in Federal Reserve Simulator - Courthouse News",
-      "source": "Courthouse News",
-      "date": "Fri, 20 Feb 2026 08:00:00 GMT",
-      "category": "Fed"
-    },
-    {
-      "title": "How Jerome Powell Is Trump-Proofing the Fed - Bloomberg.com",
-      "source": "Bloomberg.com",
-      "date": "Fri, 20 Feb 2026 10:00:04 GMT",
-      "category": "Fed"
-    },
-    {
-      "title": "Texas Economic Outlook | February 2026 - Texas Real Estate Research Center",
-      "source": "Texas Real Estate Research Center",
-      "date": "Mon, 23 Feb 2026 16:08:22 GMT",
-      "category": "US"
-    },
-    {
-      "title": "US GDP Growth Is Projected to Outperform Economist Forecasts in 2026 - Goldman Sachs",
-      "source": "Goldman Sachs",
-      "date": "Thu, 15 Jan 2026 08:00:00 GMT",
-      "category": "US"
-    },
-    {
-      "title": "Global Economic Outlook: February 2026 - S&P Global",
-      "source": "S&P Global",
-      "date": "Wed, 18 Feb 2026 08:00:00 GMT",
-      "category": "US"
-    }
-  ],
   "historical_patterns": [
     {
-      "event": "Fed Rate Cut Cycle Start (2019)",
-      "date": "2019-07-31",
       "conditions": {
-        "VIX": "Low (15-18)",
         "SPY_trend": "Uptrend",
-        "Treasury_yield": "Declining"
+        "Treasury_yield": "Declining",
+        "VIX": "Low (15-18)"
       },
+      "date": "2019-07-31",
+      "event": "Fed Rate Cut Cycle Start (2019)",
       "outcome": {
-        "SPY_6m": "+12%",
         "QQQ_6m": "+18%",
+        "SPY_6m": "+12%",
         "sectors_best": [
           "Technology",
           "Consumer Discretionary"
@@ -453,16 +31,16 @@
       }
     },
     {
-      "event": "QE3 Start (2012)",
-      "date": "2012-09-13",
       "conditions": {
-        "VIX": "Moderate (15-20)",
         "SPY_trend": "Recovery",
-        "Treasury_yield": "Low"
+        "Treasury_yield": "Low",
+        "VIX": "Moderate (15-20)"
       },
+      "date": "2012-09-13",
+      "event": "QE3 Start (2012)",
       "outcome": {
-        "SPY_6m": "+10%",
         "QQQ_6m": "+8%",
+        "SPY_6m": "+10%",
         "sectors_best": [
           "Financials",
           "Housing"
@@ -474,16 +52,16 @@
       }
     },
     {
-      "event": "Fed Pivot Signal (2023)",
-      "date": "2023-11-01",
       "conditions": {
-        "VIX": "Elevated then declining",
         "SPY_trend": "Recovery from October low",
-        "Treasury_yield": "Peak and declining"
+        "Treasury_yield": "Peak and declining",
+        "VIX": "Elevated then declining"
       },
+      "date": "2023-11-01",
+      "event": "Fed Pivot Signal (2023)",
       "outcome": {
-        "SPY_3m": "+15%",
         "QQQ_3m": "+20%",
+        "SPY_3m": "+15%",
         "sectors_best": [
           "Technology",
           "Communications"
@@ -495,13 +73,435 @@
       }
     }
   ],
-  "corporate_sentiment": {
-    "earnings_tone": "Analyzed 15 companies",
-    "guidance_trend": "Stable",
-    "filing_activity": "Recent filings: 20 companies",
-    "details": [
-      "Earnings data for 15 tickers"
-    ]
+  "lang": "ko",
+  "macro_indicators": {
+    "10Y_Yield": {
+      "change_1d": 0.32,
+      "data_quality": "actual",
+      "high_52w": 4.63,
+      "last_updated": "2026-02-26T01:00:10.310318",
+      "low_52w": 3.89,
+      "pct_from_high": -12.59,
+      "pct_from_low": 4.12,
+      "value": 4.05
+    },
+    "2Y_Yield": {
+      "change_1d": 0.0,
+      "data_quality": "actual",
+      "high_52w": 4.3,
+      "last_updated": "2026-02-26T01:00:10.157474",
+      "low_52w": 3.51,
+      "pct_from_high": -16.66,
+      "pct_from_low": 2.31,
+      "value": 3.59
+    },
+    "30Y_Yield": {
+      "change_1d": 0.06,
+      "data_quality": "actual",
+      "high_52w": 5.15,
+      "last_updated": "2026-02-26T01:00:10.467304",
+      "low_52w": 4.34,
+      "pct_from_high": -8.95,
+      "pct_from_low": 8.09,
+      "value": 4.69
+    },
+    "BTC": {
+      "change_1d": 5.01,
+      "data_quality": "actual",
+      "high_52w": 126198.07,
+      "last_updated": "2026-02-26T01:00:12.592964",
+      "low_52w": 60074.2,
+      "pct_from_high": -46.68,
+      "pct_from_low": 12.01,
+      "value": 67288.23
+    },
+    "Breadth": {
+      "change_1d": 0,
+      "desc": "RSP/SPY Ratio (Rising = Healthy)",
+      "pct_from_high": 0,
+      "signal": "Check Trend",
+      "value": 0.2932
+    },
+    "COPPER": {
+      "change_1d": 1.65,
+      "data_quality": "actual",
+      "high_52w": 6.51,
+      "last_updated": "2026-02-26T01:00:11.464648",
+      "low_52w": 4.1,
+      "pct_from_high": -7.48,
+      "pct_from_low": 46.91,
+      "value": 6.02
+    },
+    "CSI300": {
+      "change_1d": 0.6,
+      "data_quality": "actual",
+      "high_52w": 4836.96,
+      "last_updated": "2026-02-26T01:00:12.900902",
+      "low_52w": 3514.12,
+      "pct_from_high": -2.09,
+      "pct_from_low": 34.77,
+      "value": 4735.89
+    },
+    "CreditRisk": {
+      "change_1d": 0,
+      "desc": "HYG/IEF Ratio (Falling = Stress)",
+      "pct_from_high": 0,
+      "signal": "Check Trend",
+      "value": 0.8308
+    },
+    "DAX": {
+      "change_1d": 0.57,
+      "data_quality": "actual",
+      "high_52w": 25507.79,
+      "last_updated": "2026-02-26T01:00:13.209975",
+      "low_52w": 18489.91,
+      "pct_from_high": -1.48,
+      "pct_from_low": 35.91,
+      "value": 25129.66
+    },
+    "DIA": {
+      "change_1d": 0.23,
+      "data_quality": "actual",
+      "high_52w": 504.67,
+      "last_updated": "2026-02-26T01:00:12.437058",
+      "low_52w": 361.47,
+      "pct_from_high": -2.32,
+      "pct_from_low": 36.37,
+      "value": 492.95
+    },
+    "DXY": {
+      "change_1d": -0.12,
+      "data_quality": "actual",
+      "high_52w": 107.66,
+      "last_updated": "2026-02-26T01:00:09.700203",
+      "low_52w": 95.55,
+      "pct_from_high": -9.19,
+      "pct_from_low": 2.31,
+      "value": 97.76
+    },
+    "ETH": {
+      "change_1d": 8.53,
+      "data_quality": "actual",
+      "high_52w": 4953.73,
+      "last_updated": "2026-02-26T01:00:12.747752",
+      "low_52w": 1386.8,
+      "pct_from_high": -59.41,
+      "pct_from_low": 45.01,
+      "value": 2010.97
+    },
+    "EUR/USD": {
+      "change_1d": 0.09,
+      "data_quality": "actual",
+      "high_52w": 1.2,
+      "last_updated": "2026-02-26T01:00:09.854144",
+      "low_52w": 1.04,
+      "pct_from_high": -1.82,
+      "pct_from_low": 13.71,
+      "value": 1.18
+    },
+    "FTSE": {
+      "change_1d": 0.88,
+      "data_quality": "actual",
+      "high_52w": 10791.81,
+      "last_updated": "2026-02-26T01:00:13.363425",
+      "low_52w": 7544.8,
+      "pct_from_high": -0.15,
+      "pct_from_low": 42.82,
+      "value": 10775.11
+    },
+    "FearGreed": {
+      "change_1d": 0,
+      "data_quality": "simulated",
+      "note": "CNN API unavailable - using neutral placeholder",
+      "pct_from_high": 0,
+      "pct_from_low": 0,
+      "signal": "Neutral (unavailable)",
+      "value": 50
+    },
+    "GOLD": {
+      "change_1d": 1.17,
+      "data_quality": "actual",
+      "high_52w": 5586.2,
+      "last_updated": "2026-02-26T01:00:11.004511",
+      "low_52w": 2834.1,
+      "pct_from_high": -6.63,
+      "pct_from_low": 84.04,
+      "value": 5216.0
+    },
+    "HY_Credit": {
+      "change_1d": 0.07,
+      "data_quality": "actual",
+      "high_52w": 81.01,
+      "last_updated": "2026-02-26T01:00:10.656098",
+      "low_52w": 71.53,
+      "pct_from_high": -0.18,
+      "pct_from_low": 13.05,
+      "value": 80.86
+    },
+    "IEF": {
+      "change_1d": -0.09,
+      "data_quality": "actual",
+      "high_52w": 97.53,
+      "last_updated": "2026-02-26T01:00:13.990652",
+      "low_52w": 89.88,
+      "pct_from_high": -0.2,
+      "pct_from_low": 8.3,
+      "value": 97.33
+    },
+    "IG_Credit": {
+      "change_1d": -0.0,
+      "data_quality": "actual",
+      "high_52w": 111.83,
+      "last_updated": "2026-02-26T01:00:10.849727",
+      "low_52w": 99.64,
+      "pct_from_high": -0.14,
+      "pct_from_low": 12.08,
+      "value": 111.68
+    },
+    "IWM": {
+      "change_1d": -0.12,
+      "data_quality": "actual",
+      "high_52w": 271.6,
+      "last_updated": "2026-02-26T01:00:12.223255",
+      "low_52w": 170.2,
+      "pct_from_high": -3.16,
+      "pct_from_low": 54.54,
+      "value": 263.02
+    },
+    "KOSPI": {
+      "change_1d": 1.91,
+      "data_quality": "actual",
+      "high_52w": 6144.71,
+      "last_updated": "2026-02-26T01:00:13.518642",
+      "low_52w": 2284.72,
+      "pct_from_high": -0.99,
+      "pct_from_low": 166.28,
+      "value": 6083.86
+    },
+    "NAT_GAS": {
+      "change_1d": -0.45,
+      "data_quality": "actual",
+      "high_52w": 7.83,
+      "last_updated": "2026-02-26T01:00:11.616538",
+      "low_52w": 2.62,
+      "pct_from_high": -62.92,
+      "pct_from_low": 10.68,
+      "value": 2.9
+    },
+    "NIKKEI": {
+      "change_1d": 2.2,
+      "data_quality": "actual",
+      "high_52w": 58875.17,
+      "last_updated": "2026-02-26T01:00:13.056451",
+      "low_52w": 30792.74,
+      "pct_from_high": -0.5,
+      "pct_from_low": 90.25,
+      "value": 58583.12
+    },
+    "OIL": {
+      "change_1d": -0.35,
+      "data_quality": "actual",
+      "high_52w": 78.4,
+      "last_updated": "2026-02-26T01:00:11.309726",
+      "low_52w": 54.98,
+      "pct_from_high": -16.58,
+      "pct_from_low": 18.95,
+      "value": 65.4
+    },
+    "QQQ": {
+      "change_1d": 1.07,
+      "data_quality": "actual",
+      "high_52w": 636.6,
+      "last_updated": "2026-02-26T01:00:12.026368",
+      "low_52w": 400.96,
+      "pct_from_high": -3.49,
+      "pct_from_low": 53.22,
+      "value": 614.36
+    },
+    "RSP": {
+      "change_1d": -0.43,
+      "data_quality": "actual",
+      "high_52w": 205.24,
+      "last_updated": "2026-02-26T01:00:13.803038",
+      "low_52w": 148.5,
+      "pct_from_high": -1.29,
+      "pct_from_low": 36.42,
+      "value": 202.59
+    },
+    "SILVER": {
+      "change_1d": 3.93,
+      "data_quality": "actual",
+      "high_52w": 121.3,
+      "last_updated": "2026-02-26T01:00:11.157138",
+      "low_52w": 28.31,
+      "pct_from_high": -25.07,
+      "pct_from_low": 221.05,
+      "value": 90.89
+    },
+    "SKEW": {
+      "change_1d": 0.36,
+      "data_quality": "actual",
+      "high_52w": 161.86,
+      "last_updated": "2026-02-26T01:00:09.548218",
+      "low_52w": 125.77,
+      "pct_from_high": -12.31,
+      "pct_from_low": 12.86,
+      "value": 141.94
+    },
+    "SPY": {
+      "change_1d": 0.51,
+      "data_quality": "actual",
+      "high_52w": 697.84,
+      "last_updated": "2026-02-26T01:00:11.822386",
+      "low_52w": 477.64,
+      "pct_from_high": -1.0,
+      "pct_from_low": 44.64,
+      "value": 690.85
+    },
+    "USD/JPY": {
+      "change_1d": 1.11,
+      "data_quality": "actual",
+      "high_52w": 159.44,
+      "last_updated": "2026-02-26T01:00:10.005895",
+      "low_52w": 139.89,
+      "pct_from_high": -1.94,
+      "pct_from_low": 11.77,
+      "value": 156.35
+    },
+    "VIX": {
+      "change_1d": -3.99,
+      "data_quality": "actual",
+      "high_52w": 60.13,
+      "last_updated": "2026-02-26T01:00:09.397086",
+      "low_52w": 13.38,
+      "pct_from_high": -68.78,
+      "pct_from_low": 40.28,
+      "value": 18.77
+    },
+    "VNQ": {
+      "change_1d": -0.49,
+      "data_quality": "actual",
+      "high_52w": 95.64,
+      "last_updated": "2026-02-26T01:00:15.135336",
+      "low_52w": 74.77,
+      "pct_from_high": -1.02,
+      "pct_from_low": 26.6,
+      "value": 94.66
+    },
+    "XHB": {
+      "change_1d": -3.37,
+      "data_quality": "actual",
+      "high_52w": 123.13,
+      "last_updated": "2026-02-26T01:00:14.949216",
+      "low_52w": 84.08,
+      "pct_from_high": -8.01,
+      "pct_from_low": 34.71,
+      "value": 113.27
+    },
+    "XLE": {
+      "change_1d": -1.19,
+      "data_quality": "actual",
+      "high_52w": 55.93,
+      "last_updated": "2026-02-26T01:00:14.377343",
+      "low_52w": 36.32,
+      "pct_from_high": -2.65,
+      "pct_from_low": 49.9,
+      "value": 54.45
+    },
+    "XLF": {
+      "change_1d": 0.95,
+      "data_quality": "actual",
+      "high_52w": 56.52,
+      "last_updated": "2026-02-26T01:00:14.184185",
+      "low_52w": 41.78,
+      "pct_from_high": -8.94,
+      "pct_from_low": 23.18,
+      "value": 51.47
+    },
+    "XLK": {
+      "change_1d": 1.65,
+      "data_quality": "actual",
+      "high_52w": 152.76,
+      "last_updated": "2026-02-26T01:00:14.557024",
+      "low_52w": 85.84,
+      "pct_from_high": -6.63,
+      "pct_from_low": 66.17,
+      "value": 142.64
+    },
+    "XLU": {
+      "change_1d": -0.57,
+      "data_quality": "actual",
+      "high_52w": 47.29,
+      "last_updated": "2026-02-26T01:00:14.772027",
+      "low_52w": 34.77,
+      "pct_from_high": -0.76,
+      "pct_from_low": 34.98,
+      "value": 46.93
+    },
+    "YieldSpread": {
+      "change_1d": 0,
+      "desc": "10Y - 2Y Yield",
+      "pct_from_high": 0,
+      "signal": "Normal",
+      "value": 0.46
+    }
   },
-  "ai_analysis": "## 글로벌 매크로 분석 및 투자 전략\n\n안녕하십니까, 글로벌 매크로 전문 애널리스트입니다. 현재 시장 상황을 면밀히 분석하고 투자 전략을 제시해 드립니다.\n\n---\n\n### 1. 현재 상황 요약\n현재 시장은 견조한 기업 실적 기대감과 Fed의 금리 인하 기대감 사이에서 줄다리기를 하고 있습니다. 변동성 지수는 안정적이고 신용 스프레드 또한 타이트한 상황으로 위험 자산 선호 심리가 우세하지만, 일부 Fed 위원들의 매파적 발언으로 금리 인하 시점에 대한 불확실성은 여전히 존재합니다. 글로벌 증시는 대부분 52주 신고가 근처에서 강세를 보이며, 특히 기술주와 경기 민감 섹터가 두드러진 상승세를 나타내고 있습니다.\n\n### 2. 가장 유사한 과거 패턴 비교\n현재 상황은 **\"Fed Pivot Signal (2023)\"** 및 **\"Fed Rate Cut Cycle Start (2019)\"**와 가장 유사합니다.\n*   **VIX:** 52주 고점 대비 크게 하락하여 안정적인 수준에 머무르는 점 (2023: Elevated then declining, 2019: Low)\n*   **SPY_trend:** 52주 고점 근처에서 지속적인 상승 추세를 보이는 점 (2023: Recovery from October low, 2019: Uptrend)\n*   **Treasury_yield:** 52주 고점 대비 하락했으나, 최근 Fed 발언으로 단기 변동성이 있는 점 (2023: Peak and declining, 2019: Declining)\n\n이 두 시나리오 모두 기술주(Technology)와 경기 소비재(Consumer Discretionary) 섹터가 시장 상승을 주도했으며, SPY와 QQQ가 높은 수익률을 기록했습니다.\n\n### 3. 🚀 기회 알림: 현재 상황에서 유리한 섹터/자산\n*   **기술주 (Technology, XLK, QQQ):** 과거 유사 패턴에서 가장 강력한 성과를 보였으며, 현재도 시장 상승을 주도하고 있습니다. AI 및 혁신 기술에 대한 기대감은 여전합니다.\n*   **경기 소비재 (Consumer Discretionary):** 경제 성장에 대한 낙관론이 유지되는 한 소비 심리 회복과 함께 수혜가 예상됩니다.\n*   **산업재 및 소재 (Copper, XHB):** '닥터 코퍼'로 불리는 구리 가격의 급등(+3.45%)과 주택 건설 ETF(XHB)의 강세는 글로벌 경기 회복 및 인프라 투자 확대를 강하게 시사합니다.\n*   **소형주 (IWM):** 경기 회복 기대감 확산 시 중소형주의 실적 개선 기대감이 반영되며 시장 대비 초과 수익을 낼 수 있습니다.\n*   **신흥국 증시 (KOSPI, CSI300):** 달러 약세 기조(52주 대비 -9.1%)는 신흥국 자산에 긍정적이며, 특히 코스피가 52주 최고치를 기록하는 등 아시아 증시의 강세가 뚜렷합니다.\n\n### 4. ⚠️ 경고 알림: 주의해야 할 리스크\n*   **금리 인하 지연 가능성:** Fed 위원(Waller)의 \"강력한 고용 보고서 시 금리 동결 가능성\" 발언은 시장의 조기 금리 인하 기대감을 약화시킬 수 있습니다. 이는 단기적으로 채권 수익률 상승 및 주식 시장의 조정을 야기할 수 있습니다.\n*   **높은 SKEW 지수:** VIX가 안정적임에도 불구하고 SKEW 지수가 여전히 높은 수준(141.43)이라는 점은 기관 투자자들이 시장의 예상치 못한 급락에 대한 헤지를 지속하고 있음을 시사합니다. 잠재적인 꼬리 위험(tail risk)에 대한 경계를 늦추지 않아야 합니다.\n*   **밸류에이션 부담:** 주요 지수들이 52주 최고점 근처에 도달하면서 일부 섹터 및 종목의 밸류에이션 부담이 가중될 수 있습니다.\n\n### 5. 투자 전략 제안 (구체적으로)\n\n1.  **성장주 및 경기 민감주 비중 확대:** 🚀\n    *   **기술주 (XLK, QQQ) 및 경기 소비재 섹터**에 대한 비중을 유지하거나 확대합니다. AI 및 혁신 테마는 여전히 유효합니다.\n    *   글로벌 경기 회복에 베팅하여 **산업재 및 소재 섹터** (예: 구리 관련 ETF, 산업재 ETF)에 대한 전략적 비중을 고려합니다.\n    *   시장의 위험 선호 심리 확산에 따라 **소형주 (IWM)** 에 대한 관심을 높여 포트폴리오 다각화를 꾀합니다.\n\n2.  **신흥국 자산에 대한 관심:** 🌏\n    *   약달러 기조와 글로벌 경기 회복 기대감에 힘입어 **한국 (KOSPI) 및 중국 (CSI300)** 등 아시아 신흥국 증시에 대한 투자를 고려합니다. 직접 투자 또는 관련 ETF를 활용할 수 있습니다.\n\n3.  **채권 포트폴리오 조정 및 리스크 관리:** 📉\n    *   Fed의 금리 인하 시점 불확실성을 고려하여 **장기 채권 비중을 축소**하고, **단기 고품질 채권**으로 일부 전환하여 금리 변동성 위험을 관리합니다.\n    *   **현금 비중을 일정 수준 유지**하여 시장 조정 시 추가 매수 기회를 포착할 수 있도록 대비합니다.\n    *   SKEW 지수가 시사하는 잠재적 위험에 대비하여, 포트폴리오 일부에 대한 **풋옵션 매수** 등 헤지 전략을 고려해 볼 수 있습니다.\n\n4.  **원자재 포트폴리오 조정:** ⛏️\n    *   글로벌 경기 회복 기대감과 인플레이션 헤지 차원에서 **산업용 금속 (구리, 은)** 에 대한 전략적 투자를 고려합니다. 반면, 유가 하락세를 보이는 **에너지 섹터 (XLE)** 에 대한 비중은 신중하게 접근합니다.\n\n현재 시장은 낙관적인 성장 기대감과 금리 정책의 불확실성이 공존하는 복합적인 상황입니다. 과거 패턴을 참고하되, 실시간으로 발표되는 경제 지표와 Fed의 스탠스 변화를 예의주시하며 유연한 포트폴리오 전략을 가져가는 것이 중요합니다."
+  "model": "gemini",
+  "news": [
+    {
+      "category": "Federal",
+      "date": "Mon, 23 Feb 2026 13:35:11 GMT",
+      "source": "Yahoo Finance",
+      "title": "Fed's Waller says he could shift to holding rates steady if next jobs report comes in strong - Yahoo Finance"
+    },
+    {
+      "category": "Federal",
+      "date": "Mon, 23 Feb 2026 22:37:00 GMT",
+      "source": "thestreet.com",
+      "title": "Fed’s Waller calls March interest-rate cut ‘a coin flip’ - thestreet.com"
+    },
+    {
+      "category": "Federal",
+      "date": "Wed, 28 Jan 2026 08:00:00 GMT",
+      "source": "CNN",
+      "title": "Fed holds interest rates steady for first time since July - CNN"
+    },
+    {
+      "category": "Fed",
+      "date": "Sun, 11 Jan 2026 08:00:00 GMT",
+      "source": "Federal Reserve Board (.gov)",
+      "title": "Statement from Federal Reserve Chair Jerome H. Powell - Federal Reserve Board (.gov)"
+    },
+    {
+      "category": "Fed",
+      "date": "Mon, 16 Feb 2026 08:00:00 GMT",
+      "source": "marketplace.org",
+      "title": "How does the Fed actually change interest rates? - marketplace.org"
+    },
+    {
+      "category": "Fed",
+      "date": "Fri, 20 Feb 2026 10:00:04 GMT",
+      "source": "Bloomberg.com",
+      "title": "How Jerome Powell Is Trump-Proofing the Fed - Bloomberg.com"
+    },
+    {
+      "category": "US",
+      "date": "Mon, 23 Feb 2026 16:08:22 GMT",
+      "source": "Texas Real Estate Research Center",
+      "title": "Texas Economic Outlook | February 2026 - Texas Real Estate Research Center"
+    },
+    {
+      "category": "US",
+      "date": "Wed, 25 Feb 2026 06:01:00 GMT",
+      "source": "Las Vegas Sun",
+      "title": "Nevada Democrats push back on Trump’s positive economic outlook - Las Vegas Sun"
+    },
+    {
+      "category": "US",
+      "date": "Fri, 30 Jan 2026 18:36:24 GMT",
+      "source": "Federal Reserve Bank of St. Louis",
+      "title": "Speech and Q&A: U.S. Economic Outlook and Monetary Policy - Federal Reserve Bank of St. Louis"
+    }
+  ],
+  "timestamp": "2026-02-26T01:00:16.486931"
 }

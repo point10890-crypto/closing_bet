@@ -1,20 +1,20 @@
 {
   "indicators": [
     {
-      "change": 0.004,
-      "change_pct": 0.1,
+      "change": 0.015,
+      "change_pct": 0.37,
       "name": "US 10Y Treasury",
       "ticker": "^TNX",
       "unit": "%",
-      "value": 4.033
+      "value": 4.048
     },
     {
-      "change": 0.016,
-      "change_pct": 0.45,
+      "change": 0.019,
+      "change_pct": 0.53,
       "name": "US 5Y Treasury",
       "ticker": "^FVX",
       "unit": "%",
-      "value": 3.598
+      "value": 3.617
     },
     {
       "change": 0.0,
@@ -25,69 +25,69 @@
       "value": 3.588
     },
     {
-      "change": 0.143,
-      "change_pct": 0.15,
+      "change": -0.175,
+      "change_pct": -0.18,
       "name": "Dollar Index",
       "ticker": "DX-Y.NYB",
       "unit": "",
-      "value": 97.843
+      "value": 97.705
     },
     {
-      "change": -35.1001,
-      "change_pct": -0.67,
+      "change": 58.8003,
+      "change_pct": 1.14,
       "name": "Gold",
       "ticker": "GC=F",
       "unit": "$",
-      "value": 5169.6001
+      "value": 5214.6001
     },
     {
-      "change": -0.18,
-      "change_pct": -0.27,
+      "change": -0.26,
+      "change_pct": -0.4,
       "name": "Crude Oil (WTI)",
       "ticker": "CL=F",
       "unit": "$",
-      "value": 66.13
+      "value": 65.37
     },
     {
-      "change": 0.692,
-      "change_pct": 0.8,
+      "change": 3.593,
+      "change_pct": 4.11,
       "name": "Silver",
       "ticker": "SI=F",
       "unit": "$",
-      "value": 87.215
+      "value": 91.05
     },
     {
-      "change": -0.136,
-      "change_pct": -4.56,
+      "change": -0.007,
+      "change_pct": -0.24,
       "name": "Natural Gas",
       "ticker": "NG=F",
       "unit": "$",
-      "value": 2.849
+      "value": 2.908
     },
     {
-      "change": -1.47,
-      "change_pct": -0.1,
+      "change": -15.37,
+      "change_pct": -1.07,
       "name": "USD/KRW",
       "ticker": "KRW=X",
       "unit": "KRW",
-      "value": 1440.73
+      "value": 1426.83
     },
     {
-      "change": 1.094,
-      "change_pct": 0.71,
+      "change": 1.816,
+      "change_pct": 1.17,
       "name": "USD/JPY",
       "ticker": "JPY=X",
       "unit": "JPY",
-      "value": 155.729
+      "value": 156.451
     },
     {
-      "change": -0.0013,
-      "change_pct": -0.11,
+      "change": 0.0013,
+      "change_pct": 0.11,
       "name": "EUR/USD",
       "ticker": "EURUSD=X",
       "unit": "$",
-      "value": 1.1781
+      "value": 1.1806
     }
   ],
-  "timestamp": "2026-02-25T10:06:52.052116"
+  "timestamp": "2026-02-26T01:27:20.819320"
 }

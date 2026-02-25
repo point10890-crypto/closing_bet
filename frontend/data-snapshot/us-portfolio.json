@@ -1,82 +1,82 @@
 {
   "market_indices": [
     {
-      "change": 370.44,
-      "change_pct": 0.76,
+      "change": "+177.56",
+      "change_pct": 0.36107859510518664,
+      "color": "green",
       "name": "Dow Jones",
-      "price": 49174.5,
-      "ticker": "^DJI"
+      "price": "49,352.06"
     },
     {
-      "change": 52.32,
-      "change_pct": 0.77,
+      "change": "+38.86",
+      "change_pct": 0.5640051923117672,
+      "color": "green",
       "name": "S&P 500",
-      "price": 6890.07,
-      "ticker": "^GSPC"
+      "price": "6,928.93"
     },
     {
-      "change": 236.41,
-      "change_pct": 1.04,
+      "change": "+217.04",
+      "change_pct": 0.9492915038897324,
+      "color": "green",
       "name": "NASDAQ",
-      "price": 22863.68,
-      "ticker": "^IXIC"
+      "price": "23,080.72"
     },
     {
-      "change": 31.34,
-      "change_pct": 1.2,
+      "change": "-4.15",
+      "change_pct": -0.1563244434986042,
+      "color": "red",
       "name": "Russell 2000",
-      "price": 2652.33,
-      "ticker": "^RUT"
+      "price": "2,648.18"
     },
     {
-      "change": -1.46,
-      "change_pct": -6.95,
+      "change": "-1.01",
+      "change_pct": -5.166232025311639,
+      "color": "red",
       "name": "VIX",
-      "price": 19.55,
-      "ticker": "^VIX"
+      "price": "18.54"
     },
     {
-      "change": -39.6,
-      "change_pct": -0.76,
+      "change": "+58.30",
+      "change_pct": 1.1307710767928791,
+      "color": "green",
       "name": "Gold",
-      "price": 5165.1,
-      "ticker": "GC=F"
+      "price": "5,214.10"
     },
     {
-      "change": -0.19,
-      "change_pct": -0.29,
+      "change": "-0.30",
+      "change_pct": -0.45710107407883166,
+      "color": "red",
       "name": "Crude Oil",
-      "price": 66.12,
-      "ticker": "CL=F"
+      "price": "65.33"
     },
     {
-      "change": -318.89,
-      "change_pct": -0.49,
+      "change": "+3,900.67",
+      "change_pct": 6.087180638521488,
+      "color": "green",
       "name": "Bitcoin",
-      "price": 64297.85,
-      "ticker": "BTC-USD"
+      "price": "67,980.71"
     },
     {
-      "change": 0.0,
-      "change_pct": 0.1,
+      "change": "+0.01",
+      "change_pct": 0.37192825474762153,
+      "color": "green",
       "name": "10Y Treasury",
-      "price": 4.03,
-      "ticker": "^TNX"
+      "price": "4.05"
     },
     {
-      "change": 0.16,
-      "change_pct": 0.16,
+      "change": "-0.17",
+      "change_pct": -0.1695958018686405,
+      "color": "red",
       "name": "Dollar Index",
-      "price": 97.86,
-      "ticker": "DX-Y.NYB"
+      "price": "97.71"
     },
     {
-      "change": -1.02,
-      "change_pct": -0.07,
+      "change": "-14.69",
+      "change_pct": -1.018578692525508,
+      "color": "red",
       "name": "USD/KRW",
-      "price": 1441.18,
-      "ticker": "KRW=X"
+      "price": "1,427.51"
     }
   ],
-  "timestamp": "2026-02-25T10:05:52.969558"
+  "timestamp": "2026-02-26T01:26:08.370498"
 }

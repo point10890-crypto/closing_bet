@@ -1,521 +1,286 @@
 {
-  "count": 10,
-  "generated_at": "2026-01-14T10:11:44.559364",
+  "count": 20,
+  "generated_at": "2026-02-24T18:14:31.161893",
   "signals": [
     {
-      "contraction_ratio": 0.704,
-      "current_price": 89600.0,
-      "entry_price": 55600.0,
-      "foreign_5d": 1588489,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 88,
-        "reason": "사상 최대 실적 경신과 북미 시추 및 방산 시장 점유율 확대로 인한 강력한 성장 모멘텀, 그리고 외국인의 압도적인 매수세 유입."
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 86,
-        "reason": "VCP 점수(81.6)로 기술적 흐름이 양호한 가운데, 2025~2026년 최대 실적·고수익성 지속(영업이익 증가/마진 28%대)과 방산·특수전지 수요 급증, 인수(캐나다 이노바)로 고온전지 증익 모멘텀이 뚜렷해 중기 상승 여력이 크다고 판단"
-      },
-      "inst_5d": -11978,
-      "name": "비에이치아이",
-      "news": [
-        {
-          "summary": "2025년 매출 2,400억 원 돌파가 유력하며, 리튬일차전지 분야에서 글로벌 1위 진입을 목전에 둠. 캐나다 이노바 인수를 통해 고온전지 매출이 2026년 이후 크게 증익될 전망.",
-          "title": "'특수전지' 강자 비츠로셀, 최대 실적 찍고 '글로벌 1위' 도전",
-          "url": "https://www.etnews.com/20260107000214"
-        },
-        {
-          "summary": "글로벌 안보 위기로 군용 전지 수요가 급증하며 2026년 영업이익이 787억 원에 달할 것으로 추정됨. 특히 기술 장벽이 높은 앰플전지 시장에서 독보적 지위 확보.",
-          "title": "앰플전지부터 열전지까지, K-방산의 숨은 주역 세계 1위 비츠로셀",
-          "url": "https://www.creditnews.kr/news/articleView.html?idxno=28434"
-        },
-        {
-          "summary": "스마트그리드 및 군수 산업 수요 확대로 3분기 누적 영업이익률 28.9%라는 업계 최고 수준의 수익성을 유지하며 역대급 실적 행진 지속.",
-          "title": "비츠로셀, 2025년 3분기 영업이익 167억... 전년비 38% 증가",
-          "url": "https://www.issueon.co.kr/news/articleView.html?idxno=14567"
-        },
-        {
-          "summary": "최근 외국인이 대량 순매수를 지속하며 수급 주도권을 장악하고 있으며, 2026년 실적 기준 PER 10배 이하의 저평가 매력 부각.",
-          "title": "비츠로셀, 외국인 7일 연속 순매수 및 52주 신고가 경신",
-          "url": "https://www.hankyung.com/article/202512041234"
-        }
-      ],
-      "return_pct": 61.15,
-      "score": 81.60499999999998,
-      "ticker": "083650"
+      "contraction_ratio": 0.491,
+      "current_price": 16250.0,
+      "entry_price": 17330.0,
+      "foreign_5d": 110748,
+      "inst_5d": 44724,
+      "market": "KOSDAQ",
+      "name": "미코",
+      "return_pct": -6.23,
+      "score": 88.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "059090"
     },
     {
-      "contraction_ratio": 0.785,
-      "current_price": 35550.0,
-      "entry_price": 24100.0,
-      "foreign_5d": 634552,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 92,
-        "reason": "외국인과 기관의 압도적인 양매수세와 SDV 전환 가속화에 따른 목표주가 대폭 상향 및 VCP 수축 패턴 완성"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 86,
-        "reason": "SDV·로보틱스 핵심 역할 부각으로 목표주가 대폭 상향 등 실적/재평가 모멘텀이 강하고, VCP 점수(81.6)와 외국인·기관 순매수로 기술·수급 흐름도 우호적이어서 매수 관점 유지"
-      },
-      "inst_5d": 173412,
-      "name": "현대무벡스",
-      "news": [
-        {
-          "summary": "현대오토에버는 현대차그룹의 소프트웨어 사령탑으로서 차량용 OS '모빌진'을 전 차종에 확대 적용하며 독보적인 지위를 굳히고 있으며, CES 2026을 기점으로 테크 기업으로서의 재평가가 기대됨.",
-          "title": "AI의 다음 목적지는 '자동차'…CES 2026이 주목한 'SDV' 수혜 기대주",
-          "url": "https://www.etoday.co.kr/news/view/2437451"
-        },
-        {
-          "summary": "대신증권은 현대오토에버가 그룹 내 SDV 및 로보틱스 관련 SI 투자 확대의 핵심 주체임을 강조하며 목표주가를 기존 37만원에서 56만원으로 51% 상향 조정함.",
-          "title": "현대오토에버 목표주가 56만원으로 상향... 로보틱스·SDV 핵심 역할 부각",
-          "url": "https://www.livebiz.today/news/articleView.html?idxno=12345"
-        },
-        {
-          "summary": "자율주행 및 SDV 테마가 강세를 보이는 가운데, 현대오토에버는 재무 성장성과 수익성에서 높은 점수를 받으며 외국인과 기관의 강력한 '러브콜'을 받고 있음.",
-          "title": "특징주, 현대오토에버-자율주행차 테마 상승세에 신고가 경신",
-          "url": "https://www.mk.co.kr/news/stock/11210000"
-        },
-        {
-          "summary": "차량용 소프트웨어 매출 비중 확대와 스마트 팩토리 솔루션 공급 본격화로 인해 2025년 매출과 영업이익이 전년 대비 두 자릿수 성장을 기록할 것으로 분석됨.",
-          "title": "현대오토에버, 2025년 역대급 실적 전망... 연매출 4조원 시대",
-          "url": "https://wallet-story.tistory.com/123"
-        }
-      ],
-      "return_pct": 47.51,
-      "score": 81.60499999999998,
-      "ticker": "319400"
+      "contraction_ratio": 0.746,
+      "current_price": 1989.0,
+      "entry_price": 2100.0,
+      "foreign_5d": 614433,
+      "inst_5d": 63202,
+      "market": "KOSDAQ",
+      "name": "엑셈",
+      "return_pct": -5.29,
+      "score": 88.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "205100"
     },
     {
-      "contraction_ratio": 0.037,
-      "current_price": 1605.0,
-      "entry_price": 1553.0,
-      "foreign_5d": 101421,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "HOLD",
-        "confidence": 95,
-        "reason": "자진 상장폐지를 위한 공개매수가(1,580원)가 확정되어 가격 하방 경직성이 매우 강하며, 진입가 대비 목표가까지의 보유가 유효함"
-      },
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 78,
-        "reason": "자진 상장폐지 공개매수(1,580원) 이슈로 주가가 해당 가격에 수렴할 가능성이 높아 VCP·수급은 우호적이나, 추가 상승 여력은 제한적이라 관망이 합리적입니다."
-      },
-      "inst_5d": 344139,
-      "name": "로스웰",
-      "news": [
-        {
-          "summary": "로스웰의 최대주주인 트릴리온럭그룹이 자진 상장폐지를 위해 주당 1,580원에 공개매수를 진행한다고 공시하며 주가가 급등했습니다.",
-          "title": "로스웰, 자진 상장폐지 결정에 상한가… 공개매수가 1,580원",
-          "url": "https://alphasquare.co.kr/home/stock/quote/900260/news"
-        },
-        {
-          "summary": "전기차 부품 섹터의 로스웰에 대해 외국인 투자자들이 20일 넘게 연속 순매수를 기록하며 상장폐지 전 차익거래 및 수급 안정세를 주도하고 있습니다.",
-          "title": "로스웰(900260), 외국인 22일 연속 순매수 행진",
-          "url": "https://biz.chosun.com/stock/market_trend/2025/11/13/외국인-연속-순매수일-상위-20선/"
-        },
-        {
-          "summary": "수익성은 다소 악화되었으나, 현재 주가는 실적보다는 자진 상장폐지 및 공개매수 가격인 1,580원에 수렴하는 흐름을 보이고 있습니다.",
-          "title": "로스웰 2025년 3분기 실적 발표: 매출 1.2% 증가, 영업이익 감소",
-          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?gicode=A900260"
-        },
-        {
-          "summary": "1월 9일 공개매수 기간 종료 후 상장폐지 승인 절차가 진행될 예정이며, 미참여 주주를 위한 추가 매수 기회 등이 제공될 가능성이 높습니다.",
-          "title": "공개매수 종료 후 상장폐지 절차 및 향후 전망",
-          "url": "https://www.investing.com/equities/rothwell-international-co-ltd-news"
-        }
-      ],
-      "return_pct": 3.35,
-      "score": 81.43499999999999,
-      "ticker": "900260"
+      "contraction_ratio": 0.51,
+      "current_price": 7120.0,
+      "entry_price": 7490.0,
+      "foreign_5d": 1431814,
+      "inst_5d": 468664,
+      "market": "KOSDAQ",
+      "name": "SFA반도체",
+      "return_pct": -4.94,
+      "score": 88.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "036540"
     },
     {
-      "contraction_ratio": 0.771,
-      "current_price": 6540.0,
-      "entry_price": 4150.0,
-      "foreign_5d": 162016,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 88,
-        "reason": "글로벌 빅파마(BMS, 버텍스)와의 대규모 기술 수출 이력과 더불어 최근 외국인 및 기관의 강력한 동반 순매수세가 유입되며 기술적/수급적 정배열 구간 진입"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 86,
-        "reason": "VCP Score 80.1로 기술적 여건이 양호한 가운데, 버텍스와 1.3조원 규모 TPD² 기술수출(최대 3개 타깃)로 실적·밸류 재평가 모멘텀이 크고 외국인·기관 동시 순매수로 수급도 뒷받침됩니다."
-      },
-      "inst_5d": 357727,
-      "name": "오르비텍",
-      "news": [
-        {
-          "summary": "미국 버텍스 파마슈티컬과 자사의 '이중 정밀 표적 단백질 분해(TPD²)' 플랫폼을 활용한 최대 3개 타깃에 대해 총 9억 4,500만 달러 규모의 기술 이전 계약을 성사시켰습니다.",
-          "title": "오름테라퓨틱, 버텍스와 1.3조원 규모 TPD² 기술 수출 계약 체결",
-          "url": "https://www.thebionews.net/news/articleView.html?idxno=6345"
-        },
-        {
-          "summary": "최근 장중 수급 포착 결과 외국인과 기관이 동시 순매수를 기록하며 주가가 5~12%대 급등세를 보이는 등 수급 개선이 뚜렷하게 나타나고 있습니다.",
-          "title": "오름테라퓨틱, 외국인·기관 동시 순매수세에 주가 강세",
-          "url": "https://www.newspim.com/news/view/20260105000456"
-        },
-        {
-          "summary": "BMS에 이어 버텍스까지 글로벌 파트너십을 확장했으며, 2026년까지 혈액암 및 소세포폐암 치료제 등 3개 파이프라인의 추가 기술 이전을 통해 실적 퀀텀 점프를 계획 중입니다.",
-          "title": "오름테라퓨틱, 2026년 매출 930억 목표... 추가 기술수출 자신",
-          "url": "https://www.hankyung.com/article/202410087115i"
-        },
-        {
-          "summary": "항체-분해약물접합체(DAC) 분야의 혁신을 가속화하기 위해 글로벌 신약 개발 전문가인 채드 메이 박사를 최고과학책임자(CSO)로 영입하며 R&D 역량을 강화했습니다.",
-          "title": "오름테라퓨틱 DAC 혁신 가속…채드 메이 박사 CSO 선임",
-          "url": "https://www.hankyung.com/article/202601050123i"
-        }
-      ],
-      "return_pct": 57.59,
+      "contraction_ratio": 0.758,
+      "current_price": 6410.0,
+      "entry_price": 6960.0,
+      "foreign_5d": 98762,
+      "inst_5d": -80817,
+      "market": "KOSDAQ",
+      "name": "감성코퍼레이션",
+      "return_pct": -7.9,
+      "score": 88.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "036620"
+    },
+    {
+      "contraction_ratio": 0.402,
+      "current_price": 174600.0,
+      "entry_price": 172200.0,
+      "foreign_5d": 320819,
+      "inst_5d": 451201,
+      "market": "KOSDAQ",
+      "name": "에코프로",
+      "return_pct": 1.39,
+      "score": 88.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "086520"
+    },
+    {
+      "contraction_ratio": 0.395,
+      "current_price": 41000.0,
+      "entry_price": 46250.0,
+      "foreign_5d": 878660,
+      "inst_5d": -795825,
+      "market": "KOSDAQ",
+      "name": "HPSP",
+      "return_pct": -11.35,
+      "score": 87.8,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "403870"
+    },
+    {
+      "contraction_ratio": 0.548,
+      "current_price": 14440.0,
+      "entry_price": 13530.0,
+      "foreign_5d": 294722,
+      "inst_5d": 110934,
+      "market": "KOSDAQ",
+      "name": "씨아이에스",
+      "return_pct": 6.73,
+      "score": 83.4,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "222080"
+    },
+    {
+      "contraction_ratio": 0.67,
+      "current_price": 18920.0,
+      "entry_price": 20700.0,
+      "foreign_5d": 73247,
+      "inst_5d": 38028,
+      "market": "KOSDAQ",
+      "name": "케이엠더블유",
+      "return_pct": -8.6,
+      "score": 80.9,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "032500"
+    },
+    {
+      "contraction_ratio": 0.797,
+      "current_price": 213000.0,
+      "entry_price": 201000.0,
+      "foreign_5d": 332673,
+      "inst_5d": -238615,
+      "market": "KOSPI",
+      "name": "한미반도체",
+      "return_pct": 5.97,
       "score": 80.1,
-      "ticker": "046120"
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "042700"
     },
     {
-      "contraction_ratio": 0.677,
-      "current_price": 398.0,
-      "entry_price": 371.0,
-      "foreign_5d": 1646189,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 90,
-        "reason": "외국인의 160만 주 이상 강력한 순매수세와 코스피 200 지수의 사상 최고치 경신 및 2026년 5,000포인트 전망이 결합된 강력한 상승 모멘텀"
-      },
-      "gpt_recommendation": {
-        "action": "HOLD",
-        "confidence": 62,
-        "reason": "VCP Score 78과 외국인 5일 순매수는 긍정적이지만, 제공 뉴스가 지수/ETF 중심으로 종목(317240) 실적·수주 등 직접 호재가 확인되지 않아 기술적 관망이 합리적입니다."
-      },
-      "inst_5d": 0,
-      "name": "TS트릴리온",
-      "news": [
-        {
-          "summary": "2026년 1월 14일 코스피 지수가 반도체와 자동차 대형주의 강세에 힘입어 사상 최고치를 경신하며 지수 상승 압력이 거세지고 있습니다.",
-          "title": "코스피, 종가 기준 사상 처음 4690선 돌파…현대차 시총 80조 넘었다",
-          "url": "https://www.asiae.co.kr/article/2026011408451234567"
-        },
-        {
-          "summary": "삼성자산운용은 2026년 국내 증시 키워드로 '대·반·전'을 제시하며, 밸류업 정책과 반도체 호황을 근거로 KODEX 200 등 대표 지수 ETF를 핵심 투자처로 꼽았습니다.",
-          "title": "삼성자산운용, '대·반·전' ETF 테마로 코스피 5000 전망…KODEX 200 최우선 추천",
-          "url": "http://www.newsspace.kr/news/articleView.html?idxno=3852"
-        },
-        {
-          "summary": "분배금을 자동으로 재투자하는 토탈리턴(TR) 상품은 일반 ETF 대비 복리 효과와 세제 이점이 있어 장기 우상향 장세에서 수익률 극대화에 유리합니다.",
-          "title": "대통령 '픽'한 코스피200 ETF, 장기투자라면 'TR'이 매력적",
-          "url": "https://www.businesspost.co.kr/BPView.php?num=366123"
-        },
-        {
-          "summary": "주요 증권사들은 AI 반도체 수출 성장과 기업 이익 증가를 바탕으로 2026년 코스피가 최대 5,000포인트까지 상승할 수 있다는 낙관적인 전망을 내놓고 있습니다.",
-          "title": "2026년 코스피 전망 '3200~5000' 반도체·AI가 핵심 변수",
-          "url": "https://www.mk.co.kr/news/stock/11188542"
-        }
-      ],
-      "return_pct": 7.28,
-      "score": 78.0,
-      "ticker": "317240"
+      "contraction_ratio": 0.432,
+      "current_price": 3675.0,
+      "entry_price": 3560.0,
+      "foreign_5d": 213269,
+      "inst_5d": -139,
+      "market": "KOSDAQ",
+      "name": "아진산업",
+      "return_pct": 3.23,
+      "score": 78.1,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "013310"
     },
     {
-      "contraction_ratio": 0.452,
-      "current_price": 1022.0,
-      "entry_price": 851.0,
-      "foreign_5d": 273131,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 82,
-        "reason": "외국인의 강력한 5일 연속 순매수와 VCP Score(77.8) 기반의 변동성 수축 패턴이 완성 단계에 진입하여 기술적 반등 가능성이 높음"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 78,
-        "reason": "VCP 점수(77.8)와 수축비율(0.452)로 기술적 여건이 양호한 가운데, 외국인·기관 동반 순매수로 수급 모멘텀이 확인되고 사업구조 전환/수익성 개선 추진 및 하반기 실적 회복 기대가 겹쳐 단기 반등 지속 가능성이 높음."
-      },
-      "inst_5d": -22187,
-      "name": "동양",
-      "news": [
-        {
-          "summary": "최근 외국인과 기관의 동반 매수세가 유입되며 주가가 강한 반등 모멘텀을 보이고 있으며, 장중 17% 이상 급등하는 등 수급 개선이 뚜렷함.",
-          "title": "[장중수급포착] 동양, 외국인/기관 동시 순매수… 주가 급등세",
-          "url": "https://www.newspim.com/news/view/20251218000455"
-        },
-        {
-          "summary": "레미콘 중심의 건재 사업에서 인프라 및 환경 사업으로 포트폴리오를 다각화하고 있으며, 하반기 실적 회복 및 원가 경쟁력 확보에 주력 중임.",
-          "title": "동양, 건설경기 둔화 속 사업구조 전환 및 수익성 개선 추진",
-          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?gicode=A001520"
-        },
-        {
-          "summary": "52주 주가 범위 내에서 현재가가 저점 부근에 위치해 있으며, 글로벌 경기 회복 기대감과 함께 레미콘 수요의 유연한 공급 체계 구축으로 반등 기회 포착 중.",
-          "title": "동양(001520), 불확실한 시장 속 저평가 매력 부각",
-          "url": "https://www.goover.ai/report/001520-analysis-20251215"
-        },
-        {
-          "summary": "도시 재생 및 소규모 정비 사업 확대로 인한 레미콘 수요 증가와 폐열 발전 등 원가 절감 노력을 통해 미래 비용 구조 안정화를 꾀하고 있음.",
-          "title": "레미콘 수요 회복 및 친환경 전환 전략 가속화",
-          "url": "https://www.youtube.com/watch?v=example_001520"
-        }
-      ],
-      "return_pct": 20.09,
-      "score": 77.8,
-      "ticker": "001520"
+      "contraction_ratio": 0.78,
+      "current_price": 8820.0,
+      "entry_price": 8690.0,
+      "foreign_5d": 522027,
+      "inst_5d": 166276,
+      "market": "KOSDAQ",
+      "name": "코리아에프티",
+      "return_pct": 1.5,
+      "score": 77.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "123410"
     },
     {
-      "contraction_ratio": 0.5,
-      "current_price": 906.0,
-      "entry_price": 604.0,
-      "foreign_5d": 612963,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 78,
-        "reason": "영업이익 흑자전환 등 실적 턴어라운드 가시화와 외국인의 강력한 수급 유입, VCP 변동성 수축 패턴 완성에 따른 상방 돌파 기대"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 82,
-        "reason": "VCP 점수(77.4)와 낮은 수축비율(0.5)로 기술적 여건이 양호한 가운데, 2025년 3분기 누적 영업이익·순이익 흑자전환이라는 실적 모멘텀이 강하고 외국인·기관 동반 순매수로 수급도 뒷받침되어 과징금 이슈를 상쇄할 가능성이 높습니다."
-      },
-      "inst_5d": 76370,
-      "name": "아스트",
-      "news": [
-        {
-          "summary": "민항기 시장 회복과 판매 단가 상승, 원가 절감 노력에 힘입어 2025년 3분기 누적 기준 영업이익 흑자전환에 성공하며 수익성이 크게 개선되었습니다.",
-          "title": "아스트, 실적 개선 성공… 영업이익 및 당기순이익 흑자전환",
-          "url": "https://www.astk.co.kr/bbs/board.php?bo_table=sub04_01&wr_id=125"
-        },
-        {
-          "summary": "과거 회계처리 위반 사항에 대해 금융위원회로부터 22억 원의 과징금 처분을 받았으나, 이는 과거의 악재 해소 과정으로 풀이되며 현재의 실적 개선세가 이를 상쇄하고 있습니다.",
-          "title": "금융위, '회계처리 위반' 아스트에 과징금 22억원 부과",
-          "url": "https://biz.chosun.com/policy/policy_sub/2025/12/03/7Z6Z6Z6Z6Z6Z6Z6Z6Z6Z6Z6Z6Z/"
-        },
-        {
-          "summary": "최근 5거래일간 외국인이 61만 주 이상을 순매수하며 강력한 매집세를 보이고 있으며, 기관 역시 순매수에 가담하며 수급 측면에서 긍정적인 신호가 포착되고 있습니다.",
-          "title": "아스트, 외국인·기관 동반 매수세 유입… 수급 개선 뚜렷",
-          "url": "https://www.newspim.com/news/view/20240627000654"
-        },
-        {
-          "summary": "자회사 에이에스티지와의 합병을 통해 생산 역량을 강화했으며, 글로벌 항공기 제조사인 보잉 및 엠브라에르향 부품 납품 확대로 중장기 성장 동력을 확보했습니다.",
-          "title": "보잉·엠브라에르 등 글로벌 수주 확대 기대감 고조",
-          "url": "https://comp.fnguide.com/SVO2/ASP/SVD_Main.asp?gicode=A067390"
-        }
-      ],
-      "return_pct": 50.0,
-      "score": 77.4,
-      "ticker": "067390"
+      "contraction_ratio": 0.575,
+      "current_price": 74000.0,
+      "entry_price": 75800.0,
+      "foreign_5d": 88576,
+      "inst_5d": 94101,
+      "market": "KOSDAQ",
+      "name": "셀트리온제약",
+      "return_pct": -2.37,
+      "score": 77.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "068760"
+    },
+    {
+      "contraction_ratio": 0.524,
+      "current_price": 244500.0,
+      "entry_price": 235000.0,
+      "foreign_5d": 120993,
+      "inst_5d": -46486,
+      "market": "KOSPI",
+      "name": "포스코퓨처엠",
+      "return_pct": 4.04,
+      "score": 77.5,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "003670"
+    },
+    {
+      "contraction_ratio": 0.735,
+      "current_price": 38300.0,
+      "entry_price": 36600.0,
+      "foreign_5d": 263900,
+      "inst_5d": 273255,
+      "market": "KOSPI",
+      "name": "두산퓨얼셀",
+      "return_pct": 4.64,
+      "score": 77.3,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "336260"
     },
     {
       "contraction_ratio": 0.52,
-      "current_price": 678.0,
-      "entry_price": 595.0,
-      "foreign_5d": 103272,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 85,
-        "reason": "닌텐도 스위치2 출시 임박에 따른 유통 부문 실적 퀀텀 점프 기대감과 외국인의 강력한 수급 유입"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 82,
-        "reason": "VCP 점수(76.6)와 낮은 수축비율(0.52)로 기술적 여건이 양호한 가운데, 스위치2 출시 모멘텀으로 2025년 영업이익 570%↑ 전망 및 3분기 흑자전환·IP 제작사로의 체질개선이 실적/밸류 재평가를 촉발할 가능성이 커 매수 우위"
-      },
-      "inst_5d": -630,
-      "name": "오리엔트바이오",
-      "news": [
-        {
-          "summary": "신한투자증권은 닌텐도 차세대 기기 출시로 인해 대원미디어의 2025년 영업이익이 전년 대비 570% 성장한 163억 원에 달할 것으로 분석했습니다.",
-          "title": "대원미디어, 8년 만의 귀환 닌텐도 스위치2 최대 수혜…연간 영업이익 570%↑ 전망",
-          "url": "https://www.newsprime.co.kr/news/article.html?no=640231"
-        },
-        {
-          "summary": "비수기임에도 불구하고 닌텐도 차세대 기기 기대감과 하비·완구 유통 채널 확대로 매출이 54.9% 증가하며 실적 턴어라운드에 성공했습니다.",
-          "title": "대원미디어, 3분기 영업익·순이익 흑자 전환…'스위치2' 효과 가시화",
-          "url": "https://www.edaily.co.kr/news/read?newsId=03152086639119440"
-        },
-        {
-          "summary": "자회사 '스토리작'을 통해 자체 웹툰 IP를 확보하고 '아머드 사우루스'의 글로벌 전개를 본격화하며 단순 유통사에서 IP 제작사로 체질 개선 중입니다.",
-          "title": "“IP는 무기다”…대원미디어, 유통사 넘어 K-콘텐츠 원작사로 도약",
-          "url": "https://www.ezyeconomy.com/news/articleView.html?idxno=135421"
-        },
-        {
-          "summary": "인기 캐릭터 IP를 활용한 오프라인 전시 및 굿즈 판매가 흥행하며 라이선싱 사업 부문의 견조한 수익 창출 능력을 보여주었습니다.",
-          "title": "대원미디어, '스폰지밥' 25주년 팝업스토어 성료... 캐릭터 IP 파워 입증",
-          "url": "https://www.dailyinvest.kr/news/articleView.html?idxno=53421"
-        }
-      ],
-      "return_pct": 13.95,
-      "score": 76.6,
-      "ticker": "002630"
+      "current_price": 1539.0,
+      "entry_price": 1553.0,
+      "foreign_5d": 233300,
+      "inst_5d": -1042,
+      "market": "KOSPI",
+      "name": "유니온머티리얼",
+      "return_pct": -0.9,
+      "score": 77.0,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "047400"
     },
     {
-      "contraction_ratio": 0.757,
-      "current_price": 17960.0,
-      "entry_price": 9440.0,
-      "foreign_5d": 231332,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 82,
-        "reason": "VCP 수축 패턴(0.757) 완성 단계에서 외국인의 강력한 5일 연속 순매수(23만 주)가 유입되며 상방 돌파 가능성이 매우 높음"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 78,
-        "reason": "VCP Score 76.6과 변동성 수축(0.757)으로 기술적 에너지 응축 구간이며, 반도체 패키징 기판 수요 증가에 따른 마이크로 드릴 수혜·실적 회복 기대와 외국인 5일 23만주 순매수로 모멘텀이 뒷받침돼 매수 관점이 유리합니다."
-      },
-      "inst_5d": 3231,
-      "name": "네오티스",
-      "news": [
-        {
-          "summary": "최근 5거래일간 외국인이 23만 주 이상의 대규모 물량을 매집하며 수급 개선을 주도하고 있으며, 주가는 주요 이평선 위에서 안착 시도 중입니다.",
-          "title": "네오티스(085910), 외국인·기관 동반 매수세에 주가 반등 기조",
-          "url": "https://finance.naver.com/item/main.naver?code=085910"
-        },
-        {
-          "summary": "초정밀 마이크로 드릴 부문의 글로벌 경쟁력을 바탕으로 반도체 패키징 기판 수요 증가에 따른 수혜가 예상되며, 자동차용 모터 샤프트 매출도 안정적입니다.",
-          "title": "PCB 마이크로 비트 세계 시장 점유율 확대 및 전장 부품 성장세",
-          "url": "http://www.neotis.co.kr/business/business01.php"
-        },
-        {
-          "summary": "현재 주가는 역사적 저점 부근에서 VCP(변동성 수축) 패턴을 보이며 에너지를 응축하고 있으며, 실적 회복세와 맞물려 밸류에이션 재평가가 기대됩니다.",
-          "title": "네오티스, 저평가 국면 탈피하나... 자산 가치 대비 낮은 주가 수준",
-          "url": "https://finance.daum.net/quotes/A085910#news/stock"
-        }
-      ],
-      "return_pct": 90.25,
-      "score": 76.6,
-      "ticker": "085910"
+      "contraction_ratio": 0.723,
+      "current_price": 1238.0,
+      "entry_price": 1290.0,
+      "foreign_5d": 320705,
+      "inst_5d": -15623,
+      "market": "KOSPI",
+      "name": "남선알미늄",
+      "return_pct": -4.03,
+      "score": 76.4,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "008350"
     },
     {
-      "contraction_ratio": 0.625,
-      "current_price": 3540.0,
-      "entry_price": 3215.0,
-      "foreign_5d": 153922,
-      "fundamentals": {
-        "bps": "N/A",
-        "div_yield": "N/A",
-        "eps": "N/A",
-        "marcap": "N/A",
-        "pbr": "N/A",
-        "per": "N/A",
-        "roe": "N/A"
-      },
-      "gemini_recommendation": {
-        "action": "BUY",
-        "confidence": 82,
-        "reason": "2025년 실적 턴어라운드 성공과 2026년 제2성장기 진입 기대감 속에 외국인의 강력한 수급 유입 및 VCP 점수 개선이 확인됨"
-      },
-      "gpt_recommendation": {
-        "action": "BUY",
-        "confidence": 82,
-        "reason": "VCP 점수(75.7)와 수축비율(0.625)로 기술적 여건이 양호한 가운데, 2025년 2Q 이후 3개 분기 연속 흑자전환·ESS 양극재 판매 급증 등 실적 모멘텀과 외국인 5일 연속 순매수(15만주+)가 결합돼 추가 상승 기대가 우세합니다."
-      },
-      "inst_5d": -3266,
-      "name": "에코플라스틱",
-      "news": [
-        {
-          "summary": "2025년 2분기부터 3개 분기 연속 흑자를 기록하며 실적 반등에 성공했으며, 인도네시아 광물 투자 성과와 ESS용 양극재 판매 급증이 주요 원인으로 분석됨",
-          "title": "에코프로, 2025년 연결 기준 흑자 전환 성공... 리튬 가격 안정화 기여",
-          "url": "https://www.ecopro.co.kr/news/1.4"
-        },
-        {
-          "summary": "최근 5일간 외국인이 15만 주 이상을 집중 매수하며 수급 개선을 주도하고 있으며, 이는 2026년 업황 회복을 겨냥한 선제적 대응으로 풀이됨",
-          "title": "외국인, 에코프로 5거래일 연속 순매수... '바닥 통과' 베팅 가속",
-          "url": "https://www.investing.com/news/1.8"
-        },
-        {
-          "summary": "증권가는 2025년 조정을 거쳐 2026년부터 유럽 탄소배출 규제 강화와 북미 신규 공장 가동으로 에코프로의 실적 성장이 가속화될 것으로 전망함",
-          "title": "2026년 이차전지 섹터 '제2 성장 구간' 진입 전망... 에코프로 수혜 기대",
-          "url": "https://www.tistory.com/news/1.2"
-        },
-        {
-          "summary": "연말 준공 예정인 헝가리 공장을 통해 삼성SDI, BMW 등 유럽 내 주요 고객사향 공급 물량을 확대하며 글로벌 공급망 경쟁력을 확보할 예정임",
-          "title": "에코프로비엠, 헝가리 데브레첸 공장 준공 임박... 유럽 시장 공략 강화",
-          "url": "https://www.yna.co.kr/news/1.9"
-        }
-      ],
-      "return_pct": 10.11,
-      "score": 75.7,
-      "ticker": "038110"
+      "contraction_ratio": 0.491,
+      "current_price": 1262.0,
+      "entry_price": 1291.0,
+      "foreign_5d": 356318,
+      "inst_5d": -29095,
+      "market": "KOSPI",
+      "name": "조일알미늄",
+      "return_pct": -2.25,
+      "score": 76.3,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "018470"
+    },
+    {
+      "contraction_ratio": 0.421,
+      "current_price": 16130.0,
+      "entry_price": 15780.0,
+      "foreign_5d": 103292,
+      "inst_5d": -25516,
+      "market": "KOSPI",
+      "name": "제주은행",
+      "return_pct": 2.22,
+      "score": 76.2,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "006220"
+    },
+    {
+      "contraction_ratio": 0.702,
+      "current_price": 4175.0,
+      "entry_price": 3585.0,
+      "foreign_5d": 2101590,
+      "inst_5d": 283580,
+      "market": "KOSDAQ",
+      "name": "대한광통신",
+      "return_pct": 16.46,
+      "score": 76.2,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "010170"
+    },
+    {
+      "contraction_ratio": 0.4,
+      "current_price": 2855.0,
+      "entry_price": 2855.0,
+      "foreign_5d": 105586,
+      "inst_5d": 2527,
+      "market": "KOSPI",
+      "name": "한컴라이프케어",
+      "return_pct": 0,
+      "score": 76.0,
+      "signal_date": "2026-02-24",
+      "status": "OPEN",
+      "ticker": "372910"
     }
   ],
   "source": "json_live"

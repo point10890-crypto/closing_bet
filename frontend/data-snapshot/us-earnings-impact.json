@@ -1,4 +1,230 @@
 {
+  "details": {
+    "AAPL": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-05-01",
+      "revenue_growth": 0.157,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-12-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-09-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-06-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-03-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "AAPL"
+    },
+    "AMZN": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-05-01",
+      "revenue_growth": 0.136,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-12-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-09-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-06-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-03-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "AMZN"
+    },
+    "GOOGL": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-04-24",
+      "revenue_growth": 0.18,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-12-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-09-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-06-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-03-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "GOOGL"
+    },
+    "META": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-04-30",
+      "revenue_growth": 0.238,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-12-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-09-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-06-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-03-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "META"
+    },
+    "MSFT": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-04-30",
+      "revenue_growth": 0.167,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-12-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-09-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-06-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-03-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "MSFT"
+    },
+    "NVDA": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-02-26",
+      "revenue_growth": 0.625,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-10-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-07-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-04-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-01-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "NVDA"
+    },
+    "TSLA": {
+      "avg_surprise_pct": 0.0,
+      "next_earnings_date": "2026-04-22",
+      "revenue_growth": -0.031,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-12-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-09-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-06-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-03-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "TSLA"
+    }
+  },
   "sector_profiles": {
     "Financials": {
       "avg_beat_reaction_1d": 1.06,
@@ -9,75 +235,55 @@
       "sample_size": 12
     },
     "Technology": {
-      "avg_beat_reaction_1d": 6.52,
-      "avg_beat_reaction_5d": 7.72,
-      "avg_miss_reaction_1d": -5.99,
-      "avg_miss_reaction_5d": -6.34,
-      "beat_rate": 41.7,
+      "avg_beat_reaction_1d": 6.67,
+      "avg_beat_reaction_5d": 8.0,
+      "avg_miss_reaction_1d": -6.13,
+      "avg_miss_reaction_5d": -6.38,
+      "beat_rate": 39.6,
       "sample_size": 48
     }
   },
-  "timestamp": "2026-02-19T15:24:35.498769",
+  "timestamp": "2026-02-26T00:51:53.120222",
+  "transcript_metadata": {
+    "as_of_date": "2026-02-26",
+    "fetch_time": "2026-02-26T00:51:27.413054",
+    "source": "fmp_api + yfinance",
+    "ticker_count": 5,
+    "transcripts_found": 0
+  },
   "upcoming_earnings": [
     {
-      "confidence": 0.5,
-      "days_until": 0,
-      "earnings_date": "2026-02-20",
-      "historical_avg_move": 0.0,
-      "implied_move_pct": null,
-      "recommendation_en": "Insufficient data — hold",
-      "recommendation_ko": "실적 데이터 부족 — 관망",
-      "sector": "N/A",
-      "signal": "Neutral",
-      "ticker": "AKAM"
-    },
-    {
-      "confidence": 0.5,
-      "days_until": 0,
-      "earnings_date": "2026-02-20",
-      "historical_avg_move": 0.0,
-      "implied_move_pct": null,
-      "recommendation_en": "Insufficient data — hold",
-      "recommendation_ko": "실적 데이터 부족 — 관망",
-      "sector": "N/A",
-      "signal": "Neutral",
-      "ticker": "LNT"
-    },
-    {
-      "confidence": 0.5,
-      "days_until": 4,
-      "earnings_date": "2026-02-24",
-      "historical_avg_move": 0.0,
-      "implied_move_pct": null,
-      "recommendation_en": "Insufficient data — hold",
-      "recommendation_ko": "실적 데이터 부족 — 관망",
-      "sector": "N/A",
-      "signal": "Neutral",
-      "ticker": "AMT"
-    },
-    {
-      "confidence": 0.5,
-      "days_until": 6,
-      "earnings_date": "2026-02-26",
-      "historical_avg_move": 0.0,
-      "implied_move_pct": null,
-      "recommendation_en": "Insufficient data — hold",
-      "recommendation_ko": "실적 데이터 부족 — 관망",
-      "sector": "N/A",
-      "signal": "Neutral",
-      "ticker": "APA"
-    },
-    {
-      "confidence": 0.5,
-      "days_until": 7,
-      "earnings_date": "2026-02-27",
-      "historical_avg_move": 0.0,
-      "implied_move_pct": null,
-      "recommendation_en": "Insufficient data — hold",
-      "recommendation_ko": "실적 데이터 부족 — 관망",
-      "sector": "N/A",
-      "signal": "Neutral",
-      "ticker": "AES"
+      "avg_surprise_pct": 0.0,
+      "date": "2026-02-26",
+      "days_left": 0,
+      "revenue_growth": 0.625,
+      "surprises": [
+        {
+          "actual": 0,
+          "date": "2025-10-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-07-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-04-30",
+          "estimate": 0,
+          "surprise_pct": 0
+        },
+        {
+          "actual": 0,
+          "date": "2025-01-31",
+          "estimate": 0,
+          "surprise_pct": 0
+        }
+      ],
+      "ticker": "NVDA"
     }
   ]
 }
