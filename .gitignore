@@ -31,6 +31,7 @@ frontend/out/
 # Data directory: exclude heavy/generated files, keep essential
 data/*.csv
 !data/signals_log.csv
+!data/ticker_to_yahoo_map.csv
 data/*.db
 data/history/
 data/backtest/
