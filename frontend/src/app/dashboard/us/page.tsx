@@ -241,7 +241,7 @@ export default function USMarketDashboard() {
             {/* Market Gate + Indices */}
             <section className="grid grid-cols-1 lg:grid-cols-5 gap-4">
                 {/* Gate Score */}
-                <div className="lg:col-span-1 p-6 rounded-2xl bg-[#1c1c1e] border border-white/10 relative overflow-hidden group">
+                <div className="lg:col-span-1 p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-500">
                         <i className="fas fa-flag-usa text-4xl"></i>
                     </div>
@@ -283,7 +283,7 @@ export default function USMarketDashboard() {
                 </div>
 
                 {/* Market Indices Grid */}
-                <div className="lg:col-span-4 p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+                <div className="lg:col-span-4 p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-sm font-bold text-gray-400">Major Indices</h3>
                         <button onClick={loadData} disabled={loading} className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50">
@@ -566,7 +566,7 @@ export default function USMarketDashboard() {
                     <Link
                         key={link.href}
                         href={link.href}
-                        className={`p-5 rounded-2xl bg-[#1c1c1e] border border-white/10 hover:border-${link.color}-500/30 transition-all group`}
+                        className={`p-4 md:p-5 rounded-2xl bg-[#1c1c1e] border border-white/10 hover:border-${link.color}-500/30 transition-all group`}
                     >
                         <div className="flex items-center justify-between">
                             <div>

@@ -585,7 +585,7 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
             <div className="flex flex-col lg:flex-row relative z-10">
 
                 {/* Left: Info & Grade */}
-                <div className="p-6 lg:w-1/3 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col justify-between">
+                <div className="p-4 md:p-6 lg:w-1/3 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col justify-between">
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${style.border} ${style.bg} ${style.text}`}>
@@ -652,7 +652,7 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                         </div>
 
                         {/* 거래대금 / 외인 / 기관 데이터 */}
-                        <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                             <div className="bg-black/20 rounded-lg px-2 py-1.5 border border-white/5">
                                 <div className="text-gray-500 text-[10px] mb-0.5">거래대금</div>
                                 <div className="text-white font-mono font-bold">
@@ -694,7 +694,7 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                 </div>
 
                 {/* Middle: AI Analysis + News References */}
-                <div className="p-6 lg:w-5/12 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col">
+                <div className="p-4 md:p-6 lg:w-5/12 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col">
                     <div className="mb-3 flex items-center gap-2">
                         <span className={`w-1.5 h-1.5 rounded-full ${
                             signal.score.llm_source?.includes('claude') ? 'bg-gradient-to-r from-orange-400 to-amber-400' :
@@ -742,10 +742,10 @@ function SignalCard({ signal, index, onOpenChart }: { signal: Signal, index: num
                 </div>
 
                 {/* Right: Score Breakdown */}
-                <div className="p-6 lg:w-1/4 bg-white/[0.02] flex flex-col justify-center">
+                <div className="p-4 md:p-6 lg:w-1/4 bg-white/[0.02] flex flex-col justify-center">
                     <div className="text-center mb-6">
                         <div className="inline-flex items-baseline gap-1">
-                            <span className="text-4xl font-mono font-bold text-white">{signal.score.total}</span>
+                            <span className="text-3xl md:text-4xl font-mono font-bold text-white">{signal.score.total}</span>
                             <span className="text-sm text-gray-500">/ 17</span>
                         </div>
                         <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">Total Score</div>

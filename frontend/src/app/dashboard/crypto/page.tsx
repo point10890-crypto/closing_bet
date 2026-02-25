@@ -122,7 +122,7 @@ export default function CryptoPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Market Gate Gauge */}
                 {gate && gate.gate && (
-                    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-5 flex flex-col items-center">
+                    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-3 md:p-5 flex flex-col items-center">
                         <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold">Market Gate (ULTRATHINK)</div>
                         <MarketGateGauge score={gate.score} gate={gate.gate} size={180} />
                         {gate.reasons && gate.reasons.length > 0 && (
@@ -137,7 +137,7 @@ export default function CryptoPage() {
 
                 {/* Fear & Greed */}
                 {fearGreedValue !== undefined && fearGreedValue !== null && (
-                    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-5 flex flex-col items-center justify-center">
+                    <div className="rounded-xl bg-gray-800/50 border border-gray-700/50 p-3 md:p-5 flex flex-col items-center justify-center">
                         <div className="text-xs text-gray-400 mb-3 uppercase tracking-wider font-bold">Fear & Greed Index</div>
                         <div className={`text-5xl font-black ${fearGreedValue <= 25 ? 'text-red-400' : fearGreedValue <= 45 ? 'text-orange-400' : fearGreedValue <= 55 ? 'text-yellow-400' : fearGreedValue <= 75 ? 'text-green-400' : 'text-emerald-400'}`}>
                             {fearGreedValue}

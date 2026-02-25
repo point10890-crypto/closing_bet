@@ -58,7 +58,7 @@ export default function EarningsStrategy() {
 
             {/* Sector Profiles Table */}
             {sectorProfiles.length > 0 ? (
-                <div className="p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+                <div className="p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                     <h3 className="text-sm font-bold text-gray-400 mb-4 flex items-center gap-2">
                         <i className="fas fa-industry text-pink-500"></i>
                         Sector Earnings Profiles
@@ -144,7 +144,7 @@ export default function EarningsStrategy() {
             )}
 
             {/* Upcoming Earnings */}
-            <div className="p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
+            <div className="p-4 md:p-6 rounded-2xl bg-[#1c1c1e] border border-white/10">
                 <h3 className="text-sm font-bold text-gray-400 mb-4 flex items-center gap-2">
                     <i className="fas fa-calendar-check text-amber-500"></i>
                     Upcoming Earnings
