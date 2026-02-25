@@ -8,7 +8,8 @@ const BACKEND_URL = process.env.BACKEND_URL || 'https://closing-bet-api.onrender
 // NOTE: 'auth' is excluded — next-auth handles /api/auth/* via its own route handler
 const API_PREFIXES = [
   'kr', 'us', 'crypto', 'econ', 'dividend',
-  'admin', 'stripe', 'stock-analyzer',
+  'admin', 'stripe',
+  // 'stock-analyzer' — handled by Next.js API routes (no backend dependency)
   'scheduler', 'system', 'portfolio', 'stock',
 ];
 
