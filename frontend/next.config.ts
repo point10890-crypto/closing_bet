@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
-// Local: BACKEND_URL=http://localhost:5001 → rewrites proxy to Flask
-// Vercel: BACKEND_URL not set → rewrites redirect /api/* → /api/data/* (static snapshots)
-const BACKEND_URL = process.env.BACKEND_URL || '';
+// Local: BACKEND_URL=http://localhost:5001 → rewrites proxy to local Flask
+// Vercel: BACKEND_URL not set → defaults to Render.com live backend
+const BACKEND_URL = process.env.BACKEND_URL || 'https://closing-bet-api.onrender.com';
 
 // API path prefixes that map to Flask endpoints
 // NOTE: 'auth' is excluded — next-auth handles /api/auth/* via its own route handler

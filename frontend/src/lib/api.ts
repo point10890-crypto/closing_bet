@@ -9,8 +9,9 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 const IS_SERVER = typeof window === 'undefined';
 
-// NEXT_PUBLIC_API_URL이 비어있으면 Vercel 배포 환경 (Static Snapshot 모드)
-const USE_DATA_PREFIX = !API_BASE;
+// Live backend (Render.com) — 정적 스냅샷 모드 비활성화
+// next.config.ts가 /api/* → Render 백엔드로 rewrite
+const USE_DATA_PREFIX = false;
 
 /**
  * API 엔드포인트를 Vercel 환경에 맞게 변환
