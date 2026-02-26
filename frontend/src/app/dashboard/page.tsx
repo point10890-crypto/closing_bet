@@ -82,7 +82,7 @@ export default function DashboardPage() {
                                 <Link href="/dashboard/skills/breadth" className="text-center px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                                     <p className="text-[10px] text-gray-500">Breadth</p>
                                     <p className={`text-lg font-bold ${dashboard.breadth.score >= 60 ? 'text-green-400' : dashboard.breadth.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {dashboard.breadth.score.toFixed(0)}
+                                        {(dashboard.breadth.score ?? 0).toFixed(0)}
                                     </p>
                                 </Link>
                             )}
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                                 <Link href="/dashboard/skills/regime" className="text-center px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                                     <p className="text-[10px] text-gray-500">Regime</p>
                                     <p className={`text-lg font-bold ${dashboard.regime.score >= 60 ? 'text-green-400' : dashboard.regime.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {dashboard.regime.score.toFixed(0)}
+                                        {(dashboard.regime.score ?? 0).toFixed(0)}
                                     </p>
                                 </Link>
                             )}
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">Uptrend</p>
                                     <p className={`text-lg font-bold ${dashboard.uptrend.score >= 60 ? 'text-green-400' : dashboard.uptrend.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {dashboard.uptrend.score.toFixed(0)}
+                                        {(dashboard.uptrend.score ?? 0).toFixed(0)}
                                     </p>
                                 </div>
                             )}
@@ -106,7 +106,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">Bubble</p>
                                     <p className={`text-lg font-bold ${dashboard.bubble.score >= 60 ? 'text-green-400' : dashboard.bubble.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {dashboard.bubble.score.toFixed(0)}
+                                        {(dashboard.bubble.score ?? 0).toFixed(0)}
                                     </p>
                                 </div>
                             )}
@@ -114,7 +114,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">Top Risk</p>
                                     <p className={`text-lg font-bold ${dashboard.market_top.score >= 60 ? 'text-green-400' : dashboard.market_top.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {dashboard.market_top.score.toFixed(0)}
+                                        {(dashboard.market_top.score ?? 0).toFixed(0)}
                                     </p>
                                 </div>
                             )}
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">FTD</p>
                                     <p className={`text-lg font-bold ${dashboard.ftd.score >= 60 ? 'text-green-400' : dashboard.ftd.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {dashboard.ftd.score.toFixed(0)}
+                                        {(dashboard.ftd.score ?? 0).toFixed(0)}
                                     </p>
                                 </div>
                             )}
