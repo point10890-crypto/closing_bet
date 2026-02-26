@@ -1,8 +1,1 @@
-{
-  "score": 48,
-  "sentiment": "NEUTRAL",
-  "timestamp": "2026-02-26T01:27:25.791976",
-  "vix": 18.6,
-  "vix_30d_avg": 18.26,
-  "vix_change": -0.95
-}
+{"score":60,"sentiment":"GREED","timestamp":"2026-02-26T09:32:37.325148","vix":18.0,"vix_30d_avg":18.31,"vix_change":0.07}

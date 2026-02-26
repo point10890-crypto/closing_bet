@@ -1,17 +1,1 @@
-{
-  "alerts": [],
-  "concentration": {
-    "concentration_warnings": [],
-    "high_correlation_pairs": [],
-    "sector_concentration": {}
-  },
-  "drawdowns": {},
-  "portfolio_summary": {
-    "portfolio_cvar_95_5d": 0,
-    "portfolio_var_95_5d": 0,
-    "risk_level": "No Data",
-    "total_picks": 0,
-    "var_details": {}
-  },
-  "timestamp": "2026-02-26T00:51:29.171793"
-}
+{"alerts":[],"portfolio_summary":{}}
