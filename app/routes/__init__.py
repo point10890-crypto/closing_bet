@@ -47,4 +47,8 @@ def register_blueprints(app):
     from app.routes.stock_analyzer import stock_analyzer_bp
     app.register_blueprint(stock_analyzer_bp, url_prefix='/api/stock-analyzer')
 
-    print("[OK] All Blueprints registered (KR + US + Crypto + Econ + Dividend + Auth + Admin + Stripe + StockAnalyzer)")
+    # Trading Skills routes (38 skills from claude-trading-skills)
+    from app.routes.trading_skills import skills_bp
+    app.register_blueprint(skills_bp, url_prefix='/api/skills')
+
+    print("[OK] All Blueprints registered (KR + US + Crypto + Econ + Dividend + Auth + Admin + Stripe + StockAnalyzer + Skills)")

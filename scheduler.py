@@ -1308,6 +1308,87 @@ def run_full_update():
 
 
 # ============================================================
+# Trading Skills 실행
+# ============================================================
+
+def _run_trading_skill(skill_name: str, script_name: str, api_key_env: str = None):
+    """Trading skill 스크립트 실행"""
+    script_path = os.path.join(Config.BASE_DIR, 'skills', skill_name, 'scripts', script_name)
+    if not os.path.isfile(script_path):
+        logger.warning(f"⚠️ 스킬 스크립트 없음: {script_path}")
+        return False
+
+    output_dir = os.path.join(Config.BASE_DIR, 'reports', skill_name)
+    os.makedirs(output_dir, exist_ok=True)
+
+    cmd = [Config.PYTHON_PATH, script_path, '--output-dir', output_dir]
+    if api_key_env:
+        key = os.environ.get(api_key_env, '')
+        if key:
+            cmd.extend(['--api-key', key])
+
+    env = os.environ.copy()
+    env['PYTHONIOENCODING'] = 'utf-8'
+
+    try:
+        result = subprocess.run(cmd, cwd=Config.BASE_DIR, env=env,
+                                capture_output=True, text=True, timeout=300)
+        if result.returncode == 0:
+            logger.info(f"✅ 스킬 완료: {skill_name}")
+            return True
+        else:
+            logger.warning(f"⚠️ 스킬 실패: {skill_name} (exit={result.returncode})")
+            if result.stderr:
+                logger.debug(result.stderr[:500])
+            return False
+    except subprocess.TimeoutExpired:
+        logger.error(f"❌ 스킬 타임아웃: {skill_name} (5분 초과)")
+        return False
+    except Exception as e:
+        logger.error(f"❌ 스킬 실행 오류: {skill_name} — {e}")
+        return False
+
+
+def run_trading_skills_daily():
+    """매일 실행할 트레이딩 스킬 (US 프리마켓)"""
+    skills = [
+        ('market-breadth-analyzer', 'market_breadth_analyzer.py', None),
+        ('macro-regime-detector', 'macro_regime_detector.py', None),
+        ('uptrend-analyzer', 'uptrend_analyzer.py', None),
+        ('us-market-bubble-detector', 'bubble_scorer.py', None),
+        ('ftd-detector', 'ftd_detector.py', 'FMP_API_KEY'),
+        ('market-top-detector', 'market_top_detector.py', 'FMP_API_KEY'),
+    ]
+    results = []
+    for skill_name, script, api_key in skills:
+        ok = _run_trading_skill(skill_name, script, api_key)
+        results.append((skill_name, ok))
+
+    success = sum(1 for _, ok in results if ok)
+    logger.info(f"📊 Daily skills: {success}/{len(results)} 완료")
+    return success > 0
+
+
+def run_trading_skills_weekly():
+    """주간 실행 트레이딩 스킬 (월요일)"""
+    skills = [
+        ('vcp-screener', 'screen_vcp.py', 'FMP_API_KEY'),
+        ('canslim-screener', 'screen_canslim.py', 'FMP_API_KEY'),
+        ('theme-detector', 'theme_detector.py', 'FMP_API_KEY'),
+        ('earnings-trade-analyzer', 'analyze_earnings_trades.py', 'FMP_API_KEY'),
+        ('pead-screener', 'screen_pead.py', 'FMP_API_KEY'),
+    ]
+    results = []
+    for skill_name, script, api_key in skills:
+        ok = _run_trading_skill(skill_name, script, api_key)
+        results.append((skill_name, ok))
+
+    success = sum(1 for _, ok in results if ok)
+    logger.info(f"📊 Weekly skills: {success}/{len(results)} 완료")
+    return success > 0
+
+
+# ============================================================
 # 스케줄러
 # ============================================================
 
@@ -1344,6 +1425,17 @@ class Scheduler:
         for t in Config.CRYPTO_TIMES:
             schedule.every().day.at(t).do(run_crypto_pipeline)
 
+        # Trading Skills — 매일 03:30 (US 프리마켓)
+        for day in weekdays:
+            getattr(schedule.every(), day).at("03:30").do(
+                lambda: _safe_run(run_trading_skills_daily, "Trading Skills (Daily)")
+            )
+
+        # Trading Skills — 주간 월요일 03:00
+        schedule.every().monday.at("03:00").do(
+            lambda: _safe_run(run_trading_skills_weekly, "Trading Skills (Weekly)")
+        )
+
         logger.info("📅 스케줄 등록 완료:")
         logger.info(f"   🇺🇸 평일 {Config.US_UPDATE_TIME} US Market 전체 갱신 + Smart Money Top 5")
         logger.info(f"   🇺🇸 평일 {Config.US_TRACK_TIME} US Track Record 스냅샷")
@@ -1351,6 +1443,8 @@ class Scheduler:
         logger.info(f"   🇰🇷 평일 {Config.ROUND2_TIME} [2차] 데이터 갱신 + VCP + 요약")
         logger.info(f"   🇰🇷 토요일 {Config.HISTORY_TIME} 히스토리 수집")
         logger.info(f"   🪙 매일 {', '.join(Config.CRYPTO_TIMES)} Crypto 전체 파이프라인")
+        logger.info(f"   📊 평일 03:30 Trading Skills (Daily: breadth, regime, ftd, top)")
+        logger.info(f"   📊 월요일 03:00 Trading Skills (Weekly: VCP, CANSLIM, theme, PEAD)")
 
     def run(self):
         """스케줄러 실행"""

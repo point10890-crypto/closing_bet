@@ -655,6 +655,34 @@ export const dividendAPI = {
     getKRTop: () => fetchAPI<{ kr_dividends: any[]; timestamp: string }>('/api/dividend/kr-top'),
 };
 
+// Trading Skills API
+export interface SkillInfo {
+    id: string;
+    name: string;
+    category: string;
+    has_script: boolean;
+    api_key_required: string | null;
+    has_skill_md: boolean;
+    has_report: boolean;
+    last_report_time: string | null;
+    running: boolean;
+}
+
+export const skillsAPI = {
+    getCatalog: () => fetchAPI<{ total: number; skills: SkillInfo[]; categories: string[] }>('/api/skills/catalog'),
+    getReport: (skillName: string) => fetchAPI<any>(`/api/skills/report/${skillName}`),
+    getStatus: () => fetchAPI<any>('/api/skills/status'),
+    getMarketBreadth: () => fetchAPI<any>('/api/skills/market-breadth'),
+    getMacroRegime: () => fetchAPI<any>('/api/skills/macro-regime'),
+    getMarketTop: () => fetchAPI<any>('/api/skills/market-top'),
+    getFTD: () => fetchAPI<any>('/api/skills/ftd'),
+    getBubble: () => fetchAPI<any>('/api/skills/bubble'),
+    getThemes: () => fetchAPI<any>('/api/skills/themes'),
+    getVCP: () => fetchAPI<any>('/api/skills/vcp'),
+    getEarningsTrade: () => fetchAPI<any>('/api/skills/earnings-trade'),
+    runSkill: (skillName: string) => postAPI<any>(`/api/skills/run/${skillName}`),
+};
+
 // Chatbot API
 export const chatbotAPI = {
     sendMessage: (message: string) =>

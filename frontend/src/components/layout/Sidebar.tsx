@@ -87,6 +87,19 @@ const navigation: NavItem[] = [
         color: 'text-cyan-400',
     },
     {
+        name: 'Trading Skills',
+        href: '/dashboard/skills',
+        icon: 'fa-brain',
+        color: 'text-pink-400',
+        children: [
+            { name: 'Skills Hub', href: '/dashboard/skills', color: 'bg-pink-500' },
+            { name: 'VCP Screen', href: '/dashboard/skills/vcp', color: 'bg-rose-500' },
+            { name: 'Breadth', href: '/dashboard/skills/breadth', color: 'bg-blue-500' },
+            { name: 'Regime', href: '/dashboard/skills/regime', color: 'bg-purple-500' },
+            { name: 'Themes', href: '/dashboard/skills/themes', color: 'bg-amber-500' },
+        ],
+    },
+    {
         name: 'ProPicks',
         href: '/dashboard/stock-analyzer',
         icon: 'fa-crosshairs',

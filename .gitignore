@@ -95,3 +95,11 @@ crypto-analytics/crypto_market/vcp_backtest/cache/
 nul
 *.db
 us_market/output/
+
+# Trading skills reports (generated output)
+reports/
+
+# Temp scripts
+fix_path_issue.bat
+kill_zombies.ps1
+schtask_result.txt
