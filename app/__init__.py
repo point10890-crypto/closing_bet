@@ -113,6 +113,30 @@ def create_app(config=None):
         threading.Thread(target=func, daemon=True, name=f'trigger-{task}').start()
         return _jsonify({'status': 'triggered', 'task': task})
 
+    # ── 데이터 freshness 확인 (GitHub Actions용) ──
+    @app.route('/api/system/last-update')
+    def system_last_update():
+        from flask import jsonify as _jsonify
+        from datetime import datetime, timezone
+        base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        files_to_check = {
+            'kr_jongga': os.path.join(base, 'data', 'jongga_v2_latest.json'),
+            'us_briefing': os.path.join(base, 'us_market_preview', 'output', 'briefing.json'),
+            'us_market_data': os.path.join(base, 'us_market_preview', 'output', 'market_data.json'),
+            'us_top_picks': os.path.join(base, 'us_market_preview', 'output', 'top_picks.json'),
+        }
+        result = {}
+        for key, path in files_to_check.items():
+            if os.path.exists(path):
+                mtime = os.path.getmtime(path)
+                result[key] = {
+                    'timestamp': datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(),
+                    'age_seconds': int(datetime.now(timezone.utc).timestamp() - mtime),
+                }
+            else:
+                result[key] = {'timestamp': None, 'age_seconds': -1}
+        return _jsonify(result)
+
     # ── 라우트 등록 검증: 핵심 라우트 누락 시 즉시 중단 ──
     registered = {r.rule for r in app.url_map.iter_rules()}
     for critical in ['/api/health', '/api/data-version']:

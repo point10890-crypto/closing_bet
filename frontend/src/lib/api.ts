@@ -38,6 +38,7 @@ export async function fetchAPI<T>(endpoint: string): Promise<T> {
     const options: RequestInit = {};
     if (IS_SERVER) {
         options.cache = 'no-store' as any;
+        options.signal = AbortSignal.timeout(10000); // 10s timeout for live backend
     }
 
     try {
@@ -47,6 +48,18 @@ export async function fetchAPI<T>(endpoint: string): Promise<T> {
         }
         return await response.json();
     } catch (error) {
+        // Fallback: Render 다운 시 정적 스냅샷으로 전환
+        if (IS_SERVER && endpoint.startsWith('/api/') && !endpoint.startsWith('/api/data/')) {
+            const snapshotEndpoint = `/api/data/${endpoint.replace(/^\/api\//, '')}`;
+            try {
+                const fallbackUrl = `${API_BASE}${snapshotEndpoint}`;
+                const fallbackResponse = await fetch(fallbackUrl, { cache: 'no-store' as any });
+                if (fallbackResponse.ok) {
+                    console.warn(`[fetchAPI] Fallback to snapshot: ${snapshotEndpoint}`);
+                    return await fallbackResponse.json();
+                }
+            } catch { /* fallback also failed */ }
+        }
         console.error(`[fetchAPI Error] ${url}:`, error);
         throw error;
     }
