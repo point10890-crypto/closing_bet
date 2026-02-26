@@ -16,6 +16,7 @@ Features:
 import os
 import sys
 import time
+from datetime import datetime, timedelta
 from typing import Optional
 
 try:
@@ -23,6 +24,12 @@ try:
 except ImportError:
     print("ERROR: requests library not found. Install with: pip install requests", file=sys.stderr)
     sys.exit(1)
+
+try:
+    import yfinance as yf
+    _HAS_YFINANCE = True
+except ImportError:
+    _HAS_YFINANCE = False
 
 
 class FMPClient:
@@ -88,7 +95,7 @@ class FMPClient:
             return None
 
     def get_historical_prices(self, symbol: str, days: int = 600) -> Optional[dict]:
-        """Fetch historical daily OHLCV data"""
+        """Fetch historical daily OHLCV data (FMP with yfinance fallback)"""
         cache_key = f"prices_{symbol}_{days}"
         if cache_key in self.cache:
             return self.cache[cache_key]
@@ -96,9 +103,40 @@ class FMPClient:
         url = f"{self.BASE_URL}/historical-price-full/{symbol}"
         params = {"timeseries": days}
         data = self._rate_limited_get(url, params)
+
+        # Fallback to yfinance if FMP returns None (403/legacy endpoint)
+        if not data and _HAS_YFINANCE:
+            data = self._yfinance_fallback(symbol, days)
+
         if data:
             self.cache[cache_key] = data
         return data
+
+    def _yfinance_fallback(self, symbol: str, days: int) -> Optional[dict]:
+        """Fetch historical prices via yfinance when FMP fails."""
+        try:
+            end = datetime.now()
+            start = end - timedelta(days=int(days * 1.5))
+            ticker = yf.Ticker(symbol)
+            df = ticker.history(start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d"))
+            if df.empty:
+                return None
+            historical = []
+            for date, row in df.iterrows():
+                historical.append({
+                    "date": date.strftime("%Y-%m-%d"),
+                    "open": round(float(row["Open"]), 4),
+                    "high": round(float(row["High"]), 4),
+                    "low": round(float(row["Low"]), 4),
+                    "close": round(float(row["Close"]), 4),
+                    "volume": int(row["Volume"]),
+                })
+            historical.reverse()  # Most recent first (FMP format)
+            print(f"  [yfinance fallback] {symbol}: {len(historical)} days OK")
+            return {"symbol": symbol, "historical": historical}
+        except Exception as e:
+            print(f"  [yfinance fallback] {symbol} failed: {e}", file=sys.stderr)
+            return None
 
     def get_batch_historical(self, symbols: list[str], days: int = 600) -> dict[str, list[dict]]:
         """Fetch historical prices for multiple symbols"""

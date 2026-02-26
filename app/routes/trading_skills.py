@@ -246,7 +246,27 @@ def market_breadth():
     report = _get_latest_report('market-breadth-analyzer')
     if not report:
         return jsonify({'error': 'No market breadth report. Run /skill-market-breadth first.'}), 404
-    return jsonify(report)
+
+    # Transform to frontend BreadthPage format
+    composite = report.get('composite', {})
+    components = report.get('components', {})
+    result = {
+        'results': [{
+            'composite_score': composite.get('composite_score', 0),
+            'score': composite.get('composite_score', 0),
+            'zone': composite.get('zone', 'Unknown'),
+            'exposure_guidance': composite.get('exposure_guidance', ''),
+            'components': {
+                k: {'score': v.get('score', 0), 'signal': v.get('signal', ''), 'weight': w}
+                for k, v, w in [
+                    (k, components.get(k, {}), composite.get('component_scores', {}).get(k, {}).get('weight', 0))
+                    for k in components
+                ]
+            },
+        }],
+        '_report_time': report.get('_report_time'),
+    }
+    return jsonify(result)
 
 
 @skills_bp.route('/macro-regime')
@@ -255,7 +275,25 @@ def macro_regime():
     report = _get_latest_report('macro-regime-detector')
     if not report:
         return jsonify({'error': 'No macro regime report. Run /skill-macro-regime first.'}), 404
-    return jsonify(report)
+
+    # Transform to frontend RegimePage format
+    composite = report.get('composite', {})
+    regime_data = report.get('regime', {})
+    components = report.get('components', {})
+    result = {
+        'results': [{
+            'regime': regime_data.get('classification', composite.get('zone', 'neutral')),
+            'classification': regime_data.get('classification', composite.get('zone', 'neutral')),
+            'composite_score': composite.get('composite_score', 0),
+            'score': composite.get('composite_score', 0),
+            'components': {
+                k: {'signal': v.get('signal', ''), 'score': v.get('score', 0), 'regime': v.get('regime', '')}
+                for k, v in components.items()
+            },
+        }],
+        '_report_time': report.get('_report_time'),
+    }
+    return jsonify(result)
 
 
 @skills_bp.route('/market-top')
@@ -291,7 +329,26 @@ def themes():
     report = _get_latest_report('theme-detector')
     if not report:
         return jsonify({'error': 'No theme report. Run /skill-theme-detector first.'}), 404
-    return jsonify(report)
+
+    # Transform themes dict → results array for frontend ThemesPage
+    raw_themes = report.get('themes', {})
+    all_themes = raw_themes.get('all', []) if isinstance(raw_themes, dict) else []
+    results = []
+    for t in all_themes:
+        results.append({
+            'theme': t.get('name', ''),
+            'heat_score': t.get('heat', 0),
+            'lifecycle_score': t.get('maturity', 0),
+            'confidence_score': {'High': 90, 'Medium': 60, 'Low': 30}.get(t.get('confidence', ''), 50),
+            'composite_score': (t.get('heat', 0) + t.get('maturity', 0)) / 2,
+            'etfs': t.get('proxy_etfs', []),
+            'representative_stocks': t.get('representative_stocks', []),
+            'description': f"{t.get('direction', '')} | Stage: {t.get('stage', '')} | {t.get('heat_label', '')}",
+        })
+    return jsonify({
+        'results': results,
+        '_report_time': report.get('_report_time'),
+    })
 
 
 @skills_bp.route('/vcp')
@@ -300,7 +357,31 @@ def vcp():
     report = _get_latest_report('vcp-screener')
     if not report:
         return jsonify({'error': 'No VCP report. Run /skill-vcp-screener first.'}), 404
-    return jsonify(report)
+
+    # Transform to frontend VCPScreenerPage format
+    candidates = report.get('results', report.get('candidates', []))
+    results = []
+    for c in candidates:
+        results.append({
+            'symbol': c.get('symbol', ''),
+            'name': c.get('name', ''),
+            'sector': c.get('sector', ''),
+            'composite_score': c.get('composite_score', c.get('score', 0)),
+            'rating': c.get('rating', ''),
+            'current_price': c.get('current_price', c.get('price', 0)),
+            'pivot_price': c.get('pivot_price', 0),
+            'stop_price': c.get('stop_price', 0),
+            'risk_pct': c.get('risk_pct', 0),
+            'contractions': c.get('contractions', 0),
+            'relative_strength': c.get('relative_strength', c.get('rs_rank', 0)),
+            'entry_ready': c.get('entry_ready', False),
+        })
+    return jsonify({
+        'results': results,
+        'summary': report.get('summary', {}),
+        'metadata': report.get('metadata', {}),
+        '_report_time': report.get('_report_time'),
+    })
 
 
 @skills_bp.route('/earnings-trade')
