@@ -197,7 +197,7 @@ export default function USMarketDashboard() {
                             {[
                                 { label: 'Gate', value: `${decisionSignal.components.market_gate.score}`, contrib: decisionSignal.components.market_gate.contribution },
                                 { label: 'Regime', value: decisionSignal.components.regime.regime.replace('_', ' '), contrib: decisionSignal.components.regime.contribution },
-                                { label: 'ML Pred', value: `${decisionSignal.components.prediction.spy_bullish.toFixed(0)}%`, contrib: decisionSignal.components.prediction.contribution },
+                                { label: 'ML Pred', value: `${(decisionSignal.components.prediction.spy_bullish ?? 0).toFixed(0)}%`, contrib: decisionSignal.components.prediction.contribution },
                                 { label: 'Risk', value: decisionSignal.components.risk.level, contrib: decisionSignal.components.risk.contribution },
                                 { label: 'Sector', value: decisionSignal.components.sector_phase.phase, contrib: decisionSignal.components.sector_phase.contribution },
                             ].map(comp => (
@@ -205,7 +205,7 @@ export default function USMarketDashboard() {
                                     <div className="text-[10px] text-gray-500">{comp.label}</div>
                                     <div className="text-xs font-bold text-white">{comp.value}</div>
                                     <div className={`text-[10px] font-bold ${comp.contrib > 0 ? 'text-green-400' : comp.contrib < 0 ? 'text-red-400' : 'text-gray-500'}`}>
-                                        {comp.contrib > 0 ? '+' : ''}{comp.contrib.toFixed(1)}
+                                        {(comp.contrib ?? 0) > 0 ? '+' : ''}{(comp.contrib ?? 0).toFixed(1)}
                                     </div>
                                 </div>
                             ))}
@@ -264,8 +264,8 @@ export default function USMarketDashboard() {
                             </div>
                         </div>
                         <div className={`mt-3 px-3 py-1 rounded-full text-xs font-bold border ${gateData?.gate === 'GREEN' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                                gateData?.gate === 'RED' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-                                    'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+                            gateData?.gate === 'RED' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                                'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
                             }`}>
                             {loading ? 'Analyzing...' : gateData?.gate ?? gateData?.label ?? 'N/A'}
                         </div>
@@ -432,14 +432,14 @@ export default function USMarketDashboard() {
                                     <div className="text-right">
                                         <div className="text-sm font-black text-white">${stock.price?.toFixed(2) ?? '--'}</div>
                                         <div className={`text-xs font-bold ${getChangeColor(stock.change_pct)}`}>
-                                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct?.toFixed(2)}%
+                                            {stock.change_pct >= 0 ? '+' : ''}{stock.change_pct?.toFixed(2) ?? '0.00'}%
                                         </div>
                                     </div>
                                 </div>
                                 <div className="text-xs text-gray-500 truncate">{stock.name}</div>
                                 <div className="mt-2 flex gap-1">
                                     <span className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] text-blue-400 font-bold">
-                                        {stock.composite_score?.toFixed(1) ?? '--'}
+                                        {stock.composite_score?.toFixed(1) ?? 'N/A'}
                                     </span>
                                     <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] text-gray-400 font-bold">
                                         {stock.grade || 'N/A'}
@@ -460,19 +460,21 @@ export default function USMarketDashboard() {
                                         <div className="text-lg font-black text-white group-hover:text-indigo-400 transition-colors">{pick.ticker}</div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-sm font-black text-white">${pick.current_price.toFixed(2)}</div>
-                                        <div className={`text-xs font-bold ${pick.target_upside >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            {pick.target_upside > 0 ? '+' : ''}{pick.target_upside.toFixed(1)}%
-                                        </div>
+                                        <div className="text-sm font-black text-white">${(pick.current_price ?? pick.price ?? 0).toFixed(2)}</div>
+                                        {pick.target_upside != null && (
+                                            <div className={`text-xs font-bold ${pick.target_upside >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                                {pick.target_upside > 0 ? '+' : ''}{pick.target_upside?.toFixed(1) ?? '0.0'}%
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="text-xs text-gray-500 truncate mb-2">{pick.name}</div>
                                 <div className="flex gap-1 flex-wrap">
                                     <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-[10px] text-indigo-400 font-bold">
-                                        {pick.final_score.toFixed(1)}
+                                        {(pick.final_score ?? pick.composite_score ?? 0).toFixed(1)}
                                     </span>
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${pick.ai_recommendation.includes('매수') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
-                                        {pick.ai_recommendation}
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${(pick.ai_recommendation ?? pick.signal ?? '').includes('매수') || (pick.ai_recommendation ?? pick.signal ?? '').includes('Buy') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'}`}>
+                                        {pick.ai_recommendation ?? pick.signal ?? '-'}
                                     </span>
                                 </div>
                             </div>
@@ -495,11 +497,11 @@ export default function USMarketDashboard() {
                             </span>
                         </div>
                         <div className="flex items-center gap-6 flex-wrap text-sm">
-                            <span className="text-emerald-400 font-black">+{backtestData.returns.total_return.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">return</span></span>
-                            <span className="text-blue-400 font-black">+{backtestData.benchmarks.SPY?.alpha.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">alpha vs SPY</span></span>
-                            <span className="text-purple-400 font-black">{backtestData.returns.sharpe_ratio.toFixed(1)} <span className="text-gray-500 font-normal text-xs">sharpe</span></span>
-                            <span className="text-yellow-400 font-black">{backtestData.returns.win_rate.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">win rate</span></span>
-                            <span className="text-red-400 font-bold">{backtestData.returns.max_drawdown.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">max DD</span></span>
+                            <span className="text-emerald-400 font-black">+{(backtestData.returns.total_return ?? 0)?.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">return</span></span>
+                            <span className="text-blue-400 font-black">+{(backtestData.benchmarks?.SPY?.alpha ?? 0)?.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">alpha vs SPY</span></span>
+                            <span className="text-purple-400 font-black">{(backtestData.returns.sharpe_ratio ?? 0)?.toFixed(1)} <span className="text-gray-500 font-normal text-xs">sharpe</span></span>
+                            <span className="text-yellow-400 font-black">{(backtestData.returns.win_rate ?? 0)?.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">win rate</span></span>
+                            <span className="text-red-400 font-bold">{(backtestData.returns.max_drawdown ?? 0)?.toFixed(1)}% <span className="text-gray-500 font-normal text-xs">max DD</span></span>
                         </div>
                     </div>
                 </Link>

@@ -19,7 +19,7 @@ function ScoreGauge({ score, label, href }: { score: number; label: string; href
     return (
         <Wrapper {...wrapperProps as any} className={`bg-[#1c1c1e] border border-white/10 rounded-xl p-4 ${href ? 'hover:border-white/20 transition-colors cursor-pointer' : ''}`}>
             <p className="text-xs text-gray-500 mb-2">{label}</p>
-            <p className={`text-2xl font-bold ${color}`}>{score.toFixed(0)}</p>
+            <p className={`text-2xl font-bold ${color}`}>{score?.toFixed(0) ?? '--'}</p>
             <div className="h-1.5 bg-gray-800 rounded-full mt-2">
                 <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${Math.min(score, 100)}%` }} />
             </div>
@@ -82,7 +82,7 @@ export default function DashboardPage() {
                                 <Link href="/dashboard/skills/breadth" className="text-center px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                                     <p className="text-[10px] text-gray-500">Breadth</p>
                                     <p className={`text-lg font-bold ${dashboard.breadth.score >= 60 ? 'text-green-400' : dashboard.breadth.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {(dashboard.breadth.score ?? 0).toFixed(0)}
+                                        {dashboard.breadth.score?.toFixed(0) ?? '--'}
                                     </p>
                                 </Link>
                             )}
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                                 <Link href="/dashboard/skills/regime" className="text-center px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                                     <p className="text-[10px] text-gray-500">Regime</p>
                                     <p className={`text-lg font-bold ${dashboard.regime.score >= 60 ? 'text-green-400' : dashboard.regime.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {(dashboard.regime.score ?? 0).toFixed(0)}
+                                        {dashboard.regime.score?.toFixed(0) ?? '--'}
                                     </p>
                                 </Link>
                             )}
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">Uptrend</p>
                                     <p className={`text-lg font-bold ${dashboard.uptrend.score >= 60 ? 'text-green-400' : dashboard.uptrend.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {(dashboard.uptrend.score ?? 0).toFixed(0)}
+                                        {dashboard.uptrend.score?.toFixed(0) ?? '--'}
                                     </p>
                                 </div>
                             )}
@@ -106,7 +106,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">Bubble</p>
                                     <p className={`text-lg font-bold ${dashboard.bubble.score >= 60 ? 'text-green-400' : dashboard.bubble.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {(dashboard.bubble.score ?? 0).toFixed(0)}
+                                        {dashboard.bubble.score?.toFixed(0) ?? '--'}
                                     </p>
                                 </div>
                             )}
@@ -114,7 +114,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">Top Risk</p>
                                     <p className={`text-lg font-bold ${dashboard.market_top.score >= 60 ? 'text-green-400' : dashboard.market_top.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {(dashboard.market_top.score ?? 0).toFixed(0)}
+                                        {dashboard.market_top.score?.toFixed(0) ?? '--'}
                                     </p>
                                 </div>
                             )}
@@ -122,7 +122,7 @@ export default function DashboardPage() {
                                 <div className="text-center px-4 py-2 rounded-lg bg-white/5">
                                     <p className="text-[10px] text-gray-500">FTD</p>
                                     <p className={`text-lg font-bold ${dashboard.ftd.score >= 60 ? 'text-green-400' : dashboard.ftd.score >= 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                                        {(dashboard.ftd.score ?? 0).toFixed(0)}
+                                        {dashboard.ftd.score?.toFixed(0) ?? '--'}
                                     </p>
                                 </div>
                             )}
@@ -187,12 +187,11 @@ export default function DashboardPage() {
                         </Link>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className={`text-2xl font-black ${
-                            usDecision.action === 'STRONG_BUY' ? 'text-green-400' :
+                        <span className={`text-2xl font-black ${usDecision.action === 'STRONG_BUY' ? 'text-green-400' :
                             usDecision.action === 'BUY' ? 'text-emerald-400' :
-                            usDecision.action === 'NEUTRAL' ? 'text-yellow-400' :
-                            usDecision.action === 'CAUTIOUS' ? 'text-orange-400' : 'text-red-400'
-                        }`}>
+                                usDecision.action === 'NEUTRAL' ? 'text-yellow-400' :
+                                    usDecision.action === 'CAUTIOUS' ? 'text-orange-400' : 'text-red-400'
+                            }`}>
                             {usDecision.action?.replace('_', ' ')}
                         </span>
                         <span className="text-sm text-gray-500">Score: {usDecision.score}</span>
@@ -243,11 +242,10 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-400">Market Gate</span>
                         {usDecision && (
-                            <span className={`px-2 py-0.5 rounded-full font-bold ${
-                                usDecision.action === 'STRONG_BUY' || usDecision.action === 'BUY' ? 'bg-green-500/20 text-green-400' :
+                            <span className={`px-2 py-0.5 rounded-full font-bold ${usDecision.action === 'STRONG_BUY' || usDecision.action === 'BUY' ? 'bg-green-500/20 text-green-400' :
                                 usDecision.action === 'NEUTRAL' ? 'bg-yellow-500/20 text-yellow-400' :
-                                'bg-orange-500/20 text-orange-400'
-                            }`}>
+                                    'bg-orange-500/20 text-orange-400'
+                                }`}>
                                 {usDecision.action?.replace('_', ' ')}
                             </span>
                         )}

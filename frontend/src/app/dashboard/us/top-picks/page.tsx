@@ -133,7 +133,7 @@ export default function TopPicksReport() {
             <div className="space-y-4">
                 {picks.map((pick) => {
                     const isExpanded = expandedTicker === pick.ticker;
-                    const parsed = isExpanded ? parseAISummary(pick.ai_summary) : null;
+                    const parsed = isExpanded && pick.ai_summary ? parseAISummary(pick.ai_summary) : null;
 
                     return (
                         <div key={pick.ticker} className="p-5 rounded-2xl bg-[#1c1c1e] border border-white/10 hover:border-indigo-500/30 transition-all">
@@ -157,8 +157,8 @@ export default function TopPicksReport() {
                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getGradeColor(pick.grade)}`}>
                                             {pick.grade.replace(/📈|📊|📉/g, '').trim()}
                                         </span>
-                                        <span className={`text-xs font-bold ${getRecColor(pick.ai_recommendation)}`}>
-                                            {pick.ai_recommendation}
+                                        <span className={`text-xs font-bold ${getRecColor(pick.ai_recommendation ?? pick.signal ?? '')}`}>
+                                            {pick.ai_recommendation ?? pick.signal ?? '-'}
                                         </span>
                                     </div>
 
@@ -176,20 +176,22 @@ export default function TopPicksReport() {
                                                 title={`AI: ${pick.ai_bonus}`}
                                             />
                                         </div>
-                                        <span className="text-sm font-black text-white w-12 text-right">{pick.final_score.toFixed(1)}</span>
+                                        <span className="text-sm font-black text-white w-12 text-right">{(pick.final_score ?? pick.composite_score ?? 0).toFixed(1)}</span>
                                     </div>
                                     <div className="flex items-center gap-1 text-[10px] text-gray-600 mb-3">
-                                        <span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" /> Quant {pick.quant_score.toFixed(1)}
-                                        <span className="w-2 h-2 rounded-sm bg-purple-500 inline-block ml-2" /> AI +{pick.ai_bonus}
+                                        <span className="w-2 h-2 rounded-sm bg-blue-500 inline-block" /> Quant {(pick.quant_score ?? 0).toFixed(1)}
+                                        <span className="w-2 h-2 rounded-sm bg-purple-500 inline-block ml-2" /> AI +{pick.ai_bonus ?? 0}
                                     </div>
 
                                     {/* Metrics */}
                                     <div className="flex flex-wrap gap-3 text-xs">
-                                        <span className="text-gray-400">Price: <span className="text-white font-bold">${pick.current_price.toFixed(2)}</span></span>
+                                        <span className="text-gray-400">Price: <span className="text-white font-bold">${(pick.current_price ?? pick.price ?? 0).toFixed(2)}</span></span>
+                                        {pick.target_upside != null && (
                                         <span className="text-gray-400">Target: <span className={`font-bold ${pick.target_upside >= 0 ? 'text-green-400' : 'text-red-400'}`}>{pick.target_upside > 0 ? '+' : ''}{pick.target_upside.toFixed(1)}%</span></span>
-                                        <span className="text-gray-400">RSI: <span className="text-white font-bold">{pick.rsi.toFixed(1)}</span></span>
-                                        <span className="text-gray-400">Inst: <span className="text-white font-bold">{pick.inst_pct.toFixed(1)}%</span></span>
-                                        <span className={`px-2 py-0.5 rounded-full ${getSDStageColor(pick.sd_stage)}`}>{pick.sd_stage}</span>
+                                        )}
+                                        <span className="text-gray-400">RSI: <span className="text-white font-bold">{(pick.rsi ?? 0).toFixed(1)}</span></span>
+                                        {pick.inst_pct != null && <span className="text-gray-400">Inst: <span className="text-white font-bold">{pick.inst_pct.toFixed(1)}%</span></span>}
+                                        {pick.sd_stage && <span className={`px-2 py-0.5 rounded-full ${getSDStageColor(pick.sd_stage)}`}>{pick.sd_stage}</span>}
                                     </div>
                                 </div>
 

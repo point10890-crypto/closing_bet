@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { usAPI } from '@/lib/api';
 import StockDetailModal from '@/components/us/StockDetailModal';
 import { PerformanceView } from '../cumulative-performance/page';
@@ -200,7 +200,7 @@ export default function SmartMoneyPage() {
                             </thead>
                             <tbody>
                                 {sorted.map((s, idx) => (
-                                    <>
+                                    <Fragment key={s.ticker}>
                                         <tr
                                             key={s.ticker}
                                             onClick={() => setExpandedRow(expandedRow === s.ticker ? null : s.ticker)}
@@ -297,7 +297,7 @@ export default function SmartMoneyPage() {
                                                 </td>
                                             </tr>
                                         )}
-                                    </>
+                                    </Fragment>
                                 ))}
                             </tbody>
                         </table>

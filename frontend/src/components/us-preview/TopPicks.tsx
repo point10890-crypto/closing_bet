@@ -77,7 +77,7 @@ export default function TopPicks({ data }: { data: TopPicksData | null }) {
                   <div className="text-xs text-gray-500 truncate max-w-[120px]">{pick.name}</div>
                 </td>
                 <td className="py-3 px-2 text-xs text-gray-400">{pick.sector}</td>
-                <td className="py-3 px-2 text-sm text-white text-right font-mono">${pick.price.toFixed(2)}</td>
+                <td className="py-3 px-2 text-sm text-white text-right font-mono">${pick.price?.toFixed(2) || '0.00'}</td>
                 <td className="py-3 px-2 text-right">
                   <span className="text-sm font-bold text-white">{pick.composite_score}</span>
                   <div className="w-full bg-gray-700/50 rounded-full h-1 mt-1">
@@ -116,7 +116,7 @@ export default function TopPicks({ data }: { data: TopPicksData | null }) {
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-400">{pick.sector}</span>
               <div className="flex gap-3">
-                <span className="text-white font-mono">${pick.price.toFixed(2)}</span>
+                <span className="text-white font-mono">${pick.price?.toFixed(2) || '0.00'}</span>
                 <span className="text-blue-400">Score {pick.composite_score}</span>
                 <span className={getRsiColor(pick.rsi)}>RSI {pick.rsi}</span>
               </div>

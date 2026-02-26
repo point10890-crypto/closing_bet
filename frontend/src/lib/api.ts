@@ -375,11 +375,13 @@ export interface TopPicksReportData {
     generated_at: string;
     total_analyzed: number;
     top_picks: Array<{
-        ticker: string; name: string; final_score: number;
-        quant_score: number; ai_bonus: number; ai_recommendation: string;
-        grade: string; current_price: number; target_upside: number;
-        sd_stage: string; inst_pct: number; rsi: number;
-        ai_summary: string; rank: number;
+        ticker: string; name: string; rank: number; grade: string; rsi: number;
+        // Live API fields (final_top10_report.json)
+        final_score?: number; quant_score?: number; ai_bonus?: number;
+        ai_recommendation?: string; current_price?: number; target_upside?: number;
+        sd_stage?: string; inst_pct?: number; ai_summary?: string;
+        // Legacy snapshot fields (top_picks.json)
+        price?: number; composite_score?: number; signal?: string; sector?: string;
     }>;
 }
 
