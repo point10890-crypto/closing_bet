@@ -12,7 +12,7 @@ import subprocess
 import threading
 import time
 from datetime import datetime
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 
 skills_bp = Blueprint('skills', __name__)
 
@@ -362,19 +362,28 @@ def vcp():
     candidates = report.get('results', report.get('candidates', []))
     results = []
     for c in candidates:
+        # Extract nested fields
+        vcp_pat = c.get('vcp_pattern', {}) if isinstance(c.get('vcp_pattern'), dict) else {}
+        rs_data = c.get('relative_strength', {}) if isinstance(c.get('relative_strength'), dict) else {}
+        pivot_prox = c.get('pivot_proximity', {}) if isinstance(c.get('pivot_proximity'), dict) else {}
+        vol_pat = c.get('volume_pattern', {}) if isinstance(c.get('volume_pattern'), dict) else {}
+
         results.append({
             'symbol': c.get('symbol', ''),
-            'name': c.get('name', ''),
+            'name': c.get('company_name', c.get('name', '')),
             'sector': c.get('sector', ''),
             'composite_score': c.get('composite_score', c.get('score', 0)),
             'rating': c.get('rating', ''),
-            'current_price': c.get('current_price', c.get('price', 0)),
-            'pivot_price': c.get('pivot_price', 0),
+            'current_price': c.get('price', c.get('current_price', 0)),
+            'pivot_price': vcp_pat.get('pivot_price', pivot_prox.get('pivot_price', 0)),
             'stop_price': c.get('stop_price', 0),
-            'risk_pct': c.get('risk_pct', 0),
-            'contractions': c.get('contractions', 0),
-            'relative_strength': c.get('relative_strength', c.get('rs_rank', 0)),
+            'risk_pct': pivot_prox.get('risk_pct', c.get('risk_pct', 0)),
+            'contractions': vcp_pat.get('num_contractions', c.get('contractions', 0)),
+            'relative_strength': rs_data.get('rs_rank_estimate', rs_data.get('rs_percentile', 0)) if isinstance(rs_data, dict) else rs_data,
             'entry_ready': c.get('entry_ready', False),
+            'valid_vcp': c.get('valid_vcp', False),
+            'volume_dryup': vol_pat.get('contraction_volume_trend', ''),
+            'guidance': c.get('guidance', ''),
         })
     return jsonify({
         'results': results,

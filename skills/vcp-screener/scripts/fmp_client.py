@@ -169,10 +169,27 @@ class FMPClient:
                     continue
                 last = hist.iloc[-1]
                 prev = hist.iloc[-2] if len(hist) > 1 else last
+
+                # 52-week high/low and avg volume from longer history
+                year_high = 0
+                year_low = 0
+                avg_volume = int(last["Volume"])
+                try:
+                    hist_1y = ticker.history(period="1y")
+                    if not hist_1y.empty:
+                        year_high = round(float(hist_1y["High"].max()), 2)
+                        year_low = round(float(hist_1y["Low"].min()), 2)
+                        avg_volume = int(hist_1y["Volume"].mean())
+                except Exception:
+                    pass
+
                 result.append({
                     "symbol": sym,
                     "price": round(float(last["Close"]), 2),
                     "volume": int(last["Volume"]),
+                    "avgVolume": avg_volume,
+                    "yearHigh": year_high,
+                    "yearLow": year_low,
                     "marketCap": int(getattr(info, "market_cap", 0) or 0),
                     "previousClose": round(float(prev["Close"]), 2),
                     "change": round(float(last["Close"] - prev["Close"]), 2),
@@ -225,25 +242,143 @@ class FMPClient:
             return None
 
     def get_batch_quotes(self, symbols: list[str]) -> dict[str, dict]:
-        """Fetch quotes for a list of symbols, batching up to 5 per request"""
+        """Fetch quotes for a list of symbols. Tries FMP first batch, falls back to bulk yfinance."""
         results = {}
-        batch_size = 5
-        for i in range(0, len(symbols), batch_size):
-            batch = symbols[i : i + batch_size]
-            batch_str = ",".join(batch)
-            quotes = self.get_quote(batch_str)
-            if quotes:
-                for q in quotes:
-                    results[q["symbol"]] = q
+
+        # Try first FMP batch to see if API works
+        first_batch = symbols[:5]
+        first_batch_str = ",".join(first_batch)
+        url = f"{self.BASE_URL}/quote/{first_batch_str}"
+        first_data = self._rate_limited_get(url)
+        fmp_works = first_data is not None and isinstance(first_data, list) and len(first_data) > 0
+
+        if fmp_works:
+            # FMP works — use batch mode
+            for q in first_data:
+                results[q["symbol"]] = q
+            batch_size = 5
+            for i in range(batch_size, len(symbols), batch_size):
+                batch = symbols[i : i + batch_size]
+                batch_str = ",".join(batch)
+                quotes = self.get_quote(batch_str)
+                if quotes:
+                    for q in quotes:
+                        results[q["symbol"]] = q
+        elif _HAS_YFINANCE:
+            # FMP unavailable — go straight to bulk yfinance
+            print(f"  [yfinance bulk] FMP unavailable, fetching {len(symbols)} quotes via yfinance...")
+            results = self._yfinance_bulk_quotes(symbols)
+            print(f"  [yfinance bulk] Got {len(results)} quotes")
+
+        return results
+
+    def _yfinance_bulk_quotes(self, symbols: list[str]) -> dict[str, dict]:
+        """Bulk-fetch quote data via yfinance.download() for speed."""
+        results = {}
+        try:
+            sym_str = " ".join(symbols)
+            # Download 1 year of data for all symbols at once
+            df = yf.download(sym_str, period="1y", group_by="ticker", progress=False, threads=True)
+            if df.empty:
+                return results
+
+            for sym in symbols:
+                try:
+                    if len(symbols) == 1:
+                        sdf = df
+                    else:
+                        sdf = df[sym] if sym in df.columns.get_level_values(0) else None
+                    if sdf is None or sdf.empty:
+                        continue
+                    sdf = sdf.dropna(subset=["Close"])
+                    if len(sdf) < 5:
+                        continue
+
+                    last = sdf.iloc[-1]
+                    prev = sdf.iloc[-2]
+                    results[sym] = {
+                        "symbol": sym,
+                        "price": round(float(last["Close"]), 2),
+                        "volume": int(last["Volume"]) if last["Volume"] == last["Volume"] else 0,
+                        "avgVolume": int(sdf["Volume"].mean()),
+                        "yearHigh": round(float(sdf["High"].max()), 2),
+                        "yearLow": round(float(sdf["Low"].min()), 2),
+                        "marketCap": 0,
+                        "previousClose": round(float(prev["Close"]), 2),
+                        "change": round(float(last["Close"] - prev["Close"]), 2),
+                        "changesPercentage": round(float((last["Close"] - prev["Close"]) / prev["Close"] * 100), 2),
+                    }
+                except Exception:
+                    continue
+        except Exception as e:
+            print(f"  [yfinance bulk] Error: {e}", file=sys.stderr)
         return results
 
     def get_batch_historical(self, symbols: list[str], days: int = 260) -> dict[str, list[dict]]:
-        """Fetch historical prices for multiple symbols"""
+        """Fetch historical prices for multiple symbols. FMP-first with bulk yfinance fallback."""
         results = {}
-        for symbol in symbols:
-            data = self.get_historical_prices(symbol, days=days)
-            if data and "historical" in data:
-                results[symbol] = data["historical"]
+
+        # Test FMP with first symbol
+        first_data = self.get_historical_prices(symbols[0], days=days) if symbols else None
+        fmp_works = first_data is not None and "historical" in first_data
+
+        if fmp_works:
+            results[symbols[0]] = first_data["historical"]
+            for symbol in symbols[1:]:
+                data = self.get_historical_prices(symbol, days=days)
+                if data and "historical" in data:
+                    results[symbol] = data["historical"]
+        elif _HAS_YFINANCE:
+            # FMP unavailable — go straight to bulk yfinance
+            print(f"  [yfinance bulk hist] FMP unavailable, fetching {len(symbols)} symbols...")
+            results = self._yfinance_bulk_historical(symbols, days)
+            print(f"  [yfinance bulk hist] Got {len(results)} symbols")
+
+        return results
+
+    def _yfinance_bulk_historical(self, symbols: list[str], days: int) -> dict[str, list[dict]]:
+        """Bulk-fetch historical data via yfinance.download()."""
+        results = {}
+        try:
+            end = datetime.now()
+            start = end - timedelta(days=int(days * 1.5))
+            sym_str = " ".join(symbols)
+            df = yf.download(
+                sym_str, start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d"),
+                group_by="ticker", progress=False, threads=True
+            )
+            if df.empty:
+                return results
+
+            for sym in symbols:
+                try:
+                    if len(symbols) == 1:
+                        sdf = df
+                    else:
+                        sdf = df[sym] if sym in df.columns.get_level_values(0) else None
+                    if sdf is None or sdf.empty:
+                        continue
+                    sdf = sdf.dropna(subset=["Close"])
+                    if len(sdf) < 20:
+                        continue
+
+                    historical = []
+                    for date, row in sdf.iterrows():
+                        historical.append({
+                            "date": date.strftime("%Y-%m-%d"),
+                            "open": round(float(row["Open"]), 4),
+                            "high": round(float(row["High"]), 4),
+                            "low": round(float(row["Low"]), 4),
+                            "close": round(float(row["Close"]), 4),
+                            "volume": int(row["Volume"]) if row["Volume"] == row["Volume"] else 0,
+                            "adjClose": round(float(row["Close"]), 4),
+                        })
+                    historical.reverse()
+                    results[sym] = historical
+                except Exception:
+                    continue
+        except Exception as e:
+            print(f"  [yfinance bulk hist] Error: {e}", file=sys.stderr)
         return results
 
     def calculate_sma(self, prices: list[float], period: int) -> float:
