@@ -4,9 +4,18 @@
 import os
 import sys
 from flask import Flask, make_response
+from flask.json.provider import DefaultJSONProvider
 
 # 패키지 루트 경로 추가
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+class SafeJSONProvider(DefaultJSONProvider):
+    """NaN/Infinity → null 변환 (JSON 표준 준수)"""
+    def dumps(self, obj, **kwargs):
+        kwargs.setdefault("default", self.default)
+        raw = super().dumps(obj, **kwargs)
+        return raw.replace("NaN", "null").replace("Infinity", "null").replace("-Infinity", "null")
 
 
 def create_app(config=None):
@@ -14,6 +23,8 @@ def create_app(config=None):
     app = Flask(__name__,
                 template_folder='../templates',
                 static_folder='../static')
+    app.json_provider_class = SafeJSONProvider
+    app.json = SafeJSONProvider(app)
 
     # CORS 설정 (옵셔널)
     try:

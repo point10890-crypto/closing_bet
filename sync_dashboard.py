@@ -53,29 +53,48 @@ def safe_float(val):
     return val
 
 
-def safe_json_dump(data: dict, filepath: str):
-    """JSON 파일을 안전하게 저장 (NaN 제거)"""
-    class SafeEncoder(json.JSONEncoder):
-        def default(self, obj):
-            try:
-                import numpy as np
-                if isinstance(obj, (np.integer,)):
-                    return int(obj)
-                if isinstance(obj, (np.floating,)):
-                    if math.isnan(obj) or math.isinf(obj):
-                        return None
-                    return float(obj)
-                if isinstance(obj, np.ndarray):
-                    return obj.tolist()
-            except ImportError:
-                pass
-            if isinstance(obj, float):
+def clean_nans_and_numpy(obj):
+    if isinstance(obj, dict):
+        return {k: clean_nans_and_numpy(v) for k, v in obj.items()}
+    elif isinstance(obj, list) or isinstance(obj, tuple):
+        return [clean_nans_and_numpy(v) for v in obj]
+    elif isinstance(obj, float):
+        import math
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    else:
+        try:
+            import numpy as np
+            if isinstance(obj, np.integer):
+                return int(obj)
+            elif isinstance(obj, np.floating):
+                import math
                 if math.isnan(obj) or math.isinf(obj):
                     return None
-            return super().default(obj)
+                return float(obj)
+            elif isinstance(obj, np.ndarray):
+                return clean_nans_and_numpy(obj.tolist())
+        except ImportError:
+            pass
+        return obj
 
+def safe_json_dump(data: dict, filepath: str):
+    """JSON 파일을 안전하게 저장 (NaN 제거)"""
+    cleaned = clean_nans_and_numpy(data)
     with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2, cls=SafeEncoder)
+        json.dump(cleaned, f, ensure_ascii=False, indent=2)
+
+def safe_copy_json(src: str, dst: str):
+    if not src.endswith('.json'):
+        shutil.copy2(src, dst)
+        return
+    try:
+        with open(src, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        safe_json_dump(data, dst)
+    except Exception as e:
+        shutil.copy2(src, dst)
 
 
 # ============================================================
@@ -319,7 +338,7 @@ def snapshot_kr_simple_copies() -> int:
         src = os.path.join(DATA_DIR, src_name)
         dst = os.path.join(SNAPSHOT_DIR, dst_name)
         if os.path.exists(src):
-            shutil.copy2(src, dst)
+            safe_copy_json(src, dst)
             size = os.path.getsize(dst)
             log(f"✓ {dst_name:45s} {size:>10,} bytes")
             ok += 1
@@ -496,7 +515,7 @@ def snapshot_us_copies() -> int:
     for src, dst_name in copies:
         dst = os.path.join(SNAPSHOT_DIR, dst_name)
         if os.path.exists(src):
-            shutil.copy2(src, dst)
+            safe_copy_json(src, dst)
             size = os.path.getsize(dst)
             log(f"✓ {dst_name:45s} {size:>10,} bytes")
             ok += 1
@@ -522,7 +541,7 @@ def snapshot_crypto_copies() -> int:
         src = os.path.join(crypto_output, src_name)
         dst = os.path.join(SNAPSHOT_DIR, dst_name)
         if os.path.exists(src):
-            shutil.copy2(src, dst)
+            safe_copy_json(src, dst)
             size = os.path.getsize(dst)
             log(f"✓ {dst_name:45s} {size:>10,} bytes")
             ok += 1
@@ -542,7 +561,7 @@ def snapshot_econ_copies() -> int:
         src = os.path.join(econ_output, src_name)
         dst = os.path.join(SNAPSHOT_DIR, dst_name)
         if os.path.exists(src):
-            shutil.copy2(src, dst)
+            safe_copy_json(src, dst)
             size = os.path.getsize(dst)
             log(f"✓ {dst_name:45s} {size:>10,} bytes")
             ok += 1
