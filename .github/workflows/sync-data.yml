@@ -44,11 +44,18 @@ jobs:
 
       - name: Check data freshness
         id: freshness
+        continue-on-error: true
         run: |
           RESPONSE=$(curl -s --max-time 15 \
             https://closing-bet-api.onrender.com/api/system/last-update 2>/dev/null || echo "{}")
           echo "Last update response: $RESPONSE"
-          echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+          # Only write to output if response is valid JSON (not HTML 404)
+          if echo "$RESPONSE" | python3 -c "import sys,json; json.load(sys.stdin)" 2>/dev/null; then
+            echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+          else
+            echo "response={}" >> $GITHUB_OUTPUT
+            echo "Warning: last-update endpoint not available, continuing anyway"
+          fi
 
       - name: Fetch API snapshots
         run: |

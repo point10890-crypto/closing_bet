@@ -831,7 +831,7 @@ def _keep_alive_loop():
 
 
 def _safe_run(func, name: str):
-    """작업을 안전하게 실행 (예외 캐치 + 로깅)"""
+    """작업을 안전하게 실행 (예외 캐치 + 로깅 + Vercel 동기화 트리거)"""
     try:
         logger.info(f"🚀 시작: {name}")
         start = time.time()
@@ -839,6 +839,13 @@ def _safe_run(func, name: str):
         elapsed = time.time() - start
         status = "✅" if result else "⚠️"
         logger.info(f"{status} 완료: {name} ({elapsed:.1f}초)")
+
+        # 작업 성공 시 GitHub Actions 트리거 → Vercel 자동 동기화
+        if result:
+            threading.Thread(
+                target=_trigger_vercel_sync, args=(name,),
+                daemon=True, name='vercel-sync-trigger'
+            ).start()
     except Exception as e:
         logger.error(f"❌ 실패: {name} — {e}")
         traceback.print_exc()
@@ -846,6 +853,43 @@ def _safe_run(func, name: str):
             _send_telegram(f"❌ 스케줄 작업 실패: {name}\n{str(e)[:300]}")
         except Exception:
             pass
+
+
+def _trigger_vercel_sync(task_name: str = ''):
+    """GitHub Actions workflow_dispatch 트리거 → Vercel 데이터 동기화
+
+    스케줄러 작업 완료 후 호출:
+    1. GitHub Actions 'Sync Dashboard Data' 워크플로우 실행
+    2. Actions가 Render API → data-snapshot 갱신 → git push
+    3. Vercel이 git push 감지 → 자동 재배포
+    """
+    import urllib.request
+    import urllib.error
+
+    github_pat = os.getenv('GITHUB_PAT', '')
+    if not github_pat:
+        logger.debug("[VercelSync] GITHUB_PAT 미설정 — 동기화 스킵")
+        return
+
+    repo = os.getenv('GITHUB_REPO', 'point10890-crypto/closing_bet')
+    workflow_id = 'sync-data.yml'
+    url = f'https://api.github.com/repos/{repo}/actions/workflows/{workflow_id}/dispatches'
+
+    payload = json.dumps({'ref': 'main'}).encode('utf-8')
+    headers = {
+        'Authorization': f'token {github_pat}',
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+    }
+
+    try:
+        req = urllib.request.Request(url, data=payload, headers=headers, method='POST')
+        resp = urllib.request.urlopen(req, timeout=15)
+        logger.info(f"✅ [VercelSync] GitHub Actions 트리거 성공 (HTTP {resp.status}) — {task_name}")
+    except urllib.error.HTTPError as e:
+        logger.warning(f"⚠️ [VercelSync] GitHub Actions 트리거 실패: HTTP {e.code} — {e.read().decode()[:200]}")
+    except Exception as e:
+        logger.warning(f"⚠️ [VercelSync] 트리거 실패: {e}")
 
 
 # ============================================================
