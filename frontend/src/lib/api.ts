@@ -672,6 +672,8 @@ export const skillsAPI = {
     getCatalog: () => fetchAPI<{ total: number; skills: SkillInfo[]; categories: string[] }>('/api/skills/catalog'),
     getReport: (skillName: string) => fetchAPI<any>(`/api/skills/report/${skillName}`),
     getStatus: () => fetchAPI<any>('/api/skills/status'),
+    getDashboard: () => fetchAPI<any>('/api/skills/dashboard'),
+    // Individual skill endpoints
     getMarketBreadth: () => fetchAPI<any>('/api/skills/market-breadth'),
     getMacroRegime: () => fetchAPI<any>('/api/skills/macro-regime'),
     getMarketTop: () => fetchAPI<any>('/api/skills/market-top'),
@@ -680,6 +682,18 @@ export const skillsAPI = {
     getThemes: () => fetchAPI<any>('/api/skills/themes'),
     getVCP: () => fetchAPI<any>('/api/skills/vcp'),
     getEarningsTrade: () => fetchAPI<any>('/api/skills/earnings-trade'),
+    getUptrend: () => fetchAPI<any>('/api/skills/uptrend'),
+    getCanslim: () => fetchAPI<any>('/api/skills/canslim'),
+    getPead: () => fetchAPI<any>('/api/skills/pead'),
+    getPairTrade: () => fetchAPI<any>('/api/skills/pair-trade'),
+    getEarningsCalendar: () => fetchAPI<any>('/api/skills/earnings-calendar'),
+    getEconCalendar: () => fetchAPI<any>('/api/skills/econ-calendar'),
+    getDruckenmiller: () => fetchAPI<any>('/api/skills/druckenmiller'),
+    getInstitutionalFlow: () => fetchAPI<any>('/api/skills/institutional-flow'),
+    // Workflow chains
+    getChains: () => fetchAPI<any>('/api/skills/chains'),
+    getChainResults: (chainId: string) => fetchAPI<any>(`/api/skills/chain/${chainId}`),
+    runChain: (chainId: string) => postAPI<any>(`/api/skills/chain/${chainId}/run`),
     runSkill: (skillName: string) => postAPI<any>(`/api/skills/run/${skillName}`),
 };
 

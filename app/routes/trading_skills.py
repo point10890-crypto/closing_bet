@@ -391,3 +391,437 @@ def earnings_trade():
     if not report:
         return jsonify({'error': 'No earnings trade report. Run /skill-earnings-trade first.'}), 404
     return jsonify(report)
+
+
+@skills_bp.route('/uptrend')
+def uptrend():
+    """Latest uptrend analysis."""
+    report = _get_latest_report('uptrend-analyzer')
+    if not report:
+        return jsonify({'error': 'No uptrend report. Run /skill-uptrend-analyzer first.'}), 404
+
+    composite = report.get('composite', {})
+    components = report.get('components', {})
+    result = {
+        'results': [{
+            'composite_score': composite.get('composite_score', 0),
+            'score': composite.get('composite_score', 0),
+            'zone': composite.get('zone', 'Unknown'),
+            'exposure_guidance': composite.get('exposure_guidance', ''),
+            'components': {
+                k: {'score': v.get('score', 0), 'signal': v.get('signal', '')}
+                for k, v in components.items()
+            },
+        }],
+        '_report_time': report.get('_report_time'),
+    }
+    return jsonify(result)
+
+
+@skills_bp.route('/canslim')
+def canslim():
+    """Latest CANSLIM screening results."""
+    report = _get_latest_report('canslim-screener')
+    if not report:
+        return jsonify({'error': 'No CANSLIM report. Run /skill-canslim first.'}), 404
+    candidates = report.get('results', report.get('candidates', []))
+    results = []
+    for c in (candidates if isinstance(candidates, list) else []):
+        results.append({
+            'symbol': c.get('symbol', ''),
+            'name': c.get('name', c.get('company', '')),
+            'composite_score': c.get('composite_score', c.get('score', 0)),
+            'earnings_growth': c.get('earnings_growth', 0),
+            'rs_rank': c.get('rs_rank', c.get('relative_strength', 0)),
+            'industry_rank': c.get('industry_rank', 0),
+            'institutional_support': c.get('institutional_support', 0),
+        })
+    return jsonify({
+        'results': results,
+        'summary': report.get('summary', {}),
+        '_report_time': report.get('_report_time'),
+    })
+
+
+@skills_bp.route('/pead')
+def pead():
+    """Latest PEAD screening results."""
+    report = _get_latest_report('pead-screener')
+    if not report:
+        return jsonify({'error': 'No PEAD report. Run /skill-pead-screener first.'}), 404
+    candidates = report.get('results', report.get('candidates', []))
+    results = []
+    for c in (candidates if isinstance(candidates, list) else []):
+        results.append({
+            'symbol': c.get('symbol', ''),
+            'name': c.get('name', ''),
+            'surprise_pct': c.get('surprise_pct', c.get('earnings_surprise', 0)),
+            'drift_score': c.get('drift_score', c.get('composite_score', 0)),
+            'direction': c.get('direction', 'long'),
+            'days_since_earnings': c.get('days_since_earnings', 0),
+        })
+    return jsonify({
+        'results': results,
+        'summary': report.get('summary', {}),
+        '_report_time': report.get('_report_time'),
+    })
+
+
+@skills_bp.route('/pair-trade')
+def pair_trade():
+    """Latest pair trade screening results."""
+    report = _get_latest_report('pair-trade-screener')
+    if not report:
+        return jsonify({'error': 'No pair trade report. Run /skill-pair-trade first.'}), 404
+    return jsonify(report)
+
+
+@skills_bp.route('/earnings-calendar')
+def earnings_calendar():
+    """Latest earnings calendar data."""
+    report = _get_latest_report('earnings-calendar')
+    if not report:
+        return jsonify({'error': 'No earnings calendar. Run /skill-earnings-calendar first.'}), 404
+    return jsonify(report)
+
+
+@skills_bp.route('/econ-calendar')
+def econ_calendar():
+    """Latest economic calendar data."""
+    report = _get_latest_report('economic-calendar-fetcher')
+    if not report:
+        return jsonify({'error': 'No economic calendar. Run /skill-econ-calendar first.'}), 404
+    return jsonify(report)
+
+
+@skills_bp.route('/druckenmiller')
+def druckenmiller():
+    """Latest Druckenmiller strategy allocation."""
+    report = _get_latest_report('stanley-druckenmiller-investment')
+    if not report:
+        return jsonify({'error': 'No Druckenmiller report. Run /skill-druckenmiller first.'}), 404
+    return jsonify(report)
+
+
+@skills_bp.route('/institutional-flow')
+def institutional_flow():
+    """Latest institutional flow tracking."""
+    report = _get_latest_report('institutional-flow-tracker')
+    if not report:
+        return jsonify({'error': 'No institutional flow report. Run /skill-institutional-flow first.'}), 404
+    return jsonify(report)
+
+
+# ================================================================
+# Dashboard: Aggregated market pulse from all available skills
+# ================================================================
+
+def _extract_score(skill_name: str) -> dict | None:
+    """Extract score summary from a skill report."""
+    report = _get_latest_report(skill_name)
+    if not report:
+        return None
+
+    composite = report.get('composite', {})
+    score = composite.get('composite_score', report.get('score', report.get('composite_score')))
+    zone = composite.get('zone', report.get('zone', report.get('regime', '')))
+    report_time = report.get('_report_time')
+
+    if score is None:
+        return None
+
+    age_hours = 0
+    if report_time:
+        try:
+            dt = datetime.fromisoformat(report_time)
+            age_hours = (datetime.now() - dt).total_seconds() / 3600
+        except (ValueError, TypeError):
+            pass
+
+    return {
+        'score': round(score, 1) if isinstance(score, float) else score,
+        'zone': zone,
+        'report_time': report_time,
+        'age_hours': round(age_hours, 1),
+        'fresh': age_hours < 24,
+    }
+
+
+@skills_bp.route('/dashboard')
+def dashboard():
+    """Aggregated market pulse from all available skill results.
+
+    Returns a combined view of:
+    - Market timing signals (breadth, regime, top, FTD, uptrend)
+    - Risk indicators (bubble)
+    - Active themes count
+    - Screening results counts (VCP, CANSLIM, PEAD)
+    - Report freshness for all skills
+    """
+    # Core timing & analysis skills
+    timing_skills = {
+        'breadth': 'market-breadth-analyzer',
+        'regime': 'macro-regime-detector',
+        'market_top': 'market-top-detector',
+        'ftd': 'ftd-detector',
+        'uptrend': 'uptrend-analyzer',
+        'bubble': 'us-market-bubble-detector',
+    }
+
+    pulse = {}
+    for key, skill_name in timing_skills.items():
+        result = _extract_score(skill_name)
+        if result:
+            pulse[key] = result
+
+    # Themes summary
+    theme_report = _get_latest_report('theme-detector')
+    if theme_report:
+        raw_themes = theme_report.get('themes', {})
+        all_themes = raw_themes.get('all', []) if isinstance(raw_themes, dict) else []
+        pulse['themes'] = {
+            'count': len(all_themes),
+            'top_themes': [t.get('name', '') for t in all_themes[:5]],
+            'report_time': theme_report.get('_report_time'),
+        }
+
+    # Screening summary (counts only)
+    screening_skills = {
+        'vcp': 'vcp-screener',
+        'canslim': 'canslim-screener',
+        'pead': 'pead-screener',
+    }
+    screening = {}
+    for key, skill_name in screening_skills.items():
+        report = _get_latest_report(skill_name)
+        if report:
+            candidates = report.get('results', report.get('candidates', []))
+            count = len(candidates) if isinstance(candidates, list) else 0
+            screening[key] = {
+                'count': count,
+                'report_time': report.get('_report_time'),
+            }
+    if screening:
+        pulse['screening'] = screening
+
+    # Overall market signal
+    scores = [v['score'] for v in pulse.values() if isinstance(v, dict) and 'score' in v]
+    if scores:
+        avg = sum(scores) / len(scores)
+        if avg >= 70:
+            signal = 'RISK_ON'
+        elif avg >= 50:
+            signal = 'NEUTRAL'
+        elif avg >= 30:
+            signal = 'CAUTION'
+        else:
+            signal = 'RISK_OFF'
+        pulse['overall'] = {
+            'signal': signal,
+            'avg_score': round(avg, 1),
+            'skills_reporting': len(scores),
+        }
+
+    # Report freshness summary
+    total_with_reports = sum(1 for sid in SKILLS_CATALOG if _get_latest_report(sid))
+    pulse['meta'] = {
+        'total_skills': len(SKILLS_CATALOG),
+        'skills_with_reports': total_with_reports,
+        'running_skills': list(_running_skills.keys()),
+        'timestamp': datetime.now().isoformat(),
+    }
+
+    return jsonify(pulse)
+
+
+# ================================================================
+# Workflow Chains (Notion document structure)
+# ================================================================
+
+# Chain 1: Daily Market Monitoring
+# Economic Calendar → Earnings Calendar → Market News → Breadth Analyst
+CHAIN_DAILY_MONITORING = [
+    'economic-calendar-fetcher',
+    'earnings-calendar',
+    'market-news-analyst',
+    'market-breadth-analyzer',
+]
+
+# Chain 2: Macro Positioning
+# Regime Detector → Market Top → FTD → Bubble → Scenario Analyzer → Druckenmiller
+CHAIN_MACRO_POSITIONING = [
+    'macro-regime-detector',
+    'market-top-detector',
+    'ftd-detector',
+    'us-market-bubble-detector',
+    'scenario-analyzer',
+    'stanley-druckenmiller-investment',
+]
+
+# Chain 3: Stock Research
+# US Stock Analysis → Earnings Calendar → Market News → Backtest Expert
+CHAIN_STOCK_RESEARCH = [
+    'us-stock-analysis',
+    'earnings-calendar',
+    'market-news-analyst',
+    'backtest-expert',
+]
+
+WORKFLOW_CHAINS = {
+    'daily-monitoring': {
+        'name': 'Daily Market Monitoring',
+        'description': 'Pre-market flow: Economic Calendar → Earnings Calendar → Market News → Breadth Analysis',
+        'skills': CHAIN_DAILY_MONITORING,
+    },
+    'macro-positioning': {
+        'name': 'Macro Positioning',
+        'description': 'Regime → Market Top → FTD → Bubble → Scenario → Druckenmiller Allocation',
+        'skills': CHAIN_MACRO_POSITIONING,
+    },
+    'stock-research': {
+        'name': 'Stock Research',
+        'description': 'Stock Analysis → Earnings Calendar → Market News → Backtest Evaluation',
+        'skills': CHAIN_STOCK_RESEARCH,
+    },
+}
+
+
+@skills_bp.route('/chains')
+def list_chains():
+    """List all workflow chains with availability status."""
+    result = {}
+    for chain_id, chain in WORKFLOW_CHAINS.items():
+        skills_status = []
+        for skill_name in chain['skills']:
+            report = _get_latest_report(skill_name)
+            meta = SKILLS_CATALOG.get(skill_name, {})
+            skills_status.append({
+                'id': skill_name,
+                'name': meta.get('name', skill_name),
+                'has_report': report is not None,
+                'report_time': report.get('_report_time') if report else None,
+                'has_script': meta.get('script') is not None,
+            })
+        result[chain_id] = {
+            'name': chain['name'],
+            'description': chain['description'],
+            'skills': skills_status,
+            'complete': all(s['has_report'] for s in skills_status if s['has_script']),
+            'available_count': sum(1 for s in skills_status if s['has_report']),
+            'total_count': len(skills_status),
+        }
+    return jsonify(result)
+
+
+@skills_bp.route('/chain/<chain_id>')
+def chain_results(chain_id):
+    """Get aggregated results from a workflow chain."""
+    if chain_id not in WORKFLOW_CHAINS:
+        return jsonify({'error': f'Unknown chain: {chain_id}'}), 404
+
+    chain = WORKFLOW_CHAINS[chain_id]
+    results = {}
+
+    for skill_name in chain['skills']:
+        report = _get_latest_report(skill_name)
+        if report:
+            # Extract key data based on skill type
+            clean = {'_report_time': report.get('_report_time')}
+
+            composite = report.get('composite', {})
+            if composite:
+                clean['composite_score'] = composite.get('composite_score')
+                clean['zone'] = composite.get('zone')
+
+            regime = report.get('regime', {})
+            if regime:
+                clean['regime'] = regime.get('classification')
+
+            if 'themes' in report:
+                raw = report['themes']
+                if isinstance(raw, dict):
+                    clean['theme_count'] = len(raw.get('all', []))
+
+            candidates = report.get('results', report.get('candidates'))
+            if isinstance(candidates, list):
+                clean['candidate_count'] = len(candidates)
+
+            results[skill_name] = clean
+        else:
+            results[skill_name] = None
+
+    return jsonify({
+        'chain': chain_id,
+        'name': chain['name'],
+        'description': chain['description'],
+        'results': results,
+    })
+
+
+@skills_bp.route('/chain/<chain_id>/run', methods=['POST'])
+def run_chain(chain_id):
+    """Run all executable skills in a workflow chain sequentially."""
+    if chain_id not in WORKFLOW_CHAINS:
+        return jsonify({'error': f'Unknown chain: {chain_id}'}), 404
+
+    chain = WORKFLOW_CHAINS[chain_id]
+    started = []
+    skipped = []
+
+    for skill_name in chain['skills']:
+        meta = SKILLS_CATALOG.get(skill_name, {})
+        if not meta.get('script'):
+            skipped.append({'id': skill_name, 'reason': 'prompt-only'})
+            continue
+        if skill_name in _running_skills:
+            skipped.append({'id': skill_name, 'reason': 'already_running'})
+            continue
+
+        script_path = os.path.join(_SKILLS_DIR, skill_name, 'scripts', meta['script'])
+        if not os.path.isfile(script_path):
+            skipped.append({'id': skill_name, 'reason': 'script_not_found'})
+            continue
+
+        output_dir = os.path.join(_REPORTS_DIR, skill_name)
+        os.makedirs(output_dir, exist_ok=True)
+
+        cmd = [_PYTHON, script_path, '--output-dir', output_dir]
+        if meta.get('api_key'):
+            api_key_val = os.environ.get(meta['api_key'], '')
+            if api_key_val:
+                # Use the correct flag per skill
+                flag = '--fmp-api-key' if 'fmp' in meta['api_key'].lower() else '--api-key'
+                cmd.extend([flag, api_key_val])
+
+        def _execute(sname, command):
+            env = os.environ.copy()
+            env['PYTHONIOENCODING'] = 'utf-8'
+            try:
+                proc = subprocess.Popen(
+                    command, cwd=_BASE_DIR, env=env,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                _running_skills[sname] = {
+                    'started_at': datetime.now().isoformat(),
+                    'pid': proc.pid,
+                }
+                proc.wait(timeout=600)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+            except Exception:
+                pass
+            finally:
+                _running_skills.pop(sname, None)
+
+        thread = threading.Thread(
+            target=_execute, args=(skill_name, cmd),
+            daemon=True, name=f'chain-{chain_id}-{skill_name}'
+        )
+        thread.start()
+        started.append(skill_name)
+
+    return jsonify({
+        'chain': chain_id,
+        'started': started,
+        'skipped': skipped,
+    })
