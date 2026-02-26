@@ -88,13 +88,17 @@ def _get_latest_report(skill_name: str) -> dict | None:
     if not os.path.isdir(report_dir):
         return None
 
-    json_files = sorted(glob.glob(os.path.join(report_dir, '*.json')), reverse=True)
+    # Exclude history/tracking files — only pick timestamped report files
+    all_json = sorted(glob.glob(os.path.join(report_dir, '*.json')), reverse=True)
+    json_files = [f for f in all_json if 'history' not in os.path.basename(f).lower()]
     if not json_files:
         return None
 
     try:
         with open(json_files[0], 'r', encoding='utf-8') as f:
             data = json.load(f)
+        if not isinstance(data, dict):
+            return None
         data['_report_file'] = os.path.basename(json_files[0])
         data['_report_time'] = datetime.fromtimestamp(
             os.path.getmtime(json_files[0])
