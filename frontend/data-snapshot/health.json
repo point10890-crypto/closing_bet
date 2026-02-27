@@ -1,1 +1,7 @@
-{"status":"ok","mode":"github-actions","updated_at":"2026-02-27T08:02:44Z","endpoints_ok":42,"endpoints_fail":1}
+{
+  "status": "ok",
+  "mode": "static-snapshot",
+  "updated_at": "2026-02-27T10:23:22.073137",
+  "endpoints_ok": 10,
+  "endpoints_fail": 0
+}
