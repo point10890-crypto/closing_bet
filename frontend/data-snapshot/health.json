@@ -1,7 +1,7 @@
 {
   "status": "ok",
   "mode": "static-snapshot",
-  "updated_at": "2026-02-27T10:23:22.073137",
-  "endpoints_ok": 10,
-  "endpoints_fail": 0
+  "updated_at": "2026-02-27T15:20:42.481833",
+  "endpoints_ok": 7,
+  "endpoints_fail": 1
 }
