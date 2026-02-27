@@ -1460,7 +1460,10 @@ class Scheduler:
         )
 
         while self.running:
-            schedule.run_pending()
+            try:
+                schedule.run_pending()
+            except Exception as e:
+                logger.error(f"❌ 스케줄 실행 중 예외 (데몬 유지): {e}", exc_info=True)
             time.sleep(30)
 
         logger.info("👋 스케줄러 종료")
