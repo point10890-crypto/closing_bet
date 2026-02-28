@@ -30,7 +30,6 @@ export default function DashboardLayout({
             {/* Main Content */}
             <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#09090b] relative">
                 <Header
-                    title="Dashboard"
                     onMenuClick={() => setSidebarOpen(true)}
                 />
                 <MobileSubNav />

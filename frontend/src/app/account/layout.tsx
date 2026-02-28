@@ -23,7 +23,6 @@ export default function AccountLayout({
             />
             <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#09090b] relative">
                 <Header
-                    title="Account"
                     onMenuClick={() => setSidebarOpen(true)}
                 />
                 <div className="flex-1 overflow-y-auto p-3 md:p-6 pb-20 md:pb-6 scroll-smooth">

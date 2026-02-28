@@ -1,17 +1,90 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import CommandPalette from './CommandPalette';
 
 interface HeaderProps {
-    title: string;
+    title?: string;
     onMenuClick?: () => void;
 }
 
-export default function Header({ title, onMenuClick }: HeaderProps) {
-    const [paletteOpen, setPaletteOpen] = useState(false);
+const PAGE_NAMES: Record<string, string> = {
+    '/dashboard': 'Summary',
+    '/dashboard/kr': 'KR Market',
+    '/dashboard/kr/vcp': 'KR VCP Signals',
+    '/dashboard/kr/closing-bet': '\uc885\uac00\ubca0\ud305',
+    '/dashboard/kr/closing-bet/history': '\uc885\uac00\ubca0\ud305 History',
+    '/dashboard/kr/chatbot': 'KR Chatbot',
+    '/dashboard/us': 'US Market',
+    '/dashboard/us/briefing': 'Market Briefing',
+    '/dashboard/us/top-picks': 'Top Picks',
+    '/dashboard/us/smart-money': 'Smart Money',
+    '/dashboard/us/risk': 'Risk Dashboard',
+    '/dashboard/us/earnings': 'Earnings Impact',
+    '/dashboard/us/sectors': 'Sectors',
+    '/dashboard/us/signals': 'Signals',
+    '/dashboard/us/calendar': 'Economic Calendar',
+    '/dashboard/us/prediction': 'Index Prediction',
+    '/dashboard/us/regime': 'Market Regime',
+    '/dashboard/us/etf': 'ETF Flows',
+    '/dashboard/us/heatmap': 'Sector Heatmap',
+    '/dashboard/us/cumulative-performance': 'Cumulative Performance',
+    '/dashboard/us/vcp': 'US VCP',
+    '/dashboard/us/options': 'Options Flow',
+    '/dashboard/us/13f': '13F Filings',
+    '/dashboard/us/insider': 'Insider Trading',
+    '/dashboard/us/news': 'Market News',
+    '/dashboard/us/sector-rotation': 'Sector Rotation',
+    '/dashboard/us/preview': 'US Preview',
+    '/dashboard/us/track-record': 'Track Record',
+    '/dashboard/crypto': 'Crypto',
+    '/dashboard/crypto/briefing': 'Crypto Briefing',
+    '/dashboard/crypto/signals': 'Crypto VCP Signals',
+    '/dashboard/crypto/prediction': 'Crypto Prediction',
+    '/dashboard/crypto/risk': 'Crypto Risk',
+    '/dashboard/crypto/leadlag': 'Lead-Lag Analysis',
+    '/dashboard/crypto/backtest': 'Crypto Backtest',
+    '/dashboard/economy': 'Economy',
+    '/dashboard/skills': 'Trading Skills',
+    '/dashboard/skills/vcp': 'VCP Screener',
+    '/dashboard/skills/breadth': 'Market Breadth',
+    '/dashboard/skills/themes': 'Theme Detector',
+    '/dashboard/skills/ftd': 'FTD Detector',
+    '/dashboard/skills/market-top': 'Market Top Detector',
+    '/dashboard/skills/uptrend': 'Uptrend Analyzer',
+    '/dashboard/skills/bubble': 'Bubble Detector',
+    '/dashboard/skills/canslim': 'CAN SLIM Screener',
+    '/dashboard/skills/backtest': 'Backtest Expert',
+    '/dashboard/stock-analyzer': 'ProPicks Analyzer',
+    '/dashboard/data-status': 'Data Status',
+    '/admin': 'Admin Dashboard',
+    '/admin/users': 'User Management',
+    '/admin/subscriptions': 'Subscriptions',
+    '/admin/system': 'System',
+    '/account': 'My Account',
+    '/account/upgrade': 'Upgrade to Pro',
+};
 
-    // ⌘K / Ctrl+K 단축키
+function getPageTitle(pathname: string): string {
+    // Exact match first
+    if (PAGE_NAMES[pathname]) return PAGE_NAMES[pathname];
+    // Dynamic skill pages: /dashboard/skills/[skillId]
+    if (pathname.startsWith('/dashboard/skills/')) {
+        const skillId = pathname.split('/').pop() || '';
+        return skillId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+    // Fallback: last segment capitalized
+    const segments = pathname.split('/').filter(Boolean);
+    const last = segments[segments.length - 1] || 'Dashboard';
+    return last.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+export default function Header({ onMenuClick }: HeaderProps) {
+    const pathname = usePathname();
+    const [paletteOpen, setPaletteOpen] = useState(false);
+    const pageTitle = getPageTitle(pathname);
+
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -26,7 +99,7 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
     return (
         <>
             <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/10 md:border-white/5 bg-[#111113] md:bg-[#09090b]/80 backdrop-blur-md shrink-0 z-40">
-                {/* Left: Hamburger (mobile) + Breadcrumbs */}
+                {/* Left: Hamburger (mobile) + Page Title */}
                 <div className="flex items-center gap-3">
                     {/* Hamburger - mobile only */}
                     <button
@@ -38,35 +111,31 @@ export default function Header({ title, onMenuClick }: HeaderProps) {
 
                     {/* Brand - mobile only */}
                     <div className="md:hidden flex items-center gap-2">
-                        <div className="w-6 h-6 bg-[#2997ff] rounded-md flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/20">
-                            M
+                        <div className="relative w-7 h-7 bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600 rounded-lg flex items-center justify-center text-white font-extrabold text-sm shadow-lg shadow-amber-500/20 ring-1 ring-amber-400/20">
+                            <span className="relative">B</span>
                         </div>
-                        <span className="text-white font-bold text-sm tracking-tight">
-                            Market<span className="text-[#2997ff]">Flow</span>
+                        <span className="text-[15px] font-extrabold tracking-tight">
+                            <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">Bit</span><span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Man</span>
                         </span>
                     </div>
 
-                    {/* Breadcrumbs - desktop only */}
-                    <div className="hidden md:flex items-center gap-2">
-                        <span className="text-gray-500">
-                            <i className="fas fa-home"></i>
-                        </span>
-                        <span className="text-gray-600">/</span>
-                        <span className="text-gray-200 font-medium">{title}</span>
+                    {/* Page Title - desktop only */}
+                    <div className="hidden md:block">
+                        <h1 className="text-lg font-semibold text-white">{pageTitle}</h1>
                     </div>
                 </div>
 
-                {/* Search - desktop only → 클릭 시 CommandPalette 열기 */}
+                {/* Search - desktop only */}
                 <div className="hidden md:block max-w-md w-full mx-4">
                     <button
                         onClick={() => setPaletteOpen(true)}
                         className="relative group w-full"
                     >
-                        <i className="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
-                        <div className="block w-full pl-10 pr-12 py-2 bg-[#18181b] border border-white/10 rounded-full text-xs text-gray-500 text-left cursor-pointer hover:border-white/20 transition-all">
+                        <i className="fas fa-search absolute left-3.5 top-2.5 text-gray-500"></i>
+                        <div className="block w-full pl-10 pr-12 py-2.5 bg-[#18181b] border border-white/10 rounded-full text-sm text-gray-500 text-left cursor-pointer hover:border-white/20 transition-all">
                             Search markets, tickers, or commands...
                         </div>
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center">
                             <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-gray-500 bg-white/5 rounded border border-gray-600">
                                 ⌘K
                             </kbd>

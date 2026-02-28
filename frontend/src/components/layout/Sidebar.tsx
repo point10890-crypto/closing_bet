@@ -95,7 +95,6 @@ const navigation: NavItem[] = [
             { name: 'Skills Hub', href: '/dashboard/skills', color: 'bg-pink-500' },
             { name: 'VCP Screen', href: '/dashboard/skills/vcp', color: 'bg-rose-500' },
             { name: 'Breadth', href: '/dashboard/skills/breadth', color: 'bg-blue-500' },
-            { name: 'Regime', href: '/dashboard/skills/regime', color: 'bg-purple-500' },
             { name: 'Themes', href: '/dashboard/skills/themes', color: 'bg-amber-500' },
         ],
     },
@@ -145,7 +144,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const sessionResult = useSession();
     const session = sessionResult?.data;
 
-    // 세션에서 유저 정보 읽기 (없으면 기본값)
     const user = session?.user as Record<string, unknown> | undefined;
     const userName = (user?.name as string) || 'Guest';
     const userTier = (user?.tier as string) || 'free';
@@ -155,18 +153,23 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     return (
         <>
             {/* Brand */}
-            <div className="h-16 flex items-center px-4 border-b border-white/5">
-                <div className="w-8 h-8 bg-[#2997ff] rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-500/20 mr-3">
-                    M
+            <div className="h-[72px] flex items-center px-5 border-b border-white/5">
+                <div className="relative w-10 h-10 bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600 rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-amber-500/30 mr-3.5 ring-1 ring-amber-400/20 drop-shadow-sm">
+                    <div className="absolute inset-0.5 rounded-[10px] ring-1 ring-white/10" />
+                    <span className="relative">B</span>
                 </div>
-                <span className="text-white font-bold tracking-tight text-lg">
-                    Market<span className="text-[#2997ff]">Flow</span>
-                </span>
+                <div className="flex flex-col leading-none">
+                    <span className="text-[24px] font-extrabold tracking-tight">
+                        <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">Bit</span><span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Man</span>
+                    </span>
+                    <div className="w-full h-px bg-gradient-to-r from-amber-500/50 via-amber-400/20 to-transparent mt-1 mb-[3px]" />
+                    <span className="text-[11px] font-semibold tracking-[0.22em] bg-gradient-to-r from-amber-300/90 via-amber-400/60 to-gray-500/80 bg-clip-text text-transparent uppercase">MarketFlow</span>
+                </div>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-                <div className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <nav className="flex-1 px-3.5 py-5 space-y-1 overflow-y-auto">
+                <div className="px-3 mb-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                     Dashboard
                 </div>
 
@@ -180,12 +183,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                             <Link
                                 href={item.href}
                                 onClick={!hasChildren ? onNavigate : undefined}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
+                                className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium transition-all ${isActive
                                     ? 'text-white bg-white/5 border border-white/5'
                                     : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                                     }`}
                             >
-                                <i className={`fas ${item.icon} w-5 text-center ${item.color}`}></i>
+                                <i className={`fas ${item.icon} w-5 text-center text-base ${item.color}`}></i>
                                 <span>{item.name}</span>
                                 {hasChildren && (
                                     <i
@@ -197,18 +200,18 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
                             {/* Submenu */}
                             {hasChildren && isExpanded && (
-                                <div className="pl-3 space-y-1 mt-1">
+                                <div className="pl-4 space-y-0.5 mt-1">
                                     {item.children!.map((child) => (
                                         <Link
                                             key={child.href}
                                             href={child.href}
                                             onClick={onNavigate}
-                                            className={`block px-3 py-2 text-xs rounded-md transition-colors ${pathname === child.href
+                                            className={`block px-3.5 py-2 text-[13px] rounded-lg transition-colors ${pathname === child.href
                                                 ? 'text-white bg-white/10'
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                                 }`}
                                         >
-                                            <span className={`inline-block w-1.5 h-1.5 rounded-full ${child.color} mr-2`}></span>
+                                            <span className={`inline-block w-1.5 h-1.5 rounded-full ${child.color} mr-2.5`}></span>
                                             {child.name}
                                         </Link>
                                     ))}
@@ -221,27 +224,27 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 {/* User Account Section */}
                 {isLoggedIn && (
                     <>
-                        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <div className="px-3 mt-6 mb-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                             Account
                         </div>
                         <Link
                             href="/account"
                             onClick={onNavigate}
-                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${pathname === '/account'
+                            className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium transition-all ${pathname === '/account'
                                 ? 'text-white bg-white/5 border border-white/5'
                                 : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                                 }`}
                         >
-                            <i className="fas fa-user-circle w-5 text-center text-blue-400"></i>
+                            <i className="fas fa-user-circle w-5 text-center text-base text-blue-400"></i>
                             <span>My Account</span>
                         </Link>
                         {userTier === 'free' && (
                             <Link
                                 href="/pricing"
                                 onClick={onNavigate}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-yellow-400 hover:text-white hover:bg-yellow-500/10 border border-transparent transition-all"
+                                className="flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium text-yellow-400 hover:text-white hover:bg-yellow-500/10 border border-transparent transition-all"
                             >
-                                <i className="fas fa-crown w-5 text-center"></i>
+                                <i className="fas fa-crown w-5 text-center text-base"></i>
                                 <span>Upgrade to Pro</span>
                             </Link>
                         )}
@@ -251,7 +254,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 {/* Admin Section */}
                 {userRole === 'admin' && (
                     <>
-                        <div className="px-3 mt-6 mb-2 text-xs font-semibold text-red-500 uppercase tracking-wider">
+                        <div className="px-3 mt-6 mb-3 text-[11px] font-semibold text-red-500 uppercase tracking-wider">
                             Admin
                         </div>
                         {adminNavigation.map((item) => {
@@ -261,12 +264,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                     key={item.name}
                                     href={item.href}
                                     onClick={onNavigate}
-                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
+                                    className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[15px] font-medium transition-all ${isActive
                                         ? 'text-white bg-red-500/10 border border-red-500/20'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                                         }`}
                                 >
-                                    <i className={`fas ${item.icon} w-5 text-center ${item.color}`}></i>
+                                    <i className={`fas ${item.icon} w-5 text-center text-base ${item.color}`}></i>
                                     <span>{item.name}</span>
                                 </Link>
                             );
@@ -278,25 +281,25 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             {/* Profile */}
             <div className="p-4 border-t border-white/5">
                 {isLoggedIn ? (
-                    <div className="flex items-center gap-3 p-2 rounded-lg">
-                        <div className={`w-8 h-8 rounded-full ring-2 ring-white/10 flex items-center justify-center text-white text-xs font-bold ${userTier === 'pro' || userTier === 'premium' ? 'bg-gradient-to-tr from-indigo-500 to-purple-500' : 'bg-gradient-to-tr from-gray-600 to-gray-500'}`}>
+                    <div className="flex items-center gap-3 p-2.5 rounded-xl">
+                        <div className={`w-9 h-9 rounded-full ring-2 ring-white/10 flex items-center justify-center text-white text-sm font-bold ${userTier === 'pro' || userTier === 'premium' ? 'bg-gradient-to-tr from-indigo-500 to-purple-500' : 'bg-gradient-to-tr from-gray-600 to-gray-500'}`}>
                             {userName.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col flex-1 min-w-0">
-                            <span className="text-xs font-bold text-white truncate">{userName}</span>
-                            <span className={`text-[10px] ${userTier === 'pro' || userTier === 'premium' ? 'text-purple-400' : 'text-gray-500'}`}>
+                            <span className="text-sm font-bold text-white truncate">{userName}</span>
+                            <span className={`text-[11px] ${userTier === 'pro' || userTier === 'premium' ? 'text-purple-400' : 'text-gray-500'}`}>
                                 {userTier === 'pro' ? 'Pro Plan' : userTier === 'premium' ? 'Premium' : 'Free Plan'}
                             </span>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                             {userTier !== 'free' && (
-                                <span className="text-[10px] px-2 py-1 rounded bg-purple-500/10 text-purple-400 font-bold">
+                                <span className="text-[11px] px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-400 font-bold">
                                     {userTier === 'pro' ? 'Pro' : 'Premium'}
                                 </span>
                             )}
                             <button
                                 onClick={() => signOut({ callbackUrl: '/login' })}
-                                className="text-[10px] px-2 py-1 rounded bg-white/5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                className="text-[11px] px-2.5 py-1.5 rounded-md bg-white/5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                                 title="Sign Out"
                             >
                                 <i className="fas fa-sign-out-alt"></i>
@@ -306,12 +309,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 ) : (
                     <Link
                         href="/login"
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors"
+                        className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors"
                     >
-                        <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
-                            <i className="fas fa-sign-in-alt text-gray-400 text-xs"></i>
+                        <div className="w-9 h-9 rounded-full bg-gray-700 flex items-center justify-center">
+                            <i className="fas fa-sign-in-alt text-gray-400 text-sm"></i>
                         </div>
-                        <span className="text-sm text-gray-400">Sign In</span>
+                        <span className="text-[15px] text-gray-400">Sign In</span>
                     </Link>
                 )}
             </div>
@@ -331,7 +334,7 @@ export default function Sidebar({ mobile = false, isOpen = false, onClose }: Sid
     // Desktop sidebar
     if (!mobile) {
         return (
-            <aside className="w-64 apple-glass flex flex-col shrink-0 z-50">
+            <aside className="w-72 apple-glass flex flex-col shrink-0 z-50">
                 <SidebarContent />
             </aside>
         );
@@ -349,14 +352,14 @@ export default function Sidebar({ mobile = false, isOpen = false, onClose }: Sid
             />
             {/* Sidebar panel */}
             <aside
-                className={`absolute top-0 left-0 h-full w-72 apple-glass flex flex-col shadow-2xl shadow-black/50 transition-transform duration-300 ease-out ${
+                className={`absolute top-0 left-0 h-full w-80 apple-glass flex flex-col shadow-2xl shadow-black/50 transition-transform duration-300 ease-out ${
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 }`}
             >
                 {/* Close button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors z-10"
+                    className="absolute top-5 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors z-10"
                 >
                     <i className="fas fa-times text-sm"></i>
                 </button>

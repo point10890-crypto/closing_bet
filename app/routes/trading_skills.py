@@ -23,8 +23,14 @@ _PYTHON = os.path.join(_BASE_DIR, '.venv', 'Scripts', 'python.exe')
 
 # Track running skills
 _running_skills = {}  # {skill_name: {'started_at': datetime, 'pid': int}}
+_recent_results = {}  # {skill_name: {'finished_at': str, 'success': bool, 'exit_code': int}}
 
 # All 38 skills with metadata
+# cli_flags: per-script overrides for CLI arguments
+#   'api_flag': flag name for API key (default: '--api-key')
+#   'no_output_dir': True if script doesn't accept --output-dir
+#   'auto_args': extra args for auto/scheduler runs
+#   'needs_input': True if script requires user-provided input data
 SKILLS_CATALOG = {
     # === Market Analysis & Research ===
     'vcp-screener': {'name': 'VCP Screener', 'category': 'screening', 'script': 'screen_vcp.py', 'api_key': 'FMP_API_KEY'},
@@ -33,7 +39,8 @@ SKILLS_CATALOG = {
     'market-top-detector': {'name': 'Market Top', 'category': 'timing', 'script': 'market_top_detector.py', 'api_key': 'FMP_API_KEY'},
     'ftd-detector': {'name': 'FTD Detector', 'category': 'timing', 'script': 'ftd_detector.py', 'api_key': 'FMP_API_KEY'},
     'uptrend-analyzer': {'name': 'Uptrend Analyzer', 'category': 'analysis', 'script': 'uptrend_analyzer.py', 'api_key': None},
-    'us-market-bubble-detector': {'name': 'Bubble Detector', 'category': 'risk', 'script': 'bubble_scorer.py', 'api_key': None},
+    'us-market-bubble-detector': {'name': 'Bubble Detector', 'category': 'risk', 'script': 'bubble_scorer.py', 'api_key': None,
+                                   'cli_flags': {'auto_args': ['--auto']}},
     'theme-detector': {'name': 'Theme Detector', 'category': 'analysis', 'script': 'theme_detector.py', 'api_key': 'FMP_API_KEY'},
     'sector-analyst': {'name': 'Sector Analyst', 'category': 'analysis', 'script': None, 'api_key': None},
     'breadth-chart-analyst': {'name': 'Breadth Chart', 'category': 'analysis', 'script': None, 'api_key': None},
@@ -45,39 +52,56 @@ SKILLS_CATALOG = {
     # === Screening ===
     'canslim-screener': {'name': 'CANSLIM', 'category': 'screening', 'script': 'screen_canslim.py', 'api_key': 'FMP_API_KEY'},
     'pead-screener': {'name': 'PEAD Screener', 'category': 'screening', 'script': 'screen_pead.py', 'api_key': 'FMP_API_KEY'},
-    'pair-trade-screener': {'name': 'Pair Trade', 'category': 'screening', 'script': 'analyze_spread.py', 'api_key': 'FMP_API_KEY'},
-    'value-dividend-screener': {'name': 'Value Dividend', 'category': 'screening', 'script': 'screen_dividend_stocks.py', 'api_key': 'FMP_API_KEY'},
-    'dividend-growth-pullback-screener': {'name': 'Dividend Pullback', 'category': 'screening', 'script': 'screen_dividend_growth_rsi.py', 'api_key': 'FMP_API_KEY'},
+    'pair-trade-screener': {'name': 'Pair Trade', 'category': 'screening', 'script': 'analyze_spread.py', 'api_key': 'FMP_API_KEY',
+                             'cli_flags': {'no_output_dir': True, 'api_flag': '--fmp-api-key', 'needs_input': True}},
+    'value-dividend-screener': {'name': 'Value Dividend', 'category': 'screening', 'script': 'screen_dividend_stocks.py', 'api_key': 'FMP_API_KEY',
+                                 'cli_flags': {'no_output_dir': True, 'api_flag': '--fmp-api-key'}},
+    'dividend-growth-pullback-screener': {'name': 'Dividend Pullback', 'category': 'screening', 'script': 'screen_dividend_growth_rsi.py', 'api_key': 'FMP_API_KEY',
+                                           'cli_flags': {'no_output_dir': True, 'api_flag': '--fmp-api-key'}},
 
     # === Earnings ===
     'earnings-trade-analyzer': {'name': 'Earnings Trade', 'category': 'earnings', 'script': 'analyze_earnings_trades.py', 'api_key': 'FMP_API_KEY'},
-    'earnings-calendar': {'name': 'Earnings Calendar', 'category': 'earnings', 'script': 'fetch_earnings_fmp.py', 'api_key': 'FMP_API_KEY'},
-    'economic-calendar-fetcher': {'name': 'Economic Calendar', 'category': 'earnings', 'script': 'get_economic_calendar.py', 'api_key': 'FMP_API_KEY'},
+    'earnings-calendar': {'name': 'Earnings Calendar', 'category': 'earnings', 'script': 'fetch_earnings_fmp.py', 'api_key': 'FMP_API_KEY',
+                           'cli_flags': {'no_output_dir': True}},
+    'economic-calendar-fetcher': {'name': 'Economic Calendar', 'category': 'earnings', 'script': 'get_economic_calendar.py', 'api_key': 'FMP_API_KEY',
+                                   'cli_flags': {'no_output_dir': True}},
 
     # === Strategy & Risk ===
-    'backtest-expert': {'name': 'Backtest Expert', 'category': 'strategy', 'script': 'evaluate_backtest.py', 'api_key': None},
+    'backtest-expert': {'name': 'Backtest Expert', 'category': 'strategy', 'script': 'evaluate_backtest.py', 'api_key': None,
+                         'cli_flags': {'needs_input': True}},
     'scenario-analyzer': {'name': 'Scenario Analyzer', 'category': 'strategy', 'script': None, 'api_key': None},
-    'options-strategy-advisor': {'name': 'Options Strategy', 'category': 'strategy', 'script': 'black_scholes.py', 'api_key': None},
-    'stanley-druckenmiller-investment': {'name': 'Druckenmiller', 'category': 'strategy', 'script': 'allocation_engine.py', 'api_key': 'FMP_API_KEY'},
-    'strategy-pivot-designer': {'name': 'Strategy Pivot', 'category': 'strategy', 'script': 'detect_stagnation.py', 'api_key': None},
+    'options-strategy-advisor': {'name': 'Options Strategy', 'category': 'strategy', 'script': 'black_scholes.py', 'api_key': None,
+                                  'cli_flags': {'no_output_dir': True, 'needs_input': True}},
+    'stanley-druckenmiller-investment': {'name': 'Druckenmiller', 'category': 'strategy', 'script': 'allocation_engine.py', 'api_key': 'FMP_API_KEY',
+                                          'cli_flags': {'no_output_dir': True}},
+    'strategy-pivot-designer': {'name': 'Strategy Pivot', 'category': 'strategy', 'script': 'detect_stagnation.py', 'api_key': None,
+                                 'cli_flags': {'needs_input': True}},
     'portfolio-manager': {'name': 'Portfolio Manager', 'category': 'strategy', 'script': None, 'api_key': 'ALPACA_API_KEY'},
 
     # === Institutional ===
     'institutional-flow-tracker': {'name': 'Institutional Flow', 'category': 'institutional', 'script': 'track_institutional_flow.py', 'api_key': 'FMP_API_KEY'},
 
     # === Edge Discovery ===
-    'edge-candidate-agent': {'name': 'Edge Candidate', 'category': 'edge', 'script': 'auto_detect_candidates.py', 'api_key': None},
-    'edge-concept-synthesizer': {'name': 'Edge Synthesizer', 'category': 'edge', 'script': 'synthesize_edge_concepts.py', 'api_key': None},
-    'edge-hint-extractor': {'name': 'Edge Hints', 'category': 'edge', 'script': 'build_hints.py', 'api_key': None},
-    'edge-strategy-designer': {'name': 'Edge Strategy', 'category': 'edge', 'script': 'design_strategy_drafts.py', 'api_key': None},
+    'edge-candidate-agent': {'name': 'Edge Candidate', 'category': 'edge', 'script': 'auto_detect_candidates.py', 'api_key': None,
+                              'cli_flags': {'needs_input': True}},
+    'edge-concept-synthesizer': {'name': 'Edge Synthesizer', 'category': 'edge', 'script': 'synthesize_edge_concepts.py', 'api_key': None,
+                                  'cli_flags': {'no_output_dir': True, 'needs_input': True}},
+    'edge-hint-extractor': {'name': 'Edge Hints', 'category': 'edge', 'script': 'build_hints.py', 'api_key': None,
+                             'cli_flags': {'needs_input': True}},
+    'edge-strategy-designer': {'name': 'Edge Strategy', 'category': 'edge', 'script': 'design_strategy_drafts.py', 'api_key': None,
+                                'cli_flags': {'needs_input': True}},
 
     # === Dividend Workflows ===
-    'kanchi-dividend-sop': {'name': 'Kanchi Dividend SOP', 'category': 'dividend', 'script': 'build_entry_signals.py', 'api_key': 'FMP_API_KEY'},
-    'kanchi-dividend-review-monitor': {'name': 'Dividend Monitor', 'category': 'dividend', 'script': 'build_review_queue.py', 'api_key': 'FMP_API_KEY'},
-    'kanchi-dividend-us-tax-accounting': {'name': 'Dividend Tax', 'category': 'dividend', 'script': 'build_tax_planning_sheet.py', 'api_key': None},
+    'kanchi-dividend-sop': {'name': 'Kanchi Dividend SOP', 'category': 'dividend', 'script': 'build_entry_signals.py', 'api_key': None,
+                             'cli_flags': {'needs_input': True}},
+    'kanchi-dividend-review-monitor': {'name': 'Dividend Monitor', 'category': 'dividend', 'script': 'build_review_queue.py', 'api_key': None,
+                                        'cli_flags': {'no_output_dir': True, 'needs_input': True}},
+    'kanchi-dividend-us-tax-accounting': {'name': 'Dividend Tax', 'category': 'dividend', 'script': 'build_tax_planning_sheet.py', 'api_key': None,
+                                           'cli_flags': {'needs_input': True}},
 
     # === Meta ===
-    'dual-axis-skill-reviewer': {'name': 'Skill Reviewer', 'category': 'meta', 'script': 'run_dual_axis_review.py', 'api_key': None},
+    'dual-axis-skill-reviewer': {'name': 'Skill Reviewer', 'category': 'meta', 'script': 'run_dual_axis_review.py', 'api_key': None,
+                                  'cli_flags': {'needs_input': True}},
     'weekly-trade-strategy': {'name': 'Weekly Strategy', 'category': 'strategy', 'script': None, 'api_key': 'FMP_API_KEY'},
 }
 
@@ -117,6 +141,7 @@ def skills_catalog():
         has_script = meta['script'] is not None
         skill_dir = os.path.join(_SKILLS_DIR, skill_id)
 
+        cli_flags = meta.get('cli_flags', {})
         catalog.append({
             'id': skill_id,
             'name': meta['name'],
@@ -127,6 +152,8 @@ def skills_catalog():
             'has_report': report is not None,
             'last_report_time': report.get('_report_time') if report else None,
             'running': skill_id in _running_skills,
+            'needs_input': cli_flags.get('needs_input', False),
+            'auto_runnable': has_script and not cli_flags.get('needs_input', False),
         })
 
     return jsonify({
@@ -166,6 +193,10 @@ def run_skill(skill_name):
     if skill_name in _running_skills:
         return jsonify({'status': 'already_running', 'skill': skill_name}), 409
 
+    cli_flags = meta.get('cli_flags', {})
+    if cli_flags.get('needs_input'):
+        return jsonify({'error': f'Skill {skill_name} requires input data (not auto-runnable)'}), 400
+
     # Build command
     script_path = os.path.join(_SKILLS_DIR, skill_name, 'scripts', meta['script'])
     if not os.path.isfile(script_path):
@@ -174,18 +205,28 @@ def run_skill(skill_name):
     output_dir = os.path.join(_REPORTS_DIR, skill_name)
     os.makedirs(output_dir, exist_ok=True)
 
-    cmd = [_PYTHON, script_path, '--output-dir', output_dir]
+    cmd = [_PYTHON, script_path]
 
-    # Add API key if required
+    # Add --output-dir unless script doesn't support it
+    if not cli_flags.get('no_output_dir'):
+        cmd.extend(['--output-dir', output_dir])
+
+    # Add auto args if defined (e.g., bubble_scorer --auto --output json)
+    if cli_flags.get('auto_args'):
+        cmd.extend(cli_flags['auto_args'])
+
+    # Add API key if required (use per-script flag name)
     if meta.get('api_key'):
         api_key = os.environ.get(meta['api_key'], '')
         if api_key:
-            cmd.extend(['--api-key', api_key])
+            api_flag = cli_flags.get('api_flag', '--api-key')
+            cmd.extend([api_flag, api_key])
 
     # Run in background thread
     def _execute():
         env = os.environ.copy()
         env['PYTHONIOENCODING'] = 'utf-8'
+        exit_code = -1
         try:
             proc = subprocess.Popen(
                 cmd, cwd=_BASE_DIR, env=env,
@@ -196,12 +237,19 @@ def run_skill(skill_name):
                 'pid': proc.pid,
             }
             proc.wait(timeout=600)  # 10 min timeout
+            exit_code = proc.returncode
         except subprocess.TimeoutExpired:
             proc.kill()
+            exit_code = -2  # timeout
         except Exception:
             pass
         finally:
             _running_skills.pop(skill_name, None)
+            _recent_results[skill_name] = {
+                'finished_at': datetime.now().isoformat(),
+                'success': exit_code == 0,
+                'exit_code': exit_code,
+            }
 
     thread = threading.Thread(target=_execute, daemon=True, name=f'skill-{skill_name}')
     thread.start()
@@ -218,6 +266,7 @@ def skills_status():
     """Get running skills and report freshness."""
     status = {
         'running': dict(_running_skills),
+        'recent': dict(_recent_results),
         'reports': {},
     }
 
@@ -275,25 +324,7 @@ def macro_regime():
     report = _get_latest_report('macro-regime-detector')
     if not report:
         return jsonify({'error': 'No macro regime report. Run /skill-macro-regime first.'}), 404
-
-    # Transform to frontend RegimePage format
-    composite = report.get('composite', {})
-    regime_data = report.get('regime', {})
-    components = report.get('components', {})
-    result = {
-        'results': [{
-            'regime': regime_data.get('classification', composite.get('zone', 'neutral')),
-            'classification': regime_data.get('classification', composite.get('zone', 'neutral')),
-            'composite_score': composite.get('composite_score', 0),
-            'score': composite.get('composite_score', 0),
-            'components': {
-                k: {'signal': v.get('signal', ''), 'score': v.get('score', 0), 'regime': v.get('regime', '')}
-                for k, v in components.items()
-            },
-        }],
-        '_report_time': report.get('_report_time'),
-    }
-    return jsonify(result)
+    return jsonify(report)
 
 
 @skills_bp.route('/market-top')
@@ -336,17 +367,41 @@ def themes():
     results = []
     for t in all_themes:
         results.append({
+            'name': t.get('name', ''),
             'theme': t.get('name', ''),
+            'heat': t.get('heat', 0),
             'heat_score': t.get('heat', 0),
+            'heat_label': t.get('heat_label', ''),
+            'heat_breakdown': t.get('heat_breakdown', {}),
+            'direction': t.get('direction', 'neutral'),
+            'confidence': t.get('confidence', ''),
+            'stage': t.get('stage', ''),
+            'maturity': t.get('maturity', 0),
             'lifecycle_score': t.get('maturity', 0),
             'confidence_score': {'High': 90, 'Medium': 60, 'Low': 30}.get(t.get('confidence', ''), 50),
             'composite_score': (t.get('heat', 0) + t.get('maturity', 0)) / 2,
+            'proxy_etfs': t.get('proxy_etfs', []),
             'etfs': t.get('proxy_etfs', []),
             'representative_stocks': t.get('representative_stocks', []),
-            'description': f"{t.get('direction', '')} | Stage: {t.get('stage', '')} | {t.get('heat_label', '')}",
         })
+
+    # Build summary from themes
+    bullish = [t for t in results if t.get('direction') == 'bullish']
+    bearish = [t for t in results if t.get('direction') == 'bearish']
+    summary = {
+        'bullish_count': len(bullish),
+        'bearish_count': len(bearish),
+        'top_bullish': bullish[0]['name'] if bullish else '',
+        'top_bearish': bearish[0]['name'] if bearish else '',
+    }
+
+    # Industry rankings from raw report
+    industry_rankings = report.get('industry_rankings', {})
+
     return jsonify({
         'results': results,
+        'summary': summary,
+        'industry_rankings': industry_rankings,
         '_report_time': report.get('_report_time'),
     })
 
@@ -408,23 +463,7 @@ def uptrend():
     report = _get_latest_report('uptrend-analyzer')
     if not report:
         return jsonify({'error': 'No uptrend report. Run /skill-uptrend-analyzer first.'}), 404
-
-    composite = report.get('composite', {})
-    components = report.get('components', {})
-    result = {
-        'results': [{
-            'composite_score': composite.get('composite_score', 0),
-            'score': composite.get('composite_score', 0),
-            'zone': composite.get('zone', 'Unknown'),
-            'exposure_guidance': composite.get('exposure_guidance', ''),
-            'components': {
-                k: {'score': v.get('score', 0), 'signal': v.get('signal', '')}
-                for k, v in components.items()
-            },
-        }],
-        '_report_time': report.get('_report_time'),
-    }
-    return jsonify(result)
+    return jsonify(report)
 
 
 @skills_bp.route('/canslim')
@@ -448,6 +487,7 @@ def canslim():
     return jsonify({
         'results': results,
         'summary': report.get('summary', {}),
+        'metadata': report.get('metadata', {}),
         '_report_time': report.get('_report_time'),
     })
 
@@ -532,12 +572,41 @@ def _extract_score(skill_name: str) -> dict | None:
         return None
 
     composite = report.get('composite', {})
-    score = composite.get('composite_score', report.get('score', report.get('composite_score')))
-    zone = composite.get('zone', report.get('zone', report.get('regime', '')))
+    quality = report.get('quality_score', {})
+    # Use explicit None checks (0 is a valid score)
+    score = None
+    for candidate in [
+        composite.get('composite_score'),
+        quality.get('total_score'),
+        report.get('score'),
+        report.get('composite_score'),
+        report.get('percentage'),
+    ]:
+        if candidate is not None:
+            score = candidate
+            break
+    zone = ''
+    for candidate in [
+        composite.get('zone'),
+        quality.get('signal'),
+        report.get('zone'),
+        report.get('regime'),
+        report.get('phase'),
+        report.get('market_state', {}).get('combined_state'),
+    ]:
+        if candidate is not None:
+            zone = candidate
+            break
     report_time = report.get('_report_time')
 
     if score is None:
         return None
+    # Ensure numeric score (0 is valid, not falsy)
+    if not isinstance(score, (int, float)):
+        try:
+            score = float(score)
+        except (ValueError, TypeError):
+            return None
 
     age_hours = 0
     if report_time:
@@ -782,6 +851,10 @@ def run_chain(chain_id):
         if not meta.get('script'):
             skipped.append({'id': skill_name, 'reason': 'prompt-only'})
             continue
+        cli_flags = meta.get('cli_flags', {})
+        if cli_flags.get('needs_input'):
+            skipped.append({'id': skill_name, 'reason': 'needs_input'})
+            continue
         if skill_name in _running_skills:
             skipped.append({'id': skill_name, 'reason': 'already_running'})
             continue
@@ -794,17 +867,21 @@ def run_chain(chain_id):
         output_dir = os.path.join(_REPORTS_DIR, skill_name)
         os.makedirs(output_dir, exist_ok=True)
 
-        cmd = [_PYTHON, script_path, '--output-dir', output_dir]
+        cmd = [_PYTHON, script_path]
+        if not cli_flags.get('no_output_dir'):
+            cmd.extend(['--output-dir', output_dir])
+        if cli_flags.get('auto_args'):
+            cmd.extend(cli_flags['auto_args'])
         if meta.get('api_key'):
             api_key_val = os.environ.get(meta['api_key'], '')
             if api_key_val:
-                # Use the correct flag per skill
-                flag = '--fmp-api-key' if 'fmp' in meta['api_key'].lower() else '--api-key'
-                cmd.extend([flag, api_key_val])
+                api_flag = cli_flags.get('api_flag', '--api-key')
+                cmd.extend([api_flag, api_key_val])
 
         def _execute(sname, command):
             env = os.environ.copy()
             env['PYTHONIOENCODING'] = 'utf-8'
+            exit_code = -1
             try:
                 proc = subprocess.Popen(
                     command, cwd=_BASE_DIR, env=env,
@@ -815,12 +892,19 @@ def run_chain(chain_id):
                     'pid': proc.pid,
                 }
                 proc.wait(timeout=600)
+                exit_code = proc.returncode
             except subprocess.TimeoutExpired:
                 proc.kill()
+                exit_code = -2
             except Exception:
                 pass
             finally:
                 _running_skills.pop(sname, None)
+                _recent_results[sname] = {
+                    'finished_at': datetime.now().isoformat(),
+                    'success': exit_code == 0,
+                    'exit_code': exit_code,
+                }
 
         thread = threading.Thread(
             target=_execute, args=(skill_name, cmd),
