@@ -148,36 +148,9 @@ export const krAPI = {
     getSignals: () => fetchAPI<KRSignalsResponse>('/api/kr/signals'),
     getMarketGate: () => fetchAPI<KRMarketGate>('/api/kr/market-gate'),
     getAIAnalysis: () => fetchAPI<KRAIAnalysis>('/api/kr/ai-analysis'),
-    getStockChart: (ticker: string, period = '6mo') =>
-        fetchAPI<{ candles: any[] }>(`/api/kr/stock-chart/${ticker}?period=${period}`),
-    getHistoryDates: () => fetchAPI<{ dates: string[] }>('/api/kr/ai-history-dates'),
-    getHistory: (date: string) => fetchAPI<KRAIAnalysis>(`/api/kr/ai-history/${date}`),
 };
 
 // Closing Bet API
-export interface ClosingBetCandidate {
-    rank: number;
-    ticker: string;
-    name: string;
-    market: string;
-    grade: 'S' | 'A' | 'B' | 'C' | 'D';
-    price: number;
-    change_pct: number;
-    total_score: number;
-    scores: {
-        volume: number;
-        institutional: number;
-        news: number;
-        chart: number;
-        candle: number;
-        consolidation: number;
-    };
-}
-
-export interface ClosingBetResponse {
-    candidates: ClosingBetCandidate[];
-}
-
 export interface ClosingBetTiming {
     phase: string;
     time_remaining: string;
@@ -187,10 +160,7 @@ export interface ClosingBetTiming {
 }
 
 export const closingBetAPI = {
-    getCandidates: (limit = 25) =>
-        fetchAPI<ClosingBetResponse>(`/api/kr/closing-bet/candidates?limit=${limit}`),
     getTiming: () => fetchAPI<ClosingBetTiming>('/api/kr/closing-bet/timing'),
-    getBacktestStats: () => fetchAPI<any>('/api/kr/closing-bet/backtest-stats'),
 };
 
 // US Market API Types
@@ -531,8 +501,6 @@ export interface CryptoDominance {
 export const cryptoAPI = {
     getOverview: () => fetchAPI<{ cryptos: CryptoAsset[]; timestamp: string }>('/api/crypto/overview'),
     getDominance: () => fetchAPI<CryptoDominance>('/api/crypto/dominance'),
-    getChart: (ticker: string, period = '3mo') =>
-        fetchAPI<{ ticker: string; data: any[]; period: string }>(`/api/crypto/chart/${ticker}?period=${period}`),
     getMarketGate: () => fetchAPI<CryptoMarketGate>('/api/crypto/market-gate'),
     getGateHistory: () => fetchAPI<{ history: Array<{ date: string; gate: string; score: number }> }>('/api/crypto/gate-history'),
     getVCPSignals: (limit = 50) => fetchAPI<{ signals: CryptoSignal[]; count: number }>(`/api/crypto/vcp-signals?limit=${limit}`),
@@ -654,7 +622,6 @@ export interface DividendStock {
 
 export const dividendAPI = {
     getTop: () => fetchAPI<{ dividends: DividendStock[]; timestamp: string }>('/api/dividend/top'),
-    getKRTop: () => fetchAPI<{ kr_dividends: any[]; timestamp: string }>('/api/dividend/kr-top'),
 };
 
 // Trading Skills API
@@ -668,6 +635,8 @@ export interface SkillInfo {
     has_report: boolean;
     last_report_time: string | null;
     running: boolean;
+    needs_input: boolean;
+    auto_runnable: boolean;
 }
 
 export const skillsAPI = {
@@ -675,26 +644,18 @@ export const skillsAPI = {
     getReport: (skillName: string) => fetchAPI<any>(`/api/skills/report/${skillName}`),
     getStatus: () => fetchAPI<any>('/api/skills/status'),
     getDashboard: () => fetchAPI<any>('/api/skills/dashboard'),
-    // Individual skill endpoints
     getMarketBreadth: () => fetchAPI<any>('/api/skills/market-breadth'),
     getMacroRegime: () => fetchAPI<any>('/api/skills/macro-regime'),
     getMarketTop: () => fetchAPI<any>('/api/skills/market-top'),
     getFTD: () => fetchAPI<any>('/api/skills/ftd'),
+    getUptrend: () => fetchAPI<any>('/api/skills/uptrend'),
     getBubble: () => fetchAPI<any>('/api/skills/bubble'),
     getThemes: () => fetchAPI<any>('/api/skills/themes'),
     getVCP: () => fetchAPI<any>('/api/skills/vcp'),
+    getCANSLIM: () => fetchAPI<any>('/api/skills/canslim'),
+    getPEAD: () => fetchAPI<any>('/api/skills/pead'),
     getEarningsTrade: () => fetchAPI<any>('/api/skills/earnings-trade'),
-    getUptrend: () => fetchAPI<any>('/api/skills/uptrend'),
-    getCanslim: () => fetchAPI<any>('/api/skills/canslim'),
-    getPead: () => fetchAPI<any>('/api/skills/pead'),
-    getPairTrade: () => fetchAPI<any>('/api/skills/pair-trade'),
-    getEarningsCalendar: () => fetchAPI<any>('/api/skills/earnings-calendar'),
-    getEconCalendar: () => fetchAPI<any>('/api/skills/econ-calendar'),
-    getDruckenmiller: () => fetchAPI<any>('/api/skills/druckenmiller'),
-    getInstitutionalFlow: () => fetchAPI<any>('/api/skills/institutional-flow'),
-    // Workflow chains
     getChains: () => fetchAPI<any>('/api/skills/chains'),
-    getChainResults: (chainId: string) => fetchAPI<any>(`/api/skills/chain/${chainId}`),
     runChain: (chainId: string) => postAPI<any>(`/api/skills/chain/${chainId}/run`),
     runSkill: (skillName: string) => postAPI<any>(`/api/skills/run/${skillName}`),
 };

@@ -10,8 +10,7 @@ const BACKEND_URL = isVercel ? '' : (process.env.BACKEND_URL || 'http://localhos
 const API_PREFIXES = [
   'kr', 'us', 'crypto', 'econ', 'dividend',
   'admin', 'stripe',
-  // 'stock-analyzer' — handled by Next.js API routes (no backend dependency)
-  'scheduler', 'system', 'portfolio', 'stock', 'skills',
+  'system', 'stock', 'skills',
 ];
 
 const nextConfig: NextConfig = {

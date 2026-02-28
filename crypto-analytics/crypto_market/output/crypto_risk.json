@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-02-24T20:00:38.135819",
+  "timestamp": "2026-02-28T08:00:28.271803",
   "portfolio_summary": {
     "total_coins": 13,
-    "portfolio_var_95_1d": -5.17,
+    "portfolio_var_95_1d": -5.19,
     "portfolio_cvar_95_1d": -8.16,
     "risk_level": "CRITICAL"
   },
@@ -25,293 +25,293 @@
     "values": [
       [
         1.0,
-        0.7717,
-        0.9007,
-        0.8097,
-        0.8199,
-        0.9149,
-        0.9405,
-        0.8579,
-        0.9195,
-        0.8717,
-        0.9009,
-        0.8535,
-        0.8422
-      ],
-      [
-        0.7717,
-        1.0,
-        0.7741,
-        0.668,
-        0.6506,
-        0.7197,
-        0.7825,
-        0.6847,
-        0.7481,
-        0.7533,
-        0.7777,
-        0.7015,
-        0.6375
-      ],
-      [
-        0.9007,
-        0.7741,
-        1.0,
-        0.8187,
-        0.8324,
-        0.864,
-        0.9022,
-        0.8566,
-        0.9017,
-        0.8556,
-        0.8845,
-        0.8409,
-        0.7864
-      ],
-      [
-        0.8097,
-        0.668,
-        0.8187,
-        1.0,
-        0.8953,
-        0.8026,
-        0.7892,
-        0.8895,
-        0.8939,
-        0.8422,
-        0.7949,
-        0.8899,
-        0.8251
-      ],
-      [
-        0.8199,
-        0.6506,
-        0.8324,
-        0.8953,
-        1.0,
-        0.7778,
-        0.7714,
-        0.9118,
-        0.8938,
-        0.8379,
-        0.8121,
-        0.9002,
-        0.8874
-      ],
-      [
-        0.9149,
-        0.7197,
-        0.864,
-        0.8026,
-        0.7778,
-        1.0,
-        0.8741,
-        0.81,
-        0.8679,
-        0.8296,
-        0.8266,
-        0.836,
-        0.8258
-      ],
-      [
-        0.9405,
-        0.7825,
-        0.9022,
-        0.7892,
-        0.7714,
-        0.8741,
-        1.0,
+        0.7098,
+        0.9129,
+        0.8244,
         0.8236,
-        0.8946,
-        0.8764,
-        0.9105,
-        0.826,
-        0.7733
+        0.9246,
+        0.8981,
+        0.8669,
+        0.9276,
+        0.8884,
+        0.9229,
+        0.8742,
+        0.8356
       ],
       [
-        0.8579,
-        0.6847,
-        0.8566,
-        0.8895,
-        0.9118,
-        0.81,
-        0.8236,
+        0.7098,
         1.0,
-        0.9346,
-        0.8311,
-        0.8322,
-        0.9108,
-        0.8416
+        0.695,
+        0.6245,
+        0.6223,
+        0.6808,
+        0.5709,
+        0.6333,
+        0.6798,
+        0.6905,
+        0.6953,
+        0.6357,
+        0.6167
       ],
       [
-        0.9195,
-        0.7481,
-        0.9017,
-        0.8939,
-        0.8938,
-        0.8679,
-        0.8946,
-        0.9346,
+        0.9129,
+        0.695,
         1.0,
-        0.8932,
-        0.886,
-        0.927,
-        0.8571
-      ],
-      [
-        0.8717,
-        0.7533,
-        0.8556,
-        0.8422,
-        0.8379,
-        0.8296,
-        0.8764,
-        0.8311,
-        0.8932,
-        1.0,
-        0.87,
-        0.8681,
-        0.8002
-      ],
-      [
-        0.9009,
-        0.7777,
-        0.8845,
-        0.7949,
-        0.8121,
-        0.8266,
-        0.9105,
-        0.8322,
-        0.886,
-        0.87,
-        1.0,
-        0.8236,
-        0.7844
-      ],
-      [
-        0.8535,
-        0.7015,
-        0.8409,
-        0.8899,
-        0.9002,
-        0.836,
-        0.826,
-        0.9108,
-        0.927,
-        0.8681,
-        0.8236,
-        1.0,
-        0.8418
-      ],
-      [
-        0.8422,
-        0.6375,
-        0.7864,
-        0.8251,
-        0.8874,
-        0.8258,
-        0.7733,
-        0.8416,
-        0.8571,
-        0.8002,
-        0.7844,
+        0.8373,
         0.8418,
+        0.8767,
+        0.8796,
+        0.8749,
+        0.9158,
+        0.8839,
+        0.9233,
+        0.8668,
+        0.783
+      ],
+      [
+        0.8244,
+        0.6245,
+        0.8373,
+        1.0,
+        0.9047,
+        0.8076,
+        0.7647,
+        0.8945,
+        0.9014,
+        0.8519,
+        0.8362,
+        0.8951,
+        0.8194
+      ],
+      [
+        0.8236,
+        0.6223,
+        0.8418,
+        0.9047,
+        1.0,
+        0.7952,
+        0.7237,
+        0.9142,
+        0.8987,
+        0.8458,
+        0.8131,
+        0.9197,
+        0.89
+      ],
+      [
+        0.9246,
+        0.6808,
+        0.8767,
+        0.8076,
+        0.7952,
+        1.0,
+        0.8143,
+        0.8212,
+        0.8741,
+        0.8358,
+        0.8629,
+        0.8389,
+        0.8292
+      ],
+      [
+        0.8981,
+        0.5709,
+        0.8796,
+        0.7647,
+        0.7237,
+        0.8143,
+        1.0,
+        0.7913,
+        0.862,
+        0.8583,
+        0.9359,
+        0.798,
+        0.6913
+      ],
+      [
+        0.8669,
+        0.6333,
+        0.8749,
+        0.8945,
+        0.9142,
+        0.8212,
+        0.7913,
+        1.0,
+        0.9408,
+        0.8437,
+        0.8542,
+        0.9277,
+        0.8367
+      ],
+      [
+        0.9276,
+        0.6798,
+        0.9158,
+        0.9014,
+        0.8987,
+        0.8741,
+        0.862,
+        0.9408,
+        1.0,
+        0.9067,
+        0.9148,
+        0.9366,
+        0.8499
+      ],
+      [
+        0.8884,
+        0.6905,
+        0.8839,
+        0.8519,
+        0.8458,
+        0.8358,
+        0.8583,
+        0.8437,
+        0.9067,
+        1.0,
+        0.9095,
+        0.8798,
+        0.7969
+      ],
+      [
+        0.9229,
+        0.6953,
+        0.9233,
+        0.8362,
+        0.8131,
+        0.8629,
+        0.9359,
+        0.8542,
+        0.9148,
+        0.9095,
+        1.0,
+        0.8754,
+        0.7833
+      ],
+      [
+        0.8742,
+        0.6357,
+        0.8668,
+        0.8951,
+        0.9197,
+        0.8389,
+        0.798,
+        0.9277,
+        0.9366,
+        0.8798,
+        0.8754,
+        1.0,
+        0.8469
+      ],
+      [
+        0.8356,
+        0.6167,
+        0.783,
+        0.8194,
+        0.89,
+        0.8292,
+        0.6913,
+        0.8367,
+        0.8499,
+        0.7969,
+        0.7833,
+        0.8469,
         1.0
       ]
     ]
   },
   "individual_risk": {
     "ADA": {
-      "var_95_1d": -6.31,
-      "cvar_95_1d": -8.69,
-      "max_dd_30d": -32.03,
-      "volatility_30d": 95.92
+      "var_95_1d": -5.52,
+      "cvar_95_1d": -8.61,
+      "max_dd_30d": -26.68,
+      "volatility_30d": 109.4
     },
     "ATOM": {
-      "var_95_1d": -5.4,
+      "var_95_1d": -5.81,
       "cvar_95_1d": -7.22,
-      "max_dd_30d": -19.09,
-      "volatility_30d": 79.32
+      "max_dd_30d": -21.84,
+      "volatility_30d": 81.91
     },
     "AVAX": {
-      "var_95_1d": -5.86,
+      "var_95_1d": -5.92,
       "cvar_95_1d": -9.08,
-      "max_dd_30d": -31.71,
-      "volatility_30d": 87.53
+      "max_dd_30d": -24.76,
+      "volatility_30d": 102.38
     },
     "BNB": {
-      "var_95_1d": -4.1,
+      "var_95_1d": -4.11,
       "cvar_95_1d": -7.87,
-      "max_dd_30d": -34.66,
-      "volatility_30d": 74.48
+      "max_dd_30d": -32.64,
+      "volatility_30d": 79.36
     },
     "BTC": {
-      "var_95_1d": -4.51,
-      "cvar_95_1d": -7.15,
-      "max_dd_30d": -29.69,
-      "volatility_30d": 80.21
+      "var_95_1d": -4.5,
+      "cvar_95_1d": -6.99,
+      "max_dd_30d": -25.85,
+      "volatility_30d": 83.15
     },
     "DOGE": {
-      "var_95_1d": -5.99,
+      "var_95_1d": -6.0,
       "cvar_95_1d": -9.27,
-      "max_dd_30d": -29.94,
-      "volatility_30d": 104.83
+      "max_dd_30d": -24.61,
+      "volatility_30d": 111.42
     },
     "DOT": {
-      "var_95_1d": -6.53,
+      "var_95_1d": -6.57,
       "cvar_95_1d": -9.22,
-      "max_dd_30d": -33.68,
-      "volatility_30d": 88.53
+      "max_dd_30d": -28.45,
+      "volatility_30d": 150.32
     },
     "ETH": {
-      "var_95_1d": -6.33,
+      "var_95_1d": -6.28,
       "cvar_95_1d": -9.21,
-      "max_dd_30d": -39.72,
-      "volatility_30d": 97.92
+      "max_dd_30d": -35.36,
+      "volatility_30d": 105.17
     },
     "LINK": {
-      "var_95_1d": -5.94,
+      "var_95_1d": -5.96,
       "cvar_95_1d": -8.26,
-      "max_dd_30d": -34.3,
-      "volatility_30d": 89.77
+      "max_dd_30d": -28.75,
+      "volatility_30d": 101.51
     },
     "LTC": {
-      "var_95_1d": -5.38,
-      "cvar_95_1d": -8.18,
-      "max_dd_30d": -27.55,
-      "volatility_30d": 76.37
+      "var_95_1d": -5.19,
+      "cvar_95_1d": -8.04,
+      "max_dd_30d": -23.32,
+      "volatility_30d": 85.49
     },
     "NEAR": {
-      "var_95_1d": -7.67,
-      "cvar_95_1d": -11.39,
-      "max_dd_30d": -35.46,
-      "volatility_30d": 93.69
+      "var_95_1d": -6.82,
+      "cvar_95_1d": -10.4,
+      "max_dd_30d": -30.03,
+      "volatility_30d": 122.1
     },
     "SOL": {
       "var_95_1d": -6.01,
       "cvar_95_1d": -8.88,
-      "max_dd_30d": -39.62,
-      "volatility_30d": 99.86
+      "max_dd_30d": -33.89,
+      "volatility_30d": 108.03
     },
     "XRP": {
-      "var_95_1d": -5.03,
-      "cvar_95_1d": -8.47,
-      "max_dd_30d": -36.6,
-      "volatility_30d": 115.96
+      "var_95_1d": -4.89,
+      "cvar_95_1d": -8.44,
+      "max_dd_30d": -32.77,
+      "volatility_30d": 117.84
     }
   },
   "concentration": {
-    "btc_weight_pct": 55.92,
-    "eth_weight_pct": 9.74,
-    "top3_weight_pct": 73.77,
+    "btc_weight_pct": 56.11,
+    "eth_weight_pct": 9.92,
+    "top3_weight_pct": 73.88,
     "top3_coins": [
       "BTC",
       "ETH",
       "USDT"
     ],
-    "total_market_cap_usd": 2264061651200.0,
+    "total_market_cap_usd": 2336305415888.0,
     "warnings": [
-      "BTC dominance very high at 55.9% - market heavily concentrated"
+      "BTC dominance very high at 56.1% - market heavily concentrated"
     ]
   },
   "alerts": [
@@ -319,260 +319,302 @@
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "ADA",
-      "message": "ADA 30d max drawdown: -32.0%",
-      "value": -32.03
+      "message": "ADA 30d max drawdown: -26.7%",
+      "value": -26.68
+    },
+    {
+      "severity": "critical",
+      "alert_type": "drawdown",
+      "coin": "ATOM",
+      "message": "ATOM 30d max drawdown: -21.8%",
+      "value": -21.84
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "AVAX",
-      "message": "AVAX 30d max drawdown: -31.7%",
-      "value": -31.71
+      "message": "AVAX 30d max drawdown: -24.8%",
+      "value": -24.76
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "BNB",
-      "message": "BNB 30d max drawdown: -34.7%",
-      "value": -34.66
+      "message": "BNB 30d max drawdown: -32.6%",
+      "value": -32.64
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "BTC",
-      "message": "BTC 30d max drawdown: -29.7%",
-      "value": -29.69
+      "message": "BTC 30d max drawdown: -25.9%",
+      "value": -25.85
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "DOGE",
-      "message": "DOGE 30d max drawdown: -29.9%",
-      "value": -29.94
+      "message": "DOGE 30d max drawdown: -24.6%",
+      "value": -24.61
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "DOT",
-      "message": "DOT 30d max drawdown: -33.7%",
-      "value": -33.68
+      "message": "DOT 30d max drawdown: -28.4%",
+      "value": -28.45
+    },
+    {
+      "severity": "critical",
+      "alert_type": "volatility",
+      "coin": "DOT",
+      "message": "DOT annualized volatility: 150.3% (threshold: 80.0%)",
+      "value": 150.32
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "ETH",
-      "message": "ETH 30d max drawdown: -39.7%",
-      "value": -39.72
+      "message": "ETH 30d max drawdown: -35.4%",
+      "value": -35.36
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "LINK",
-      "message": "LINK 30d max drawdown: -34.3%",
-      "value": -34.3
+      "message": "LINK 30d max drawdown: -28.8%",
+      "value": -28.75
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "LTC",
-      "message": "LTC 30d max drawdown: -27.6%",
-      "value": -27.55
+      "message": "LTC 30d max drawdown: -23.3%",
+      "value": -23.32
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "NEAR",
-      "message": "NEAR 30d max drawdown: -35.5%",
-      "value": -35.46
+      "message": "NEAR 30d max drawdown: -30.0%",
+      "value": -30.03
+    },
+    {
+      "severity": "critical",
+      "alert_type": "volatility",
+      "coin": "NEAR",
+      "message": "NEAR annualized volatility: 122.1% (threshold: 80.0%)",
+      "value": 122.1
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "SOL",
-      "message": "SOL 30d max drawdown: -39.6%",
-      "value": -39.62
+      "message": "SOL 30d max drawdown: -33.9%",
+      "value": -33.89
     },
     {
       "severity": "critical",
       "alert_type": "drawdown",
       "coin": "XRP",
-      "message": "XRP 30d max drawdown: -36.6%",
-      "value": -36.6
+      "message": "XRP 30d max drawdown: -32.8%",
+      "value": -32.77
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "ADA",
-      "message": "ADA annualized volatility: 95.9% (threshold: 80.0%)",
-      "value": 95.92
+      "message": "ADA annualized volatility: 109.4% (threshold: 80.0%)",
+      "value": 109.4
     },
     {
       "severity": "warning",
-      "alert_type": "drawdown",
+      "alert_type": "volatility",
       "coin": "ATOM",
-      "message": "ATOM 30d max drawdown: -19.1%",
-      "value": -19.09
+      "message": "ATOM annualized volatility: 81.9% (threshold: 80.0%)",
+      "value": 81.91
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "AVAX",
-      "message": "AVAX annualized volatility: 87.5% (threshold: 80.0%)",
-      "value": 87.53
+      "message": "AVAX annualized volatility: 102.4% (threshold: 80.0%)",
+      "value": 102.38
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "BTC",
-      "message": "BTC annualized volatility: 80.2% (threshold: 80.0%)",
-      "value": 80.21
+      "message": "BTC annualized volatility: 83.2% (threshold: 80.0%)",
+      "value": 83.15
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "DOGE",
-      "message": "DOGE annualized volatility: 104.8% (threshold: 80.0%)",
-      "value": 104.83
-    },
-    {
-      "severity": "warning",
-      "alert_type": "volatility",
-      "coin": "DOT",
-      "message": "DOT annualized volatility: 88.5% (threshold: 80.0%)",
-      "value": 88.53
+      "message": "DOGE annualized volatility: 111.4% (threshold: 80.0%)",
+      "value": 111.42
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "ETH",
-      "message": "ETH annualized volatility: 97.9% (threshold: 80.0%)",
-      "value": 97.92
+      "message": "ETH annualized volatility: 105.2% (threshold: 80.0%)",
+      "value": 105.17
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "LINK",
-      "message": "LINK annualized volatility: 89.8% (threshold: 80.0%)",
-      "value": 89.77
+      "message": "LINK annualized volatility: 101.5% (threshold: 80.0%)",
+      "value": 101.51
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
-      "coin": "NEAR",
-      "message": "NEAR annualized volatility: 93.7% (threshold: 80.0%)",
-      "value": 93.69
+      "coin": "LTC",
+      "message": "LTC annualized volatility: 85.5% (threshold: 80.0%)",
+      "value": 85.49
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "SOL",
-      "message": "SOL annualized volatility: 99.9% (threshold: 80.0%)",
-      "value": 99.86
+      "message": "SOL annualized volatility: 108.0% (threshold: 80.0%)",
+      "value": 108.03
     },
     {
       "severity": "warning",
       "alert_type": "volatility",
       "coin": "XRP",
-      "message": "XRP annualized volatility: 116.0% (threshold: 80.0%)",
-      "value": 115.96
+      "message": "XRP annualized volatility: 117.8% (threshold: 80.0%)",
+      "value": 117.84
     },
     {
       "severity": "warning",
       "alert_type": "portfolio_var",
       "coin": "PORTFOLIO",
       "message": "Portfolio 1-day VaR(95%): -5.2% - elevated risk",
-      "value": -5.17
+      "value": -5.19
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "ADA/AVAX",
-      "message": "High correlation (0.90) between ADA and AVAX - limited diversification",
-      "value": 0.9007
+      "message": "High correlation (0.91) between ADA and AVAX - limited diversification",
+      "value": 0.9129
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "ADA/DOGE",
-      "message": "High correlation (0.91) between ADA and DOGE - limited diversification",
-      "value": 0.9149
-    },
-    {
-      "severity": "info",
-      "alert_type": "correlation",
-      "coin": "ADA/DOT",
-      "message": "High correlation (0.94) between ADA and DOT - limited diversification",
-      "value": 0.9405
+      "message": "High correlation (0.92) between ADA and DOGE - limited diversification",
+      "value": 0.9246
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "ADA/LINK",
-      "message": "High correlation (0.92) between ADA and LINK - limited diversification",
-      "value": 0.9195
+      "message": "High correlation (0.93) between ADA and LINK - limited diversification",
+      "value": 0.9276
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "ADA/NEAR",
-      "message": "High correlation (0.90) between ADA and NEAR - limited diversification",
-      "value": 0.9009
-    },
-    {
-      "severity": "info",
-      "alert_type": "correlation",
-      "coin": "AVAX/DOT",
-      "message": "High correlation (0.90) between AVAX and DOT - limited diversification",
-      "value": 0.9022
+      "message": "High correlation (0.92) between ADA and NEAR - limited diversification",
+      "value": 0.9229
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "AVAX/LINK",
-      "message": "High correlation (0.90) between AVAX and LINK - limited diversification",
-      "value": 0.9017
+      "message": "High correlation (0.92) between AVAX and LINK - limited diversification",
+      "value": 0.9158
+    },
+    {
+      "severity": "info",
+      "alert_type": "correlation",
+      "coin": "AVAX/NEAR",
+      "message": "High correlation (0.92) between AVAX and NEAR - limited diversification",
+      "value": 0.9233
+    },
+    {
+      "severity": "info",
+      "alert_type": "correlation",
+      "coin": "BNB/BTC",
+      "message": "High correlation (0.90) between BNB and BTC - limited diversification",
+      "value": 0.9047
+    },
+    {
+      "severity": "info",
+      "alert_type": "correlation",
+      "coin": "BNB/LINK",
+      "message": "High correlation (0.90) between BNB and LINK - limited diversification",
+      "value": 0.9014
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "BTC/ETH",
       "message": "High correlation (0.91) between BTC and ETH - limited diversification",
-      "value": 0.9118
+      "value": 0.9142
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "BTC/SOL",
-      "message": "High correlation (0.90) between BTC and SOL - limited diversification",
-      "value": 0.9002
+      "message": "High correlation (0.92) between BTC and SOL - limited diversification",
+      "value": 0.9197
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "DOT/NEAR",
-      "message": "High correlation (0.91) between DOT and NEAR - limited diversification",
-      "value": 0.9105
+      "message": "High correlation (0.94) between DOT and NEAR - limited diversification",
+      "value": 0.9359
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "ETH/LINK",
-      "message": "High correlation (0.93) between ETH and LINK - limited diversification",
-      "value": 0.9346
+      "message": "High correlation (0.94) between ETH and LINK - limited diversification",
+      "value": 0.9408
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "ETH/SOL",
-      "message": "High correlation (0.91) between ETH and SOL - limited diversification",
-      "value": 0.9108
+      "message": "High correlation (0.93) between ETH and SOL - limited diversification",
+      "value": 0.9277
+    },
+    {
+      "severity": "info",
+      "alert_type": "correlation",
+      "coin": "LINK/LTC",
+      "message": "High correlation (0.91) between LINK and LTC - limited diversification",
+      "value": 0.9067
+    },
+    {
+      "severity": "info",
+      "alert_type": "correlation",
+      "coin": "LINK/NEAR",
+      "message": "High correlation (0.91) between LINK and NEAR - limited diversification",
+      "value": 0.9148
     },
     {
       "severity": "info",
       "alert_type": "correlation",
       "coin": "LINK/SOL",
-      "message": "High correlation (0.93) between LINK and SOL - limited diversification",
-      "value": 0.927
+      "message": "High correlation (0.94) between LINK and SOL - limited diversification",
+      "value": 0.9366
+    },
+    {
+      "severity": "info",
+      "alert_type": "correlation",
+      "coin": "LTC/NEAR",
+      "message": "High correlation (0.91) between LTC and NEAR - limited diversification",
+      "value": 0.9095
     }
   ]
 }

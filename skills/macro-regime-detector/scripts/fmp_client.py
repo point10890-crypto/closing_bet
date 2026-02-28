@@ -1,174 +1,18 @@
 #!/usr/bin/env python3
 """
-FMP API Client for Macro Regime Detector
+FMP API Client for Macro Regime Detector — Thin wrapper around shared module.
 
-Provides rate-limited access to Financial Modeling Prep API endpoints
-for macro regime detection analysis.
-
-Features:
-- Rate limiting (0.3s between requests)
-- Automatic retry on 429 errors
-- Session caching for duplicate requests
-- Batch historical data support
-- Treasury rates endpoint support
+All logic lives in skills/_shared/fmp_client.py.
 """
-
+import importlib.util
 import os
-import sys
-import time
-from datetime import datetime, timedelta
-from typing import Optional
 
-try:
-    import requests
-except ImportError:
-    print("ERROR: requests library not found. Install with: pip install requests", file=sys.stderr)
-    sys.exit(1)
+_shared_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '_shared', 'fmp_client.py')
+_spec = importlib.util.spec_from_file_location("_shared_fmp_client", _shared_path)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
 
-try:
-    import yfinance as yf
-    _HAS_YFINANCE = True
-except ImportError:
-    _HAS_YFINANCE = False
+FMPClient = _mod.FMPClient
+ApiCallBudgetExceeded = _mod.ApiCallBudgetExceeded
 
-
-class FMPClient:
-    """Client for Financial Modeling Prep API with rate limiting and caching"""
-
-    BASE_URL = "https://financialmodelingprep.com/api/v3"
-    STABLE_URL = "https://financialmodelingprep.com/stable"
-    RATE_LIMIT_DELAY = 0.3  # 300ms between requests
-
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("FMP_API_KEY")
-        if not self.api_key:
-            raise ValueError(
-                "FMP API key required. Set FMP_API_KEY environment variable "
-                "or pass api_key parameter."
-            )
-        self.session = requests.Session()
-        self.cache = {}
-        self.last_call_time = 0
-        self.rate_limit_reached = False
-        self.retry_count = 0
-        self.max_retries = 1
-        self.api_calls_made = 0
-
-    def _rate_limited_get(self, url: str, params: Optional[dict] = None) -> Optional[dict]:
-        if self.rate_limit_reached:
-            return None
-
-        if params is None:
-            params = {}
-        params["apikey"] = self.api_key
-
-        elapsed = time.time() - self.last_call_time
-        if elapsed < self.RATE_LIMIT_DELAY:
-            time.sleep(self.RATE_LIMIT_DELAY - elapsed)
-
-        try:
-            response = self.session.get(url, params=params, timeout=30)
-            self.last_call_time = time.time()
-            self.api_calls_made += 1
-
-            if response.status_code == 200:
-                self.retry_count = 0
-                return response.json()
-            elif response.status_code == 429:
-                self.retry_count += 1
-                if self.retry_count <= self.max_retries:
-                    print("WARNING: Rate limit exceeded. Waiting 60 seconds...", file=sys.stderr)
-                    time.sleep(60)
-                    return self._rate_limited_get(url, params)
-                else:
-                    print("ERROR: Daily API rate limit reached.", file=sys.stderr)
-                    self.rate_limit_reached = True
-                    return None
-            else:
-                print(
-                    f"ERROR: API request failed: {response.status_code} - {response.text[:200]}",
-                    file=sys.stderr,
-                )
-                return None
-        except requests.exceptions.RequestException as e:
-            print(f"ERROR: Request exception: {e}", file=sys.stderr)
-            return None
-
-    def get_historical_prices(self, symbol: str, days: int = 600) -> Optional[dict]:
-        """Fetch historical daily OHLCV data (FMP with yfinance fallback)"""
-        cache_key = f"prices_{symbol}_{days}"
-        if cache_key in self.cache:
-            return self.cache[cache_key]
-
-        url = f"{self.BASE_URL}/historical-price-full/{symbol}"
-        params = {"timeseries": days}
-        data = self._rate_limited_get(url, params)
-
-        # Fallback to yfinance if FMP returns None (403/legacy endpoint)
-        if not data and _HAS_YFINANCE:
-            data = self._yfinance_fallback(symbol, days)
-
-        if data:
-            self.cache[cache_key] = data
-        return data
-
-    def _yfinance_fallback(self, symbol: str, days: int) -> Optional[dict]:
-        """Fetch historical prices via yfinance when FMP fails."""
-        try:
-            end = datetime.now()
-            start = end - timedelta(days=int(days * 1.5))
-            ticker = yf.Ticker(symbol)
-            df = ticker.history(start=start.strftime("%Y-%m-%d"), end=end.strftime("%Y-%m-%d"))
-            if df.empty:
-                return None
-            historical = []
-            for date, row in df.iterrows():
-                historical.append({
-                    "date": date.strftime("%Y-%m-%d"),
-                    "open": round(float(row["Open"]), 4),
-                    "high": round(float(row["High"]), 4),
-                    "low": round(float(row["Low"]), 4),
-                    "close": round(float(row["Close"]), 4),
-                    "volume": int(row["Volume"]),
-                })
-            historical.reverse()  # Most recent first (FMP format)
-            print(f"  [yfinance fallback] {symbol}: {len(historical)} days OK")
-            return {"symbol": symbol, "historical": historical}
-        except Exception as e:
-            print(f"  [yfinance fallback] {symbol} failed: {e}", file=sys.stderr)
-            return None
-
-    def get_batch_historical(self, symbols: list[str], days: int = 600) -> dict[str, list[dict]]:
-        """Fetch historical prices for multiple symbols"""
-        results = {}
-        for symbol in symbols:
-            data = self.get_historical_prices(symbol, days=days)
-            if data and "historical" in data:
-                results[symbol] = data["historical"]
-        return results
-
-    def get_treasury_rates(self, days: int = 600) -> Optional[list[dict]]:
-        """
-        Fetch treasury rate data from FMP stable endpoint.
-
-        Returns list of dicts with keys like 'date', 'year2', 'year10', etc.
-        Most recent first.
-        """
-        cache_key = f"treasury_{days}"
-        if cache_key in self.cache:
-            return self.cache[cache_key]
-
-        url = f"{self.STABLE_URL}/treasury-rates"
-        params = {"limit": days}
-        data = self._rate_limited_get(url, params)
-        if data and isinstance(data, list):
-            self.cache[cache_key] = data
-            return data
-        return None
-
-    def get_api_stats(self) -> dict:
-        return {
-            "cache_entries": len(self.cache),
-            "api_calls_made": self.api_calls_made,
-            "rate_limit_reached": self.rate_limit_reached,
-        }
+__all__ = ["FMPClient", "ApiCallBudgetExceeded"]

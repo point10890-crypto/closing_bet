@@ -1,90 +1,90 @@
 {
-  "timestamp": "2026-02-19T15:33:02.996533",
+  "timestamp": "2026-02-27T10:23:07.382660",
   "predictions": {
     "spy": {
-      "current_price": 686.29,
-      "bullish_probability": 74.1,
-      "bearish_probability": 25.9,
-      "predicted_return_pct": 0.41,
+      "current_price": 689.3,
+      "bullish_probability": 58.2,
+      "bearish_probability": 41.8,
+      "predicted_return_pct": 0.05,
       "target_range": {
-        "low": 675.47,
-        "mid": 689.1,
-        "high": 702.73
-      },
-      "confidence_level": "High",
-      "key_drivers": [
-        {
-          "feature": "yield_spread_proxy",
-          "impact": 0.1777,
-          "value": 0.0,
-          "direction": "bearish"
-        },
-        {
-          "feature": "xlu_relative_1m",
-          "impact": 0.0946,
-          "value": 0.0,
-          "direction": "bullish"
-        },
-        {
-          "feature": "gold_return_1w",
-          "impact": 0.082,
-          "value": -1.08,
-          "direction": "bearish"
-        },
-        {
-          "feature": "spy_return_1m",
-          "impact": 0.0691,
-          "value": 0.0,
-          "direction": "bearish"
-        },
-        {
-          "feature": "qqq_rsi",
-          "impact": 0.0629,
-          "value": 44.25,
-          "direction": "bearish"
-        }
-      ]
-    },
-    "qqq": {
-      "current_price": 605.79,
-      "bullish_probability": 51.2,
-      "bearish_probability": 48.8,
-      "predicted_return_pct": 0.96,
-      "target_range": {
-        "low": 595.72,
-        "mid": 611.6,
-        "high": 627.48
+        "low": 675.97,
+        "mid": 689.64,
+        "high": 703.3
       },
       "confidence_level": "Low",
       "key_drivers": [
         {
           "feature": "yield_spread_proxy",
-          "impact": 0.1377,
-          "value": 0.0,
-          "direction": "bearish"
+          "impact": 0.1515,
+          "value": 0.43,
+          "direction": "bullish"
         },
         {
           "feature": "breadth_pct_above_50ma",
-          "impact": 0.0909,
-          "value": 84.0,
+          "impact": 0.101,
+          "value": 82.0,
           "direction": "bullish"
         },
         {
           "feature": "xlu_relative_1m",
-          "impact": 0.0901,
-          "value": 0.0,
+          "impact": 0.0777,
+          "value": 9.52,
+          "direction": "bearish"
+        },
+        {
+          "feature": "qqq_rsi",
+          "impact": 0.0757,
+          "value": 48.4,
+          "direction": "bearish"
+        },
+        {
+          "feature": "gold_return_1w",
+          "impact": 0.0754,
+          "value": 4.37,
+          "direction": "bullish"
+        }
+      ]
+    },
+    "qqq": {
+      "current_price": 609.24,
+      "bullish_probability": 79.0,
+      "bearish_probability": 21.0,
+      "predicted_return_pct": 0.6,
+      "target_range": {
+        "low": 596.98,
+        "mid": 612.92,
+        "high": 628.87
+      },
+      "confidence_level": "High",
+      "key_drivers": [
+        {
+          "feature": "xlu_relative_1m",
+          "impact": 0.1134,
+          "value": 9.52,
+          "direction": "bearish"
+        },
+        {
+          "feature": "yield_spread_proxy",
+          "impact": 0.1114,
+          "value": 0.43,
           "direction": "bullish"
         },
         {
-          "feature": "vix_value",
-          "impact": 0.0807,
-          "value": 0.0,
+          "feature": "breadth_pct_above_50ma",
+          "impact": 0.0923,
+          "value": 82.0,
           "direction": "bullish"
         },
         {
-          "feature": "spy_rsi",
-          "impact": 0.0775,
-          "value": 48.63,
+          "feature": "xly_relative_1m",
+          "impact": 0.0848,
+          "value": -3.71,
+          "direction": "bearish"
+        },
+        {
+          "feature": "spy_return_1m",
+          "impact": 0.0766,
+          "value": -0.89,
           "direction": "bearish"
         }
       ]
@@ -92,13 +92,13 @@
   },
   "model_info": {
     "algorithm": "GradientBoosting Ensemble (per-ticker)",
-    "training_accuracy": 58.2,
-    "training_samples": 676,
-    "last_trained": "2026-02-13T10:10:05.327081",
+    "training_accuracy": 56.1,
+    "training_samples": 678,
+    "last_trained": "2026-02-26T00:59:45.980787",
     "features_used": 20
   },
   "historical_performance": {
-    "total_predictions": 9,
+    "total_predictions": 11,
     "evaluated": 0,
     "direction_accuracy": 0.0
   },

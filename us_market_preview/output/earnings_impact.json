@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-02-19T15:24:35.498769",
+  "timestamp": "2026-02-27T10:08:12.487334",
   "sector_profiles": {
     "Technology": {
-      "avg_beat_reaction_1d": 6.52,
-      "avg_miss_reaction_1d": -5.99,
-      "avg_beat_reaction_5d": 7.72,
-      "avg_miss_reaction_5d": -6.34,
-      "beat_rate": 41.7,
+      "avg_beat_reaction_1d": 6.67,
+      "avg_miss_reaction_1d": -6.13,
+      "avg_beat_reaction_5d": 8.0,
+      "avg_miss_reaction_5d": -6.38,
+      "beat_rate": 39.6,
       "sample_size": 48
     },
     "Financials": {

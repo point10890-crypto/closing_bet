@@ -1,10 +1,10 @@
 {
-  "date": "2026-02-19",
-  "open_signals": 428,
-  "closed_signals": 669,
-  "today_new_signals": 113,
-  "total_signals": 1097,
-  "generated_at": "2026-02-19T15:20:03.122007",
+  "date": "2026-02-27",
+  "open_signals": 168,
+  "closed_signals": 813,
+  "today_new_signals": 14,
+  "total_signals": 981,
+  "generated_at": "2026-02-27T16:03:59.822352",
   "env": {
     "base_dir": "C:\\closing_bet",
     "python": "C:\\closing_bet\\.venv\\Scripts\\python.exe"

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-18T09:54:41.017445",
+  "timestamp": "2026-02-27T10:07:40.229462",
   "tickers": [
     "AAPL",
     "NVDA",
@@ -18,16 +18,16 @@
         "META": 0.15,
         "MSFT": 0.07,
         "NVDA": 0.16,
-        "TSLA": 0.19
+        "TSLA": 0.18
       },
       "AMZN": {
         "AAPL": 0.23,
         "AMZN": 1.0,
         "GOOGL": 0.34,
         "META": 0.36,
-        "MSFT": 0.28,
+        "MSFT": 0.29,
         "NVDA": 0.26,
-        "TSLA": 0.36
+        "TSLA": 0.35
       },
       "GOOGL": {
         "AAPL": 0.34,
@@ -35,48 +35,48 @@
         "GOOGL": 1.0,
         "META": 0.21,
         "MSFT": 0.06,
-        "NVDA": 0.22,
-        "TSLA": 0.4
+        "NVDA": 0.23,
+        "TSLA": 0.38
       },
       "META": {
         "AAPL": 0.15,
         "AMZN": 0.36,
         "GOOGL": 0.21,
         "META": 1.0,
-        "MSFT": 0.05,
-        "NVDA": 0.27,
-        "TSLA": 0.3
+        "MSFT": 0.08,
+        "NVDA": 0.25,
+        "TSLA": 0.29
       },
       "MSFT": {
         "AAPL": 0.07,
-        "AMZN": 0.28,
+        "AMZN": 0.29,
         "GOOGL": 0.06,
-        "META": 0.05,
+        "META": 0.08,
         "MSFT": 1.0,
-        "NVDA": 0.34,
-        "TSLA": 0.29
+        "NVDA": 0.32,
+        "TSLA": 0.31
       },
       "NVDA": {
         "AAPL": 0.16,
         "AMZN": 0.26,
-        "GOOGL": 0.22,
-        "META": 0.27,
-        "MSFT": 0.34,
+        "GOOGL": 0.23,
+        "META": 0.25,
+        "MSFT": 0.32,
         "NVDA": 1.0,
-        "TSLA": 0.38
+        "TSLA": 0.37
       },
       "TSLA": {
-        "AAPL": 0.19,
-        "AMZN": 0.36,
-        "GOOGL": 0.4,
-        "META": 0.3,
-        "MSFT": 0.29,
-        "NVDA": 0.38,
+        "AAPL": 0.18,
+        "AMZN": 0.35,
+        "GOOGL": 0.38,
+        "META": 0.29,
+        "MSFT": 0.31,
+        "NVDA": 0.37,
         "TSLA": 1.0
       }
     },
     "high_correlation_pairs": [],
-    "portfolio_volatility_annualized": 19.38,
+    "portfolio_volatility_annualized": 19.37,
     "risk_level": "Moderate"
   }
 }

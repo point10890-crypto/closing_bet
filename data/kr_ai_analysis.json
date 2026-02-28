@@ -2,20 +2,6 @@
   "market_indices": {},
   "signals": [
     {
-      "ticker": "086520",
-      "name": "에코프로",
-      "score": 88.5,
-      "contraction_ratio": 0.402,
-      "foreign_5d": 320819,
-      "inst_5d": 451201,
-      "entry_price": 172200.0,
-      "current_price": 172200.0,
-      "return_pct": 0,
-      "signal_date": "2026-02-24",
-      "market": "KOSDAQ",
-      "status": "OPEN"
-    },
-    {
       "ticker": "036540",
       "name": "SFA반도체",
       "score": 88.5,
@@ -30,28 +16,14 @@
       "status": "OPEN"
     },
     {
-      "ticker": "028050",
-      "name": "삼성E&A",
+      "ticker": "036620",
+      "name": "감성코퍼레이션",
       "score": 88.5,
-      "contraction_ratio": 0.722,
-      "foreign_5d": 162290,
-      "inst_5d": 147873,
-      "entry_price": 34900.0,
-      "current_price": 34900.0,
-      "return_pct": 0,
-      "signal_date": "2026-02-25",
-      "market": "KOSPI",
-      "status": "OPEN"
-    },
-    {
-      "ticker": "205100",
-      "name": "엑셈",
-      "score": 88.5,
-      "contraction_ratio": 0.746,
-      "foreign_5d": 614433,
-      "inst_5d": 63202,
-      "entry_price": 2100.0,
-      "current_price": 2100.0,
+      "contraction_ratio": 0.758,
+      "foreign_5d": 98762,
+      "inst_5d": -80817,
+      "entry_price": 6960.0,
+      "current_price": 6960.0,
       "return_pct": 0,
       "signal_date": "2026-02-24",
       "market": "KOSDAQ",
@@ -72,17 +44,45 @@
       "status": "OPEN"
     },
     {
-      "ticker": "036620",
-      "name": "감성코퍼레이션",
+      "ticker": "205100",
+      "name": "엑셈",
       "score": 88.5,
-      "contraction_ratio": 0.758,
-      "foreign_5d": 98762,
-      "inst_5d": -80817,
-      "entry_price": 6960.0,
-      "current_price": 6960.0,
+      "contraction_ratio": 0.746,
+      "foreign_5d": 614433,
+      "inst_5d": 63202,
+      "entry_price": 2100.0,
+      "current_price": 2100.0,
       "return_pct": 0,
       "signal_date": "2026-02-24",
       "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "086520",
+      "name": "에코프로",
+      "score": 88.5,
+      "contraction_ratio": 0.402,
+      "foreign_5d": 320819,
+      "inst_5d": 451201,
+      "entry_price": 172200.0,
+      "current_price": 172200.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "028050",
+      "name": "삼성E&A",
+      "score": 88.5,
+      "contraction_ratio": 0.722,
+      "foreign_5d": 162290,
+      "inst_5d": 147873,
+      "entry_price": 34900.0,
+      "current_price": 34900.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-25",
+      "market": "KOSPI",
       "status": "OPEN"
     },
     {
@@ -124,6 +124,20 @@
       "current_price": 46250.0,
       "return_pct": 0,
       "signal_date": "2026-02-24",
+      "market": "KOSDAQ",
+      "status": "OPEN"
+    },
+    {
+      "ticker": "005290",
+      "name": "동진쎄미켐",
+      "score": 86.7,
+      "contraction_ratio": 0.317,
+      "foreign_5d": 53669,
+      "inst_5d": -17749,
+      "entry_price": 54500.0,
+      "current_price": 54500.0,
+      "return_pct": 0,
+      "signal_date": "2026-02-27",
       "market": "KOSDAQ",
       "status": "OPEN"
     },
@@ -266,23 +280,9 @@
       "signal_date": "2026-02-25",
       "market": "KOSPI",
       "status": "OPEN"
-    },
-    {
-      "ticker": "000250",
-      "name": "삼천당제약",
-      "score": 81.4,
-      "contraction_ratio": 0.746,
-      "foreign_5d": 91855,
-      "inst_5d": 60618,
-      "entry_price": 636000.0,
-      "current_price": 636000.0,
-      "return_pct": 0,
-      "signal_date": "2026-02-25",
-      "market": "KOSDAQ",
-      "status": "OPEN"
     }
   ],
   "api_status": "ok",
-  "generated_at": "2026-02-26T19:16:40.693898",
-  "signal_date": "2026-02-26"
+  "generated_at": "2026-02-27T16:03:59.818068",
+  "signal_date": "2026-02-27"
 }

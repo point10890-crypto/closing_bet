@@ -1,126 +1,126 @@
 {
-  "timestamp": "2026-02-19T15:24:12.697914",
+  "timestamp": "2026-02-27T10:07:43.515224",
   "portfolio_summary": {
     "total_picks": 15,
-    "portfolio_var_95_5d": -1915.17,
-    "portfolio_cvar_95_5d": -2320.97,
+    "portfolio_var_95_5d": -1515.19,
+    "portfolio_cvar_95_5d": -1971.78,
     "risk_level": "Low",
     "var_details": {
-      "var_pct": -1.92,
-      "var_dollar": -1915.17,
-      "cvar_pct": -2.32,
-      "cvar_dollar": -2320.97,
-      "t_var_dollar": -2233.67,
+      "var_pct": -1.52,
+      "var_dollar": -1515.19,
+      "cvar_pct": -1.97,
+      "cvar_dollar": -1971.78,
+      "t_var_dollar": -1805.51,
       "confidence": 0.95,
       "horizon_days": 5,
-      "degrees_of_freedom": 3736735.16
+      "degrees_of_freedom": 47278597.6
     }
   },
   "drawdowns": {
-    "AES": {
-      "current_price": 16.29,
-      "peak_price": 16.44,
-      "current_dd": -0.91,
-      "max_dd": -7.58,
-      "from_peak_days": 7
-    },
     "ALL": {
-      "current_price": 209.43,
+      "current_price": 212.76,
       "peak_price": 215.19,
-      "current_dd": -2.68,
-      "max_dd": -9.86,
-      "from_peak_days": 13
-    },
-    "T": {
-      "current_price": 27.88,
-      "peak_price": 28.8,
-      "current_dd": -3.19,
-      "max_dd": -10.57,
-      "from_peak_days": 6
-    },
-    "AKAM": {
-      "current_price": 109.31,
-      "peak_price": 111.76,
-      "current_dd": -2.19,
-      "max_dd": -11.4,
-      "from_peak_days": 5
-    },
-    "ALGN": {
-      "current_price": 190.82,
-      "peak_price": 197.51,
-      "current_dd": -3.39,
-      "max_dd": -9.11,
-      "from_peak_days": 7
-    },
-    "ACGL": {
-      "current_price": 98.06,
-      "peak_price": 101.98,
-      "current_dd": -3.84,
-      "max_dd": -6.66,
-      "from_peak_days": 13
-    },
-    "AOS": {
-      "current_price": 78.96,
-      "peak_price": 80.47,
-      "current_dd": -1.88,
-      "max_dd": -4.93,
-      "from_peak_days": 8
-    },
-    "AMCR": {
-      "current_price": 49.59,
-      "peak_price": 50.09,
-      "current_dd": -1.0,
-      "max_dd": -7.29,
-      "from_peak_days": 7
-    },
-    "APTV": {
-      "current_price": 83.81,
-      "peak_price": 88.67,
-      "current_dd": -5.48,
-      "max_dd": -14.57,
-      "from_peak_days": 40
-    },
-    "AMT": {
-      "current_price": 186.62,
-      "peak_price": 193.09,
-      "current_dd": -3.35,
-      "max_dd": -7.12,
-      "from_peak_days": 1
+      "current_dd": -1.13,
+      "max_dd": -9.39,
+      "from_peak_days": 21
     },
     "ADI": {
-      "current_price": 346.37,
-      "peak_price": 346.37,
-      "current_dd": 0.0,
+      "current_price": 354.35,
+      "peak_price": 360.8,
+      "current_dd": -1.79,
       "max_dd": -4.36,
-      "from_peak_days": 0
+      "from_peak_days": 1
     },
-    "AMAT": {
-      "current_price": 369.3,
-      "peak_price": 369.3,
-      "current_dd": 0.0,
-      "max_dd": -12.81,
-      "from_peak_days": 0
+    "ALGN": {
+      "current_price": 189.2,
+      "peak_price": 197.51,
+      "current_dd": -4.21,
+      "max_dd": -9.11,
+      "from_peak_days": 15
     },
     "AEP": {
-      "current_price": 127.27,
-      "peak_price": 130.24,
-      "current_dd": -2.28,
+      "current_price": 132.1,
+      "peak_price": 132.46,
+      "current_dd": -0.27,
       "max_dd": -8.14,
       "from_peak_days": 1
     },
-    "MO": {
-      "current_price": 66.77,
-      "peak_price": 67.25,
-      "current_dd": -0.71,
-      "max_dd": -6.08,
-      "from_peak_days": 5
+    "T": {
+      "current_price": 27.46,
+      "peak_price": 28.8,
+      "current_dd": -4.65,
+      "max_dd": -10.57,
+      "from_peak_days": 14
+    },
+    "AMT": {
+      "current_price": 185.01,
+      "peak_price": 193.09,
+      "current_dd": -4.18,
+      "max_dd": -7.12,
+      "from_peak_days": 9
+    },
+    "ACGL": {
+      "current_price": 99.65,
+      "peak_price": 101.98,
+      "current_dd": -2.28,
+      "max_dd": -6.66,
+      "from_peak_days": 21
+    },
+    "ABNB": {
+      "current_price": 136.97,
+      "peak_price": 140.07,
+      "current_dd": -2.21,
+      "max_dd": -17.21,
+      "from_peak_days": 44
+    },
+    "AES": {
+      "current_price": 16.25,
+      "peak_price": 16.51,
+      "current_dd": -1.57,
+      "max_dd": -7.58,
+      "from_peak_days": 6
+    },
+    "AAPL": {
+      "current_price": 272.95,
+      "peak_price": 285.92,
+      "current_dd": -4.54,
+      "max_dd": -13.8,
+      "from_peak_days": 86
+    },
+    "AMCR": {
+      "current_price": 48.24,
+      "peak_price": 49.92,
+      "current_dd": -3.37,
+      "max_dd": -7.29,
+      "from_peak_days": 3
+    },
+    "ABT": {
+      "current_price": 116.26,
+      "peak_price": 128.25,
+      "current_dd": -9.35,
+      "max_dd": -17.31,
+      "from_peak_days": 90
+    },
+    "MMM": {
+      "current_price": 166.17,
+      "peak_price": 173.83,
+      "current_dd": -4.41,
+      "max_dd": -11.51,
+      "from_peak_days": 14
     },
     "AMGN": {
-      "current_price": 379.73,
-      "peak_price": 381.68,
-      "current_dd": -0.51,
+      "current_price": 379.33,
+      "peak_price": 384.33,
+      "current_dd": -1.3,
       "max_dd": -9.15,
-      "from_peak_days": 12
+      "from_peak_days": 1
+    },
+    "AMAT": {
+      "current_price": 375.72,
+      "peak_price": 394.95,
+      "current_dd": -4.87,
+      "max_dd": -12.81,
+      "from_peak_days": 1
     }
   },
   "concentration": {
@@ -129,15 +129,15 @@
         "count": 3,
         "weight_pct": 20.0
       },
-      "Utilities": {
-        "count": 2,
-        "weight_pct": 13.3
+      "Health Care": {
+        "count": 3,
+        "weight_pct": 20.0
       },
       "Financials": {
         "count": 2,
         "weight_pct": 13.3
       },
-      "Health Care": {
+      "Utilities": {
         "count": 2,
         "weight_pct": 13.3
       },
@@ -145,11 +145,7 @@
         "count": 1,
         "weight_pct": 6.7
       },
-      "Industrials": {
-        "count": 1,
-        "weight_pct": 6.7
-      },
-      "Materials": {
+      "Real Estate": {
         "count": 1,
         "weight_pct": 6.7
       },
@@ -157,11 +153,11 @@
         "count": 1,
         "weight_pct": 6.7
       },
-      "Real Estate": {
+      "Materials": {
         "count": 1,
         "weight_pct": 6.7
       },
-      "Consumer Staples": {
+      "Industrials": {
         "count": 1,
         "weight_pct": 6.7
       }

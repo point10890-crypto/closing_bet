@@ -1,5 +1,5 @@
 # KR Market Package - Claude Code 자율 운영 가이드
-# v2.5.0 (US Dashboard Endpoints + Structural Optimization + TTL Cache)
+# v2.6.0 (Codebase Cleanup + 17-Point Scoring + Path Unification)
 
 ## 1. 환경 설정 (절대 고정 - 변경 금지)
 
@@ -48,29 +48,30 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
 
 ---
 
-## 2. 프로젝트 아키텍처 (v2.5.0 최적화 완료)
+## 2. 프로젝트 아키텍처 (v2.6.0 정리 완료)
 
 ### 디렉토리 구조
 ```
 /c/closing_bet/
 ├── flask_app.py              # Flask API 진입점 (포트 5001)
 ├── scheduler.py              # 통합 스케줄러 (US/KR/Crypto, 고정경로)
-├── market_gate.py            # 시장 레짐 감지 (RISK_ON/OFF/NEUTRAL)
-├── config.py                 # 루트 설정 (ScreenerConfig, MarketGateConfig, BacktestConfig)
-├── models.py                 # 루트 모델 (StockInfo, Trade, Signal - scheduler/backtest용)
+├── market_gate.py            # KR 시장 레짐 감지 (RISK_ON/OFF/NEUTRAL)
+├── config.py                 # 루트 설정 (MarketGateConfig, BacktestConfig)
+├── models.py                 # 루트 모델 (Signal, Trade - backtest용)
 ├── all_institutional_trend_data.py  # 기관 수급 데이터 수집 (scheduler 호출)
 ├── signal_tracker.py         # VCP 시그널 추적 (scheduler 호출)
-├── update_us.py              # US 마켓 데이터 파이프라인 (scheduler 호출)
-├── sync-vercel.sh            # Vercel 배포 데이터 동기화 (FLASK_PORT=5001)
+├── sync_dashboard.py         # Vercel 데이터 동기화 (scheduler 호출)
+├── sync-vercel.sh            # Vercel 배포 스크립트 (수동)
+├── start.sh / start_all.bat  # 서버 시작 스크립트
 ├── .env                      # API 키 관리
 │
 ├── engine/                   # === 종가베팅 V2 핵심 엔진 ===
-│   ├── config.py             # V2 설정 (SignalConfig, Grade, 점수 가중치 14점)
+│   ├── config.py             # V2 설정 (SignalConfig, Grade, 점수 가중치 17점)
 │   ├── models.py             # V2 모델 (Signal, ScoreDetail, ChecklistDetail)
 │   ├── collectors.py         # 데이터 수집 (KRXCollector, EnhancedNewsCollector)
 │   ├── dart_collector.py     # OpenDART 호재공시 수집기
 │   ├── llm_analyzer.py       # LLM 분석 + Multi-AI Consensus (Gemini+GPT-4o)
-│   ├── scorer.py             # 점수 계산기 (14점 만점, DART 포함)
+│   ├── scorer.py             # 점수 계산기 (17점 만점, DART+애널리스트 포함)
 │   ├── position_sizer.py     # R 기반 포지션 사이징
 │   └── generator.py          # 시그널 생성 메인 엔진 (run_screener)
 │
@@ -86,7 +87,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
 │       ├── cache.py          # 파일 캐시 유틸
 │       └── scheduler.py      # 앱 내 가격갱신 스케줄러 (V2 연동, 고정경로)
 │
-├── us_market_preview/output/ # US 마켓 데이터 (활성 데이터 소스)
+├── us_market/output/         # US 마켓 데이터 (유일한 데이터 소스)
 │   ├── briefing.json         # AI Macro Briefing
 │   ├── market_data.json      # VIX, Fear&Greed 등
 │   ├── prediction.json       # AI 예측
@@ -97,10 +98,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
 │   ├── earnings_analysis.json # 어닝 분석 (upcoming_earnings 상세)
 │   └── sector_rotation.json  # 섹터 로테이션 데이터
 │
-├── app.py                    # Stock Analyzer 단독 웹앱 (포트 5000)
-├── stock_info.py             # 일괄 스크래핑 스크립트
-├── stock_data.xlsx           # 종목 목록 2,500건
-├── templates/index.html      # 단독 웹 UI
+├── us_market_preview/output/ # → us_market/output/ 심링크 (하위호환)
 │
 ├── frontend/                 # Next.js 14 대시보드
 │   ├── .env.local            # 환경변수 (포트 4000/5001)
@@ -137,20 +135,29 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_placeholder
     └── prompts.py
 ```
 
-### 삭제된 파일 (v2.5.0 구조 최적화)
+### 삭제된 파일 (v2.6.0 정리)
 | 파일/디렉토리 | 이유 |
 |-------------|------|
-| `login_output.txt` | 빈 파일, 참조 없음 |
-| `test_analyze.py` | 포트 5003 호출하는 구버전 테스트 |
-| `run_flask.py` | flask_app.py로 대체됨 |
-| `start-frontend.sh` | 포트 5000 사용 (현재 4000) |
-| `kr_market_package/` | 123MB 복사본 (자체 .venv 포함) |
+| `app.py` (root) | stock_analyzer Blueprint로 대체됨 |
+| `stock_info.py` | app.py 전용 스크래핑, 미사용 |
+| `stock_data.xlsx` | app.py/stock_info.py 전용 데이터 |
+| `update_us.py` | us_market/update_all.py로 대체 |
+| `start-local.sh` | 잘못된 포트. start.sh/start_all.bat로 대체 |
+| `fix_path_issue.bat` | 1회성 경로 수정, 적용 완료 |
+| `korean market/` | 2.9GB 프로젝트 통째 복사본 |
+| `us-market-pro/` | 930MB 실험용 복사본 |
+| `closing-bet-api/` | 390MB Java 프로젝트 (미완성) |
+| `__MACOSX/` | 81MB macOS zip 아티팩트 |
+| `claude-trading-skills/` | 38MB, skills/와 중복 |
+| `backups/` | 139MB tar.gz, git 이력으로 대체 |
+| `us_market_preview/*.py` | us_market/과 동일 중복. output/만 심링크로 유지 |
+| `kr_market_package/` | 123MB 복사본 (v2.5에서 삭제) |
 
 ### 경로 고정 원칙 (모든 파일에 적용 완료)
 | 파일 | 경로 방식 | 기준점 |
 |------|----------|--------|
 | `kr_market.py` | `DATA_DIR = _BASE_DIR + '/data'` | `__file__` 기반 절대경로 |
-| `us_market.py` | `PREVIEW_OUTPUT_DIR = _BASE_DIR + '/us_market_preview/output'` | `__file__` 기반 절대경로 |
+| `us_market.py` | `_OUTPUT_DIR + _PREVIEW_DIR` (심링크 통일) | `__file__` 기반 절대경로 |
 | `app/utils/scheduler.py` | `BASE_DIR` / `DATA_DIR` | `__file__` 기반 절대경로 |
 | `scheduler.py` | `Config.BASE_DIR` / `Config.DATA_DIR` | `__file__` 기반 + env 오버라이드 |
 | `engine/generator.py` | `os.path.dirname(os.path.abspath(__file__))` | 엔진 패키지 기준 |
@@ -171,7 +178,7 @@ run_screener(capital=50_000_000)
   │   ├─ asyncio.gather(뉴스수집, DART공시수집) → 병렬 실행
   │   ├─ LLM 뉴스 분석 (dart_text 포함)
   │   ├─ get_supply_data() → 5일 누적 수급
-  │   ├─ Scorer.calculate() → 14점 만점 점수
+  │   ├─ Scorer.calculate() → 17점 만점 점수
   │   ├─ determine_grade() → S/A/B/C 등급
   │   └─ PositionSizer.calculate() → R 기반 포지션
   │
@@ -186,7 +193,7 @@ run_screener(capital=50_000_000)
   └─ 5. save_result_to_json() → data/jongga_v2_latest.json + 날짜별 아카이브
 ```
 
-### 점수 체계 (14점 만점)
+### 점수 체계 (17점 만점)
 | 항목 | 배점 | 소스 | 설명 |
 |------|------|------|------|
 | 뉴스/재료 | 0~3 | LLM 분석 or 키워드 | Perplexity→Gemini→Claude→OpenAI→키워드 폴백 |
@@ -196,14 +203,15 @@ run_screener(capital=50_000_000)
 | 기간조정 | 0~1 | 60일 차트 | 변동성 축소 후 돌파 |
 | 수급 | 0~2 | 투자자별 순매수 | 외인+기관 동시매수:2 |
 | 공시(DART) | 0~2 | OpenDART API | 자사주/무상증자:2, 배당/합병:1, 악재:-2 |
+| 애널리스트 | 0~3 | yfinance | 컨센서스 (Strong Buy:3, Buy:2, Hold:1) |
 
-### 등급 기준
+### 등급 기준 (17점 만점 기준)
 | 등급 | 최소점수 | 최소거래대금 | R배수 |
 |------|---------|------------|-------|
-| S | 9점 | 500억 | 1.5x |
-| A | 7점 | 100억 | 1.0x |
-| B | 5점 | 20억 | 0.5x |
-| C | - | - | 0 (매매안함) |
+| S | 9/17 | 500억 | 1.5x |
+| A | 7/17 | 100억 | 1.0x |
+| B | 5/17 | 20억 | 0.5x |
+| C | <5 | - | 0 (매매안함) |
 
 ---
 
@@ -224,11 +232,11 @@ run_screener(capital=50_000_000)
 
 ### US 마켓 데이터 흐름
 ```
-[Scheduler] update_us.py → us_market_preview/output/*.json
-    ↓ 읽기 (30s TTL 캐시)
-[Flask] /api/us/* (us_market.py → _load_preview_json())
+[Scheduler] us_market/update_all.py → us_market/output/*.json
+    ↓ 읽기 (30s TTL 캐시, _OUTPUT_DIR + _PREVIEW_DIR 심링크)
+[Flask] /api/us/* (us_market.py)
     ↓ 데이터 변환 (프론트엔드 인터페이스 매핑)
-[Next.js] /api/* → rewrite → Flask (NEXT_PUBLIC_API_URL 설정 시)
+[Next.js] /api/* → rewrite → Flask (BACKEND_URL 설정 시)
     ↓ 렌더링
 [Dashboard] http://localhost:4000/dashboard/us/*
 ```
@@ -414,6 +422,11 @@ def add_cache_headers(response):
 | 브라우저 매번 재요청 | 모든 JSON에 no-cache 적용 | 정적→`max-age=30`, 실시간만 no-cache | v2.5 |
 | dead `/sector-heatmap` 라우트 | 11개 yfinance 호출, 프론트엔드 미사용 | 라우트 삭제 + api.ts getSectorHeatmap 제거 | v2.5 |
 | `sync-vercel.sh` 잘못된 포트 | `FLASK_PORT=5002` | `FLASK_PORT=5001`로 수정 | v2.5 |
+| 점수 체계 문서 불일치 | CLAUDE.md "14점", 실제 17점 | 문서 전체 17점 만점으로 수정 | v2.6 |
+| us_market_preview 중복 | 36개 Python + output 이중 보관 | 스크립트 삭제, output 심링크 | v2.6 |
+| ~4.5GB dead 디렉토리 | korean market, us-market-pro 등 6개 | 전체 삭제 | v2.6 |
+| 6개 dead root Python 파일 | app.py, stock_info.py 등 미사용 | 전체 삭제 | v2.6 |
+| api.ts 19개 dead 함수 | 프론트엔드에서 미호출 API 함수 | 삭제 | v2.6 |
 
 ---
 
@@ -563,8 +576,8 @@ echo "=== Done ==="
 7. **us_market_preview/output/ JSON 구조 변경** → Flask 변환 로직 동기화 필수
 
 ### US 엔드포인트 수정 시 주의사항
-- **PREVIEW_OUTPUT_DIR**: `us_market_preview/output/` — 활성 데이터 소스
-- **US_DATA_DIR**: `us_market/data/` — 폴백 전용 (스테일 가능)
+- **_OUTPUT_DIR**: `us_market/output/` — 유일한 데이터 소스
+- **_PREVIEW_DIR**: `us_market_preview/output/` — _OUTPUT_DIR 심링크 (동일 데이터)
 - 프론트엔드 TS 인터페이스와 Flask 변환 로직 동기화 필수
 - `_load_preview_json()` 캐시 TTL 30초 — 즉시 반영 필요 시 `_preview_cache.clear()` 호출
 
@@ -649,18 +662,28 @@ Investing.com ProPicks 분석 결과(적극 매수/매수/중립/매도/적극 �
 | POST | `/api/stock-analyzer/analyze` | 단건 스크래핑 (`{url, name}`) |
 | POST | `/api/stock-analyzer/export` | 조회 기록 Excel 변환 (`{records}`) |
 
-### 독립 실행
-```bash
-# 단독 웹앱 - http://localhost:5000
-cd "$PROJECT" && "$PYTHON" app.py
-
-# 일괄 스크래핑 (2,500개 전체)
-cd "$PROJECT" && "$PYTHON" -u stock_info.py
-```
+### 독립 실행 (v2.6.0에서 삭제됨)
+> `app.py` (단독 웹앱)과 `stock_info.py` (일괄 스크래핑)은 v2.6.0에서 삭제.
+> 기능은 `app/routes/stock_analyzer.py` Blueprint로 대시보드에 통합됨.
 
 ---
 
 ## 14. 변경 이력
+
+### v2.6.0 (2026-02-27) — Codebase Cleanup + Scoring Fix
+**Dead Code 제거 (~4.5GB):**
+- 대형 디렉토리 6개 삭제: korean market(2.9GB), us-market-pro(930MB), closing-bet-api(390MB), backups(139MB), __MACOSX(81MB), claude-trading-skills(38MB)
+- Root Python 6개 삭제: app.py, stock_info.py, update_us.py, stock_data.xlsx, start-local.sh, fix_path_issue.bat
+- us_market_preview/ Python 스크립트 36개 삭제, output/ 심링크로 대체
+- api.ts 미사용 함수 19개 삭제, DisclaimerBanner 컴포넌트 삭제
+- bcryptjs 미사용 npm 패키지 제거
+
+**문서 정정:**
+- 점수 체계: 14점 → 17점 만점 (analyst:3 누락 수정)
+- US 데이터 경로: us_market_preview → us_market/output 통일
+
+**설정 정리:**
+- next.config.ts 미사용 rewrite prefix 제거 (scheduler, portfolio)
 
 ### v2.5.0 (2025-02-25) — US Dashboard Endpoints + Structural Optimization
 **엔드포인트 구현/수정:**

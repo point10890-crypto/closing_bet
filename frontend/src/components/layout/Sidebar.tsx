@@ -153,7 +153,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     return (
         <>
             {/* Brand */}
-            <div className="h-[72px] flex items-center px-5 border-b border-white/5">
+            <Link href="/dashboard" className="h-[72px] flex items-center px-5 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer">
                 <div className="relative w-10 h-10 bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600 rounded-xl flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-amber-500/30 mr-3.5 ring-1 ring-amber-400/20 drop-shadow-sm">
                     <div className="absolute inset-0.5 rounded-[10px] ring-1 ring-white/10" />
                     <span className="relative">B</span>
@@ -163,9 +163,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                         <span className="bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent">Bit</span><span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">Man</span>
                     </span>
                     <div className="w-full h-px bg-gradient-to-r from-amber-500/50 via-amber-400/20 to-transparent mt-1 mb-[3px]" />
-                    <span className="text-[11px] font-semibold tracking-[0.22em] bg-gradient-to-r from-amber-300/90 via-amber-400/60 to-gray-500/80 bg-clip-text text-transparent uppercase">MarketFlow</span>
+                    <span className="text-[13px] font-semibold tracking-[0.18em] bg-gradient-to-r from-gray-300 via-slate-400 to-gray-500 bg-clip-text text-transparent">MarketFlow</span>
                 </div>
-            </div>
+            </Link>
 
             {/* Navigation */}
             <nav className="flex-1 px-3.5 py-5 space-y-1 overflow-y-auto">

@@ -255,22 +255,74 @@ def manual_assessment() -> dict[str, int]:
     return scores
 
 
+def auto_assessment() -> dict[str, int]:
+    """Automatic market assessment using yfinance data."""
+    try:
+        import yfinance as yf
+
+        spy = yf.Ticker("SPY")
+        hist = spy.history(period="1y")
+        if hist.empty:
+            return {k: 1 for k in BubbleScorer().indicators}
+
+        ret_1y = (hist['Close'].iloc[-1] / hist['Close'].iloc[0] - 1) * 100
+        price_acc = 2 if ret_1y > 25 else 1 if ret_1y > 15 else 0
+
+        ret_3m = (hist['Close'].iloc[-1] / hist['Close'].iloc[-63] - 1) * 100 if len(hist) > 63 else 0
+        val_disc = 2 if ret_3m > 15 else 1 if ret_3m > 8 else 0
+
+        iwm = yf.Ticker("IWM")
+        iwm_hist = iwm.history(period="3mo")
+        iwm_ret = (iwm_hist['Close'].iloc[-1] / iwm_hist['Close'].iloc[0] - 1) * 100 if not iwm_hist.empty else 0
+        breadth = 2 if iwm_ret > 12 else 1 if iwm_ret > 5 else 0
+
+        vix = yf.Ticker("^VIX")
+        vix_hist = vix.history(period="1mo")
+        vix_val = vix_hist['Close'].iloc[-1] if not vix_hist.empty else 20
+        leverage = 2 if vix_val < 12 else 0 if vix_val > 25 else 1
+
+        daily_rets = hist['Close'].pct_change().dropna()
+        vol_20d = daily_rets.tail(20).std() * (252 ** 0.5) * 100
+        media = 1 if vol_20d < 12 else 0
+        mass_pen = 0
+        new_issue = 1
+        new_acct = 0
+
+        return {
+            "mass_penetration": mass_pen,
+            "media_saturation": media,
+            "new_accounts": new_acct,
+            "new_issuance": new_issue,
+            "leverage": leverage,
+            "price_acceleration": price_acc,
+            "valuation_disconnect": val_disc,
+            "breadth_expansion": breadth,
+        }
+    except Exception:
+        return {k: 1 for k in BubbleScorer().indicators}
+
+
 def main():
+    import os
+
     parser = argparse.ArgumentParser(description="米国市場のバブル度を評価するBubble-O-Meter")
     parser.add_argument("--manual", action="store_true", help="対話型の手動評価モード")
+    parser.add_argument("--auto", action="store_true", help="自動評価モード (yfinanceデータ使用)")
     parser.add_argument(
         "--scores",
         type=str,
         help='JSON形式のスコア文字列 (例: \'{"mass_penetration":2,"media_saturation":1,...}\')',
     )
     parser.add_argument("--output", choices=["text", "json"], default="text", help="出力形式")
+    parser.add_argument("--output-dir", type=str, help="JSON出力ディレクトリ")
 
     args = parser.parse_args()
     scorer = BubbleScorer()
 
-    # スコアの取得
     if args.manual:
         scores = manual_assessment()
+    elif args.auto:
+        scores = auto_assessment()
     elif args.scores:
         try:
             scores = json.loads(args.scores)
@@ -278,19 +330,32 @@ def main():
             print("エラー: 無効なJSON形式です")
             return 1
     else:
-        print("エラー: --manual または --scores を指定してください")
+        print("エラー: --manual, --auto, または --scores を指定してください")
         print("\nガイドラインを表示:")
         print(scorer.get_scoring_guidelines())
         return 1
 
-    # 評価の実行
     result = scorer.calculate_score(scores)
 
-    # 出力
+    # Dashboard-compatible fields
+    result['composite'] = {
+        'composite_score': result['percentage'],
+        'zone': result['phase'],
+    }
+    result['score'] = result['percentage']
+
     if args.output == "json":
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
         print(scorer.format_output(result))
+
+    if args.output_dir:
+        os.makedirs(args.output_dir, exist_ok=True)
+        ts = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        outpath = os.path.join(args.output_dir, f"bubble_scorer_{ts}.json")
+        with open(outpath, 'w', encoding='utf-8') as f:
+            json.dump(result, f, indent=2, ensure_ascii=False)
+        print(f"\n✓ Report saved: {outpath}")
 
     return 0
 
